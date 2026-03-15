@@ -1,0 +1,51 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group = 'ru.mephi.it'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+ext {
+    kubernetesClientVersion = '6.8.1'
+    jacksonVersion = '2.15.2'
+    slfVersion = '2.0.9'
+}
+
+dependencies {
+    // Внешние зависимости
+    api "io.fabric8:kubernetes-client:${kubernetesClientVersion}"
+    api "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+
+    // Внутренние зависимости
+    implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
+    implementation "org.slf4j:slf4j-api:${slfVersion}"
+    implementation 'org.projectlombok:lombok:1.18.30'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.mockito:mockito-core:5.7.0'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+    testImplementation "org.slf4j:slf4j-simple:${slfVersion}"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
