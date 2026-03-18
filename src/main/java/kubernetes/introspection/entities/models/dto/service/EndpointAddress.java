@@ -1,5 +1,16 @@
 package kubernetes.introspection.entities.models.dto.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Builder;
+import lombok.Data;
+
+/**
+ * Реальные эндпоинты (поды), которые получают трафик от сервиса.
+ * Содержат IP, имя пода и порт для каждого готового пода.
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Builder
+@Data
 public class EndpointAddress {
     /**
      * IP адрес пода

@@ -1,6 +1,9 @@
 package kubernetes.introspection.entities.models.dto.owner;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.fabric8.kubernetes.api.model.batch.v1.JobStatus;
+import lombok.Builder;
+import lombok.Data;
 
 import java.util.Map;
 
@@ -8,11 +11,14 @@ import java.util.Map;
  * Информация о ресурсе, владеющем подом.
  * Позволяет понять, кто создал под и в каком состоянии находится контроллер.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Builder
+@Data
 public class OwnerInfo {
     /**
      * Тип владельца (Deployment, StatefulSet, и т.д.)
      */
-    private WorkloadType type;
+    private OwnerType type;
 
     /**
      * Имя ресурса-владельца

@@ -3,6 +3,8 @@ package kubernetes.introspection.entities.models.dto.enviroment;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import kubernetes.introspection.entities.models.exceptions.ErrorCode;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Информация об ошибке при сборе данных Kubernetes окружения.
@@ -13,6 +15,7 @@ import lombok.Builder;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
+@Data
 public class CollectionError {
     /**
      * Тип ресурса, при сборе которого произошла ошибка.

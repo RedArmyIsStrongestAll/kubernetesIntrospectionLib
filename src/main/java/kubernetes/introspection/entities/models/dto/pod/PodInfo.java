@@ -2,6 +2,7 @@ package kubernetes.introspection.entities.models.dto.pod;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;
+import lombok.Data;
 
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.Map;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
+@Data
 public class PodInfo {
     /**
      * Имя пода

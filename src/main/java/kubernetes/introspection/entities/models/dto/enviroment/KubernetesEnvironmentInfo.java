@@ -5,6 +5,8 @@ import kubernetes.introspection.entities.models.dto.owner.OwnerInfo;
 import kubernetes.introspection.entities.models.dto.pod.PodInfo;
 import kubernetes.introspection.entities.models.dto.service.ServiceInfo;
 import kubernetes.introspection.entities.models.dto.source.ConfigSourceInfo;
+import lombok.Builder;
+import lombok.Data;
 
 import java.util.List;
 
@@ -17,6 +19,8 @@ import java.util.List;
  * </p>
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Builder
+@Data
 public class KubernetesEnvironmentInfo {
     /**
      * Информация о текущем поде, в котором запущено приложение.
@@ -48,7 +52,6 @@ public class KubernetesEnvironmentInfo {
      * ConfigMap и Secret с их ключами (только имена, без значений).
      */
     private List<ConfigSourceInfo> configSources;
-
 
 
     /**

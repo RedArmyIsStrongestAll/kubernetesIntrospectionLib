@@ -1,8 +1,15 @@
 package kubernetes.introspection.entities.models.dto.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Builder;
+import lombok.Data;
+
 /**
  * Информация о порте сервиса
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Builder
+@Data
 public class ServicePort {
     /**
      * Имя порта (если есть)

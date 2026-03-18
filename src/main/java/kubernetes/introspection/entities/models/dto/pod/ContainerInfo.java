@@ -1,6 +1,8 @@
 package kubernetes.introspection.entities.models.dto.pod;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Builder;
+import lombok.Data;
 
 /**
  * Информация о контейнере в поде.
@@ -9,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @see ContainerState возможные состояния контейнера
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Builder
+@Data
 public class ContainerInfo {
     /**
      * Имя контейнера (из spec.containers[].name)

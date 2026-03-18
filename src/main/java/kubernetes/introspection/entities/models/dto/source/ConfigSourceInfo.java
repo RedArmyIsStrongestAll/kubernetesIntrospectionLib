@@ -1,6 +1,8 @@
 package kubernetes.introspection.entities.models.dto.source;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Builder;
+import lombok.Data;
 
 import java.util.List;
 
@@ -13,6 +15,8 @@ import java.util.List;
  * </p>
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Builder
+@Data
 public class ConfigSourceInfo {
     /**
      * Имя ресурса (ConfigMap или Secret) в Kubernetes.
