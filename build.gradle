@@ -20,6 +20,7 @@ ext {
     kubernetesClientVersion = '6.8.1'
     jacksonVersion = '2.15.2'
     slfVersion = '2.0.9'
+    lombokVersion = '1.18.30'
 }
 
 dependencies {
@@ -29,13 +30,20 @@ dependencies {
 
     // Внутренние зависимости
     implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
-    implementation "org.slf4j:slf4j-api:${slfVersion}"
-    implementation 'org.projectlombok:lombok:1.18.30'
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    runtimeOnly 'ch.qos.logback:logback-classic:1.4.11'
 
+    // Тестирование
+    testImplementation "io.fabric8:kubernetes-server-mock:${kubernetesClientVersion}"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
     testImplementation 'org.mockito:mockito-core:5.7.0'
     testImplementation 'org.assertj:assertj-core:3.24.2'
-    testImplementation "org.slf4j:slf4j-simple:${slfVersion}"
+
+    // Ломбок
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 }
 
 test {
