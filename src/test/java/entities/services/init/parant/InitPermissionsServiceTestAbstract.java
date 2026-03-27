@@ -3,15 +3,16 @@ package entities.services.init.parant;
 import engine.RbacAnalyzer;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.entities.models.dto.enviroment.CollectionError;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
+import kubernetes.introspection.entities.services.init.InitPermissionsService;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,16 +26,17 @@ public class InitPermissionsServiceTestAbstract {
     protected final String testNamespace = "test-namespace";
 
 
-    @BeforeEach
-    void setUp() {
-        mockServer = new KubernetesMockServer();
-        mockServer.init();
-        client = mockServer.createClient();
+    public PermissionInfo getPermissionInfoForRbacFile(String filename, String namespace) throws IOException {
+        InitPermissionsService service = new InitPermissionsService(client);
+        String yamlContent = loadRbacYaml(filename);
+        RbacAnalyzer analyzer = new RbacAnalyzer(yamlContent);
+        setupMockServerWithRbacAnalyzer(analyzer);
+
+        return service.checkPermissions(namespace);
     }
 
-    @AfterEach
-    void tearDown() {
-        mockServer.destroy();
+    public List<CollectionError> convert(PermissionInfo info, String namespace) {
+        return new InitPermissionsService(client).convertToCollectionErrors(info, namespace);
     }
 
 

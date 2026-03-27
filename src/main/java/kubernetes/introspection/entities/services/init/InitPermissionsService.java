@@ -4,11 +4,14 @@ package kubernetes.introspection.entities.services.init;
 import io.fabric8.kubernetes.api.model.authorization.v1.SelfSubjectAccessReview;
 import io.fabric8.kubernetes.api.model.authorization.v1.SelfSubjectAccessReviewBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import kubernetes.introspection.entities.models.dto.enviroment.CollectionError;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermission;
 import kubernetes.introspection.entities.models.dto.permision.SsarRequestDto;
+import kubernetes.introspection.entities.models.exceptions.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,6 +60,24 @@ public class InitPermissionsService {
         }
     }
 
+    /**
+     * Парсирует ответ checkPermissions метода в список CollectionError
+     *
+     * @return List<CollectionError> с результатами проверки прав
+     */
+    public List<CollectionError> convertToCollectionErrors(PermissionInfo permissionInfo, String namespace) {
+        return permissionInfo.getPermissions().stream()
+                .filter(p -> !p.isAllowed())
+                .map(p -> CollectionError.builder()
+                        .resourceType(p.getResource())
+                        .resourceName("unknown")
+                        .namespace(namespace)
+                        .errorCode(ErrorCode.FORBIDDEN)
+                        .message(ErrorCode.FORBIDDEN.getMessage())
+                        .timestamp(Instant.now().toString())
+                        .build())
+                .toList();
+    }
 
     /**
      * Проверка для Pods

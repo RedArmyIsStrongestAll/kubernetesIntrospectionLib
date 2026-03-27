@@ -1,12 +1,18 @@
 package entities.services.init;
 
-import engine.RbacAnalyzer;
 import entities.services.init.parant.InitPermissionsServiceTestAbstract;
+import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.entities.models.dto.enviroment.CollectionError;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
-import kubernetes.introspection.entities.services.init.InitPermissionsService;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,14 +21,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Slf4j
 class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
 
+    @BeforeEach
+    void setUp() {
+        mockServer = new KubernetesMockServer();
+        mockServer.init();
+        client = mockServer.createClient();
+    }
+
+    @AfterEach
+    void tearDown() {
+        mockServer.destroy();
+    }
+
     @Test
     void testCheckPermissionsWithAllAccess() throws Exception {
-        InitPermissionsService service = new InitPermissionsService(client);
-        String yamlContent = loadRbacYaml("rbac/test-rbac.yaml");
-        RbacAnalyzer analyzer = new RbacAnalyzer(yamlContent);
-        setupMockServerWithRbacAnalyzer(analyzer);
-
-        PermissionInfo result = service.checkPermissions(testNamespace);
+        PermissionInfo result = getPermissionInfoForRbacFile("rbac/test-rbac.yaml", testNamespace);
         log.info("Test result: {}", result);
 
         assertTrue(result.isSuccess(), "Проверка должна быть успешной, если все разрешения разрешены");
@@ -39,14 +52,19 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
     }
 
     @Test
+    void convertToCollectionErrorsWithAllAccess() throws IOException {
+        PermissionInfo info = getPermissionInfoForRbacFile("rbac/test-rbac.yaml", testNamespace);
+        log.info("Call checkPermissions result: {}", info);
+
+        List<CollectionError> errors = convert(info, testNamespace);
+        log.info("Test result: {}", errors);
+
+        assertTrue(errors.isEmpty(), "Должно быть 0 ошибок, если все разрешения разрешены");
+    }
+
+    @Test
     void testCheckPermissionsNoPodWatch() throws Exception {
-        InitPermissionsService service = new InitPermissionsService(client);
-
-        String yamlContent = loadRbacYaml("rbac/fail-test-rbac-no-pod-watch.yaml");
-        RbacAnalyzer analyzer = new RbacAnalyzer(yamlContent);
-        setupMockServerWithRbacAnalyzer(analyzer);
-
-        PermissionInfo result = service.checkPermissions(testNamespace);
+        PermissionInfo result = getPermissionInfoForRbacFile("rbac/fail-test-rbac-no-pod-watch.yaml", testNamespace);
         log.info("Test result: {}", result);
 
         assertFalse(result.isSuccess(), "Проверка должна быть неуспешной когда pods/watch запрещен");
@@ -63,13 +81,25 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
     }
 
     @Test
-    void testCheckPermissionsWithDefaultRbac() throws Exception {
-        InitPermissionsService service = new InitPermissionsService(client);
-        String yamlContent = loadRbacYaml("rbac/fail-test-rbac-default.yaml");
-        RbacAnalyzer analyzer = new RbacAnalyzer(yamlContent);
-        setupMockServerWithRbacAnalyzer(analyzer);
+    void convertToCollectionErrorsNoPodWatch() throws IOException {
+        PermissionInfo info = getPermissionInfoForRbacFile("rbac/fail-test-rbac-no-pod-watch.yaml", testNamespace);
+        log.info("Call checkPermissions result: {}", info);
 
-        PermissionInfo result = service.checkPermissions(testNamespace);
+        List<CollectionError> errors = convert(info, testNamespace);
+        log.info("Test result: {}", errors);
+
+        assertEquals(1, errors.size(), "Должна быть одна ошибка");
+        CollectionError error = errors.get(0);
+
+        assertEquals("pods/watch" + "@" + testNamespace, error.getResourceType());
+        assertEquals("unknown", error.getResourceName());
+        assertEquals(testNamespace, error.getNamespace());
+        assertEquals("FORBIDDEN", error.getErrorCode().name());
+    }
+
+    @Test
+    void testCheckPermissionsWithDefaultRbac() throws Exception {
+        PermissionInfo result = getPermissionInfoForRbacFile("rbac/fail-test-rbac-default.yaml", testNamespace);
         log.info("Test result: {}", result);
 
         assertFalse(result.isSuccess(), "Проверка должна быть успешной при дефольных разрешениях");
@@ -98,13 +128,19 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
     }
 
     @Test
-    void testCheckPermissionsNoAllPermissions() throws Exception {
-        InitPermissionsService service = new InitPermissionsService(client);
-        String yamlContent = loadRbacYaml("rbac/fail-test-rbac-no-all.yaml");
-        RbacAnalyzer analyzer = new RbacAnalyzer(yamlContent);
-        setupMockServerWithRbacAnalyzer(analyzer);
+    void convertToCollectionErrorsWithDefaultRbac() throws IOException {
+        PermissionInfo info = getPermissionInfoForRbacFile("rbac/fail-test-rbac-default.yaml", testNamespace);
+        log.info("Call checkPermissions result: {}", info);
 
-        PermissionInfo result = service.checkPermissions(testNamespace);
+        List<CollectionError> errors = convert(info, testNamespace);
+        log.info("Test result: {}", errors);
+
+        assertEquals(33, errors.size(), "Должна быть одна ошибка");
+    }
+
+    @Test
+    void testCheckPermissionsNoAllPermissions() throws Exception {
+        PermissionInfo result = getPermissionInfoForRbacFile("rbac/fail-test-rbac-no-all.yaml", testNamespace);
         log.info("Test result: {}", result);
 
         assertFalse(result.isSuccess(), "Проверка должна быть неуспешной при полном запрете");
@@ -128,6 +164,17 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
         assertFalse(svcGet.isAllowed(), "services/get должен быть запрещен");
         assertNotNull(svcList, "Permission services/list должен присутствовать");
         assertFalse(svcList.isAllowed(), "services/list должен быть запрещен");
+    }
+
+    @Test
+    void convertToCollectionErrors_noPermissions_allDenied_sixErrors() throws IOException {
+        PermissionInfo info = getPermissionInfoForRbacFile("rbac/fail-test-rbac-no-all.yaml", testNamespace);
+        log.info("Call checkPermissions result: {}", info);
+
+        List<CollectionError> errors = convert(info, testNamespace);
+        log.info("Test result: {}", info);
+
+        assertEquals(33, errors.size(), "Должно быть 6 ошибок");
     }
 
 }
