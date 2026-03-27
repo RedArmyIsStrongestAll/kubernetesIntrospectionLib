@@ -61,32 +61,6 @@ public class InitPermissionsService {
         }
     }
 
-    /**
-     * Парсирует ответ checkPermissions метода в список CollectionError.
-     *
-     * <p> Ресур имеет измененый вид от ресурса k8s: pods/get@namespace -> pods/get </p>
-     *
-     * @return List<CollectionError> с результатами проверки прав
-     */
-    public List<CollectionError> convertToCollectionErrors(PermissionInfo permissionInfo, String namespace) {
-        log.info("Start convertToCollectionErrors");
-        return permissionInfo.getPermissions().stream()
-                .filter(p -> !p.isAllowed())
-                .map(p -> {
-                    String resourceType = (p.getResource() == null) ? "unknown" : p.getResource().getStringValue();
-
-                    return CollectionError.builder()
-                            .resourceType(resourceType)
-                            .resourceName("unknown")
-                            .namespace(namespace)
-                            .errorCodeEnum(ErrorCodeEnum.FORBIDDEN)
-                            .message(ErrorCodeEnum.FORBIDDEN.getMessage())
-                            .timestamp(Instant.now().toString())
-                            .build();
-                })
-                .toList();
-    }
-
 
     /**
      * Проверка для Pods
@@ -168,6 +142,33 @@ public class InitPermissionsService {
             log.error("Error executing kubernetes access review for resource: {}", request);
             return new PermissionInfo.PermissionInfoDto(request.getResourcePermissionEnum(), false);
         }
+    }
+
+
+    /**
+     * Парсирует ответ checkPermissions метода в список CollectionError.
+     *
+     * <p> Ресур имеет измененый вид от ресурса k8s: pods/get@namespace -> pods/get </p>
+     *
+     * @return List<CollectionError> с результатами проверки прав
+     */
+    public static List<CollectionError> convertToCollectionErrors(PermissionInfo permissionInfo, String namespace) {
+        log.info("Start convertToCollectionErrors");
+        return permissionInfo.getPermissions().stream()
+                .filter(p -> !p.isAllowed())
+                .map(p -> {
+                    String resourceType = (p.getResource() == null) ? "unknown" : p.getResource().getStringValue();
+
+                    return CollectionError.builder()
+                            .resourceType(resourceType)
+                            .resourceName("unknown")
+                            .namespace(namespace)
+                            .errorCodeEnum(ErrorCodeEnum.FORBIDDEN)
+                            .message(ErrorCodeEnum.FORBIDDEN.getMessage())
+                            .timestamp(Instant.now().toString())
+                            .build();
+                })
+                .toList();
     }
 
 }
