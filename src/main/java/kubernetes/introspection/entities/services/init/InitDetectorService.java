@@ -1,6 +1,6 @@
 package kubernetes.introspection.entities.services.init;
 
-import kubernetes.introspection.entities.models.exceptions.ErrorCode;
+import kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,8 +40,8 @@ public class InitDetectorService {
         log.info("Start getNamespace");
 
         if (!runningInKubernetes()) {
-            log.error(ErrorCode.NOT_IN_CLUSTER.getMessage());
-            throw new KubernetesException(ErrorCode.NOT_IN_CLUSTER);
+            log.error(ErrorCodeEnum.NOT_IN_CLUSTER.getMessage());
+            throw new KubernetesException(ErrorCodeEnum.NOT_IN_CLUSTER);
         }
 
         try {
@@ -52,8 +52,8 @@ public class InitDetectorService {
             return ns;
 
         } catch (Exception e) {
-            log.error(ErrorCode.NOT_NAMESPACE.getMessage());
-            throw new KubernetesException(ErrorCode.NOT_NAMESPACE);
+            log.error(ErrorCodeEnum.NOT_NAMESPACE.getMessage());
+            throw new KubernetesException(ErrorCodeEnum.NOT_NAMESPACE);
         }
     }
 

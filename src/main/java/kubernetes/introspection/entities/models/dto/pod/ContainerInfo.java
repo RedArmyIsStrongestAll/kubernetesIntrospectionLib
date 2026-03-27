@@ -8,7 +8,7 @@ import lombok.Data;
  * Информация о контейнере в поде.
  * Содержит идентификацию, состояние, причины ошибок и историю рестартов.
  *
- * @see ContainerState возможные состояния контейнера
+ * @see ContainerStateEnum возможные состояния контейнера
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
@@ -38,7 +38,7 @@ public class ContainerInfo {
     /**
      * Текущее состояние контейнера
      */
-    private ContainerState state;
+    private ContainerStateEnum state;
 
     /**
      * Причина текущего состояния (CrashLoopBackOff, ImagePullBackOff и т.д.)

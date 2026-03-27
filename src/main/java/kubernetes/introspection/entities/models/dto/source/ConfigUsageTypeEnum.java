@@ -8,7 +8,7 @@ import lombok.Getter;
  * Определяет, как именно ConfigMap или Secret подключен к контейнеру.
  */
 @Getter
-public enum ConfigUsageType {
+public enum ConfigUsageTypeEnum {
     /**
      * Используется в отдельных переменных окружения (valueFrom)
      */
@@ -44,7 +44,7 @@ public enum ConfigUsageType {
      */
     private final String originalName;
 
-    ConfigUsageType(String name, String originalName) {
+    ConfigUsageTypeEnum(String name, String originalName) {
         this.name = name;
         this.originalName = originalName;
     }
@@ -57,7 +57,7 @@ public enum ConfigUsageType {
      * @param hasVolume  есть ли ссылки через volume
      * @return соответствующий ConfigUsageType
      */
-    public static ConfigUsageType fromUsage(boolean hasEnvRef, boolean hasEnvFrom, boolean hasVolume) {
+    public static ConfigUsageTypeEnum fromUsage(boolean hasEnvRef, boolean hasEnvFrom, boolean hasVolume) {
         int count = 0;
         if (hasEnvRef) count++;
         if (hasEnvFrom) count++;

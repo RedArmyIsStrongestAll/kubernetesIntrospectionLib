@@ -4,9 +4,9 @@ package kubernetes.introspection.entities.services.main.pod;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import kubernetes.introspection.entities.models.dto.permision.ResourcePermission;
+import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.dto.pod.ContainerInfo;
-import kubernetes.introspection.entities.models.dto.pod.ContainerState;
+import kubernetes.introspection.entities.models.dto.pod.ContainerStateEnum;
 import kubernetes.introspection.entities.models.dto.pod.PodInfo;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.main.pod.delegate.CurrentPodServiceConstDownwardApiExt;
@@ -21,8 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static kubernetes.introspection.entities.models.exceptions.ErrorCode.BROKEN_NAME_IN_POD;
-import static kubernetes.introspection.entities.models.exceptions.ErrorCode.POD_NOT_FOUND;
+import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.BROKEN_NAME_IN_POD;
+import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.POD_NOT_FOUND;
 
 /**
  * Абстрактный базовый класс для сервисов, предоставляющих информацию о текущем Pod'е в Kubernetes.
@@ -83,8 +83,8 @@ public abstract class CurrentPodService {
     public PodInfo getCurrentPodInfoWithCheckPermisions() {
         log.info("Start getCurrentPodInfoWithCheckPermisions in {}", getNameClassExt());
 
-        List<ResourcePermission> resourcePermissionList = getPermission();
-        log.info("Resource permissions: {}", String.join(", ", resourcePermissionList.toString()));
+        List<ResourcePermissionEnum> resourcePermissionEnumList = getPermission();
+        log.info("Resource permissions: {}", String.join(", ", resourcePermissionEnumList.toString()));
 
 
 
@@ -163,7 +163,7 @@ public abstract class CurrentPodService {
                                 .image(container.getImage())
                                 .imageID(status != null ? status.getImageID() : null)
                                 .containerID(status != null ? status.getContainerID() : null)
-                                .state(status != null ? ContainerState.parserFromKubernetes(status.getState().toString()) : null)
+                                .state(status != null ? ContainerStateEnum.parserFromKubernetes(status.getState().toString()) : null)
                                 .stateReason(status != null && status.getState().getWaiting() != null ? status.getState().getWaiting().getReason() : null)
                                 .restartCount(status != null ? status.getRestartCount() : 0)
                                 .lastTerminationReason(status != null && status.getLastState() != null && status.getLastState().getTerminated() != null
@@ -180,7 +180,7 @@ public abstract class CurrentPodService {
     }
 
 
-    protected abstract List<ResourcePermission> getPermission();
+    protected abstract List<ResourcePermissionEnum> getPermission();
 
     protected abstract String getNameClassExt();
 

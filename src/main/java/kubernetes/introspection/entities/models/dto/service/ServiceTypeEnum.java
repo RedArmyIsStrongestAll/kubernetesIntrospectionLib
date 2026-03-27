@@ -18,7 +18,7 @@ import lombok.Getter;
  * </ul>
  */
 @Getter
-public enum ServiceType {
+public enum ServiceTypeEnum {
     /**
      * Доступ только внутри кластера по внутреннему IP
      */
@@ -49,7 +49,7 @@ public enum ServiceType {
      */
     private final String originalName;
 
-    ServiceType(String name, String originalName) {
+    ServiceTypeEnum(String name, String originalName) {
         this.name = name;
         this.originalName = originalName;
     }
@@ -60,7 +60,7 @@ public enum ServiceType {
      * @param type строка типа сервиса из spec.type (ClusterIP, NodePort, LoadBalancer, ExternalName)
      * @return соответствующий ServiceType или null если тип неизвестен
      */
-    public static ServiceType fromKubernetes(String type) {
+    public static ServiceTypeEnum fromKubernetes(String type) {
         if (type == null) return null;
         return switch (type.toLowerCase()) {
             case "clusterip" -> CLUSTER_IP;

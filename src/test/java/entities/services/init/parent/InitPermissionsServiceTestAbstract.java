@@ -102,7 +102,8 @@ public class InitPermissionsServiceTestAbstract {
 
     protected PermissionInfo.PermissionInfoDto findPermission(PermissionInfo result, String resource, String verb) {
         return result.getPermissions().stream()
-                .filter(p -> p.getResource().startsWith(resource + "/" + verb))
+                .filter(p -> p.getResource().getResource().equals(resource))
+                .filter(p -> p.getResource().getVerb().equals(verb))
                 .findFirst()
                 .orElse(null);
     }

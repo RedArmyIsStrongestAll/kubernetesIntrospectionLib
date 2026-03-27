@@ -1,10 +1,9 @@
 package kubernetes.introspection.entities.models.dto.enviroment;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import kubernetes.introspection.entities.models.exceptions.ErrorCode;
+import kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Информация об ошибке при сборе данных Kubernetes окружения.
@@ -38,7 +37,7 @@ public class CollectionError {
      * Код ошибки для программной обработки.
      * Например: NOT_FOUND, FORBIDDEN, TIMEOUT, SERVER_ERROR
      */
-    private ErrorCode errorCode;
+    private ErrorCodeEnum errorCodeEnum;
 
     /**
      * Человеко-читаемое описание ошибки.

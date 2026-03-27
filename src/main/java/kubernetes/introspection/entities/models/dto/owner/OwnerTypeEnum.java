@@ -32,7 +32,7 @@ import lombok.Getter;
  * </ul>
  */
 @Getter
-public enum OwnerType {
+public enum OwnerTypeEnum {
     /**
      * Управляет обновлением и масштабированием через ReplicaSet
      */
@@ -88,7 +88,7 @@ public enum OwnerType {
      */
     private final String originalName;
 
-    OwnerType(String name, String originalName) {
+    OwnerTypeEnum(String name, String originalName) {
         this.name = name;
         this.originalName = originalName;
     }
@@ -99,7 +99,7 @@ public enum OwnerType {
      * @param kind строка kind из Kubernetes (Deployment, StatefulSet, и т.д.)
      * @return соответствующий WorkloadType или UNKNOWN если тип не распознан
      */
-    public static OwnerType fromKubernetes(String kind) {
+    public static OwnerTypeEnum fromKubernetes(String kind) {
         if (kind == null) return UNKNOWN;
 
         return switch (kind.toLowerCase()) {

@@ -8,8 +8,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-import static kubernetes.introspection.entities.models.exceptions.ErrorCode.ERROR_READ_FILE_RBAC;
-import static kubernetes.introspection.entities.models.exceptions.ErrorCode.NO_STATIC_FILE_RBAC;
+import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.ERROR_READ_FILE_RBAC;
+import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.NO_STATIC_FILE_RBAC;
 
 /**
  * Возвращает шаблон YAML файл для RBAC

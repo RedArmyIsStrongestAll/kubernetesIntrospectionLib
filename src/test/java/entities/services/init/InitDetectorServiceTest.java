@@ -1,6 +1,6 @@
 package entities.services.init;
 
-import kubernetes.introspection.entities.models.exceptions.ErrorCode;
+import kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.init.InitDetectorService;
 import org.junit.jupiter.api.Test;
@@ -91,7 +91,7 @@ class InitDetectorServiceTest {
                     .thenReturn(false);
 
             KubernetesException ex = assertThrows(KubernetesException.class, testService::getNamespace);
-            assertEquals(ErrorCode.NOT_IN_CLUSTER, ex.getErrorCode());
+            assertEquals(ErrorCodeEnum.NOT_IN_CLUSTER, ex.getErrorCodeEnum());
         }
     }
 
@@ -135,7 +135,7 @@ class InitDetectorServiceTest {
                     .thenReturn("");
 
             KubernetesException ex = assertThrows(KubernetesException.class, testService::getNamespace);
-            assertEquals(ErrorCode.NOT_NAMESPACE, ex.getErrorCode());
+            assertEquals(ErrorCodeEnum.NOT_NAMESPACE, ex.getErrorCodeEnum());
         }
     }
 }

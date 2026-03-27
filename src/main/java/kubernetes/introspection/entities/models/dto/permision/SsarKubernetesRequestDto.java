@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SsarKubernetesRequestDto {
-    private ResourcePermission resourcePermission;
+    private ResourcePermissionEnum resourcePermissionEnum;
     private String namespace;
 }

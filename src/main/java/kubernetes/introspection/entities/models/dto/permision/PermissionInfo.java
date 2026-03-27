@@ -17,7 +17,7 @@ public class PermissionInfo {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class PermissionInfoDto {
-        private String resource;
+        private ResourcePermissionEnum resource;
         private boolean allowed;
     }
 }

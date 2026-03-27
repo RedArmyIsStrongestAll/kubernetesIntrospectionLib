@@ -9,5 +9,5 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 public class KubernetesException extends RuntimeException {
-    private final ErrorCode errorCode;
+    private final ErrorCodeEnum errorCodeEnum;
 }

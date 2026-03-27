@@ -11,7 +11,7 @@ import lombok.Getter;
  * Kubernetes ContainerStatus API</a>
  */
 @Getter
-public enum ContainerState {
+public enum ContainerStateEnum {
     /**
      * Контейнер работает
      */
@@ -37,7 +37,7 @@ public enum ContainerState {
      */
     private final String originalName;
 
-    ContainerState(String name, String originalName) {
+    ContainerStateEnum(String name, String originalName) {
         this.name = name;
         this.originalName = originalName;
     }
@@ -48,7 +48,7 @@ public enum ContainerState {
      * @param state статус из ContainerStatus (running/waiting/terminated)
      * @return соответствующий элемент enum или null если статус неизвестен
      */
-    public static ContainerState parserFromKubernetes(String state) {
+    public static ContainerStateEnum parserFromKubernetes(String state) {
         if (state == null) return null;
         return switch (state.toLowerCase()) {
             case "running" -> RUNNING;

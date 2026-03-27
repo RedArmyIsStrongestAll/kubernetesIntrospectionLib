@@ -11,7 +11,7 @@ import lombok.Getter;
  * </p>
  */
 @Getter
-public enum ConfigSourceType {
+public enum ConfigSourceTypeEnum {
     /**
      * Несекретные данные конфигурации
      */
@@ -32,7 +32,7 @@ public enum ConfigSourceType {
      */
     private final String originalName;
 
-    ConfigSourceType(String name, String originalName) {
+    ConfigSourceTypeEnum(String name, String originalName) {
         this.name = name;
         this.originalName = originalName;
     }
@@ -43,7 +43,7 @@ public enum ConfigSourceType {
      * @param kind строка kind из Kubernetes (ConfigMap, Secret)
      * @return соответствующий ConfigSourceType или null если тип неизвестен
      */
-    public static ConfigSourceType fromKubernetes(String kind) {
+    public static ConfigSourceTypeEnum fromKubernetes(String kind) {
         if (kind == null) return null;
         return switch (kind.toLowerCase()) {
             case "configmap" -> CONFIG_MAP;

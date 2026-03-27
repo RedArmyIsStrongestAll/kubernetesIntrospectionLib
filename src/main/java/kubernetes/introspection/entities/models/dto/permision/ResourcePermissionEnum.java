@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Getter
-public enum ResourcePermission {
+public enum ResourcePermissionEnum {
     // Pod ресурсы
     PODS_GET("pods", "get"),
     PODS_LIST("pods", "list"),
@@ -58,21 +58,21 @@ public enum ResourcePermission {
     private final String resource;
     private final String verb;
 
-    ResourcePermission(String resource, String verb) {
+    ResourcePermissionEnum(String resource, String verb) {
         this.resource = resource;
         this.verb = verb;
     }
 
 
-    public static List<ResourcePermission> getPodPermissions() {
+    public static List<ResourcePermissionEnum> getPodPermissions() {
         return Arrays.asList(PODS_GET, PODS_LIST, PODS_WATCH);
     }
 
-    public static List<ResourcePermission> getServicePermissions() {
+    public static List<ResourcePermissionEnum> getServicePermissions() {
         return Arrays.asList(SERVICES_GET, SERVICES_LIST, SERVICES_WATCH);
     }
 
-    public static List<ResourcePermission> getOwnerPermissions() {
+    public static List<ResourcePermissionEnum> getOwnerPermissions() {
         return Arrays.asList(
                 DEPLOYMENTS_GET, DEPLOYMENTS_LIST, DEPLOYMENTS_WATCH,
                 STATEFULSETS_GET, STATEFULSETS_LIST, STATEFULSETS_WATCH,
@@ -84,7 +84,7 @@ public enum ResourcePermission {
         );
     }
 
-    public static List<ResourcePermission> getConfigPermissions() {
+    public static List<ResourcePermissionEnum> getConfigPermissions() {
         return Arrays.asList(
                 CONFIGMAPS_GET, CONFIGMAPS_LIST, CONFIGMAPS_WATCH,
                 SECRETS_GET, SECRETS_LIST, SECRETS_WATCH
@@ -96,12 +96,18 @@ public enum ResourcePermission {
         return resource + "/" + verb;
     }
 
-    public static ResourcePermission getFromStringValue(String value) {
-        for (ResourcePermission rp : values()) {
+    public static ResourcePermissionEnum getFromStringValue(String value) {
+        for (ResourcePermissionEnum rp : values()) {
             if (rp.getStringValue().equals(value)) {
                 return rp;
             }
         }
         return null;
+    }
+
+    public static ResourcePermissionEnum findByResourceAndVerb(String resource, String verb) {
+        return Arrays.stream(values())
+                .filter(p -> p.getResource().equals(resource) && p.getVerb().equals(verb))
+                .findFirst().get();
     }
 }

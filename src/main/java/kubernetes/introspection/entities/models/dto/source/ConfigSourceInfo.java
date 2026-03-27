@@ -26,7 +26,7 @@ public class ConfigSourceInfo {
     /**
      * Тип источника: CONFIG_MAP (несекретные данные) или SECRET (пароли, токены).
      */
-    private ConfigSourceType type;
+    private ConfigSourceTypeEnum type;
 
     /**
      * Список имен ключей (переменных), определенных в этом источнике.
@@ -37,7 +37,7 @@ public class ConfigSourceInfo {
     /**
      * Способ использования источника контейнерами пода.
      *
-     * @see ConfigUsageType
+     * @see ConfigUsageTypeEnum
      */
-    private ConfigUsageType usageType;
+    private ConfigUsageTypeEnum usageType;
 }

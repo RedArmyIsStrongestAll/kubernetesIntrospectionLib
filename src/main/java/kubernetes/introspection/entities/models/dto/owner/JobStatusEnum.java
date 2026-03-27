@@ -19,7 +19,7 @@ import lombok.Getter;
  * </ul>
  */
 @Getter
-public enum JobStatus {
+public enum JobStatusEnum {
     /**
      * Job выполняется: поды созданы и работают
      */
@@ -45,7 +45,7 @@ public enum JobStatus {
      */
     private final String originalName;
 
-    JobStatus(String name, String originalName) {
+    JobStatusEnum(String name, String originalName) {
         this.name = name;
         this.originalName = originalName;
     }
@@ -106,7 +106,7 @@ public enum JobStatus {
      * @param completionTime время завершения Job в формате RFC3339 (null если не завершена)
      * @return соответствующий JobStatus (ACTIVE/SUCCEEDED/FAILED)
      */
-    public static JobStatus fromKubernetes(Integer active, Integer succeeded, Integer failed, String completionTime) {
+    public static JobStatusEnum fromKubernetes(Integer active, Integer succeeded, Integer failed, String completionTime) {
         if (completionTime != null) {
             // Job завершена
             return failed > 0 ? FAILED : SUCCEEDED;
@@ -119,7 +119,7 @@ public enum JobStatus {
     /**
      * Упрощенный вариант - из строки условия.
      */
-    public static JobStatus fromKubernetes(String condition) {
+    public static JobStatusEnum fromKubernetes(String condition) {
         if (condition == null) return null;
         return switch (condition.toLowerCase()) {
             case "complete" -> SUCCEEDED;

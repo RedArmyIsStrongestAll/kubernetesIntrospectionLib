@@ -18,7 +18,7 @@ public class OwnerInfo {
     /**
      * Тип владельца (Deployment, StatefulSet, и т.д.)
      */
-    private OwnerType type;
+    private OwnerTypeEnum type;
 
     /**
      * Имя ресурса-владельца

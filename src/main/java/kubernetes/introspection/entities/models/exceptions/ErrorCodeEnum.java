@@ -3,7 +3,7 @@ package kubernetes.introspection.entities.models.exceptions;
 import lombok.Getter;
 
 @Getter
-public enum ErrorCode {
+public enum ErrorCodeEnum {
     NOT_IN_CLUSTER(500, "Not in cluster",
             "The application is not running in a Kubernetes cluster.",
             true),
@@ -65,7 +65,7 @@ public enum ErrorCode {
     private final String message;
     private final boolean critical;
 
-    ErrorCode(int code, String name, String message, boolean critical) {
+    ErrorCodeEnum(int code, String name, String message, boolean critical) {
         this.code = code;
         this.name = name;
         this.message = message;

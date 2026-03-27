@@ -3,7 +3,7 @@ package kubernetes.introspection.entities.services.main.pod.delegate;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import kubernetes.introspection.entities.models.dto.permision.ResourcePermission;
+import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.services.main.pod.CurrentPodService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static kubernetes.introspection.entities.models.dto.permision.ResourcePermission.PODS_GET;
-import static kubernetes.introspection.entities.models.dto.permision.ResourcePermission.PODS_LIST;
+import static kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum.PODS_GET;
+import static kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum.PODS_LIST;
 
 
 @Slf4j
@@ -32,7 +32,7 @@ public class CurrentPodServiceLabelsExt extends CurrentPodService {
     }
 
     @Override
-    protected List<ResourcePermission> getPermission() {
+    protected List<ResourcePermissionEnum> getPermission() {
         return new ArrayList<>(List.of(PODS_LIST, PODS_GET));
     }
 
