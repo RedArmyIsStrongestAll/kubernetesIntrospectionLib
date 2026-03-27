@@ -1,6 +1,7 @@
 package entities.services.init;
 
 import engine.RbacAnalyzer;
+import entities.services.init.parant.InitPermissionsServiceTestAbstract;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.services.init.InitPermissionsService;
 import lombok.extern.slf4j.Slf4j;

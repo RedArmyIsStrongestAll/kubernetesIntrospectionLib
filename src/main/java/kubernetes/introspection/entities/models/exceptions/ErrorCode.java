@@ -1,80 +1,70 @@
 package kubernetes.introspection.entities.models.exceptions;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
-/**
- * Код ошибки при сборе информации из Kubernetes.
- */
 @Getter
 public enum ErrorCode {
+    NOT_IN_CLUSTER(500, "Not in cluster",
+            "The application is not running in a Kubernetes cluster.", true),
+
+    NOT_NAMESPACE(500, "Not namespace",
+            "The application is running in a Kubernetes cluster, " +
+                    "but cannot read 'namespace' from file '/var/run/secrets/kubernetes.io/serviceaccount/namespace'",
+            true);
+
     /**
      * Ресурс не найден
      */
-    NOT_FOUND("not found"),
+//    NOT_FOUND(404, "Resource not found", false),
 
     /**
      * Нет доступа к ресурсу (RBAC)
      */
-    FORBIDDEN("forbidden"),
+//    FORBIDDEN(403, "Access denied", true),
 
     /**
      * Таймаут при запросе к API
      */
-    TIMEOUT("timeout"),
+//    TIMEOUT(408, "Request timeout", true),
 
     /**
      * Внутренняя ошибка Kubernetes API
      */
-    SERVER_ERROR("server error"),
+//    SERVER_ERROR(500, "Internal server error", true),
 
     /**
      * Ошибка парсинга ответа
      */
-    PARSE_ERROR("parse error"),
+//    PARSE_ERROR(422, "Failed to parse response", false),
 
     /**
      * Неизвестная ошибка
      */
-    UNKNOWN("unknown");
+//    UNKNOWN(520, "Unknown error", true);
 
-    /**
-     * Имя для внутреннего использования (в нижнем регистре)
-     */
+    private final int code;
     private final String name;
+    private final String message;
+    private final boolean critical;
 
-    ErrorCode(String name) {
+    ErrorCode(int code, String name, String message, boolean critical) {
+        this.code = code;
         this.name = name;
+        this.message = message;
+        this.critical = critical;
     }
 
     /**
-     * Создает ErrorCode из HTTP статуса или исключения.
-     *
-     * @param httpCode HTTP код ошибки (404, 403, 500 и т.д.)
-     * @return соответствующий ErrorCode
+     * Создает ErrorCode из HTTP статуса.
      */
-    public static ErrorCode fromHttpCode(int httpCode) {
-        return switch (httpCode) {
-            case 404 -> NOT_FOUND;
-            case 403 -> FORBIDDEN;
-            case 408, 504 -> TIMEOUT;
-            case 500, 502, 503 -> SERVER_ERROR;
-            default -> UNKNOWN;
-        };
-    }
-
-    /**
-     * Возвращает имя для сериализации в JSON.
-     *
-     * @return имя кода ошибки
-     */
-    @JsonValue
-    public String toJson() {
-        return name;
-    }
-
-    @Override
-    public String toString() {
-        return this.name();
-    }
+//    public static ErrorCode fromHttpCode(int httpCode) {
+//        return switch (httpCode) {
+//            case 404 -> NOT_FOUND;
+//            case 403 -> FORBIDDEN;
+//            case 408, 504 -> TIMEOUT;
+//            case 500, 502, 503 -> SERVER_ERROR;
+//            case 422 -> PARSE_ERROR;
+//            default -> UNKNOWN;
+//        };
+//    }
 }

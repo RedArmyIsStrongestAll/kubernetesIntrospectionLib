@@ -97,17 +97,17 @@ public class RbacAnalyzer {
      * @see #RbacAnalyzer(String) конструктор, загружающий правила из YAML
      */
     public boolean isAllowed(String resource, String verb, String namespace) {
-        String targetNamespace = (namespace == null || namespace.isEmpty()) ?
-                serviceAccountNamespace : namespace;
+        if (!serviceAccountNamespace.equals(namespace)) {
+            return false;
+        }
 
         return rules.stream().anyMatch(rule ->
-                rule.matches(resource, verb, targetNamespace)
+                rule.matches(resource, verb, namespace)
         );
     }
 
     private void parseYamlRules(String yamlContent) {
         LoaderOptions options = new LoaderOptions();
-        options.setMaxAliasesForCollections(100); // Защита от DoS
 
         Yaml yaml = new Yaml(new SafeConstructor(options));
         Iterable<Object> documents = yaml.loadAll(yamlContent);
@@ -144,7 +144,6 @@ public class RbacAnalyzer {
     }
 
     private String extractNamespaceFromYaml(String yamlContent) {
-        // Простой способ извлечь namespace из ServiceAccount
         if (yamlContent.contains("namespace:")) {
             int index = yamlContent.indexOf("namespace:");
             if (index != -1) {
