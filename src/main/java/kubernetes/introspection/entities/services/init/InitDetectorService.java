@@ -7,12 +7,19 @@ import lombok.extern.slf4j.Slf4j;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Проверяет находится ли приложение в кластере Kubernetes
+ */
 @Slf4j
 public class InitDetectorService {
+
     private static final String ENV = "KUBERNETES_SERVICE_HOST";
     private static final Path SA_TOKEN = Path.of("/var/run/secrets/kubernetes.io/serviceaccount/token");
     private static final Path SA_NS = Path.of("/var/run/secrets/kubernetes.io/serviceaccount/namespace");
 
+    /**
+     * Проверяет находится ли приложение в кластере Kubernetes
+     */
     public boolean runningInKubernetes() {
         log.info("Start runningInKubernetes");
         String kubeHost = getKubernetesHostEnv();
@@ -25,12 +32,12 @@ public class InitDetectorService {
         return hasKubeEnv && hasToken && hasNs;
     }
 
-    public String getKubernetesHostEnv() {
-        return System.getenv(ENV);
-    }
-
+    /**
+     * Проверяет находится ли приложение в кластере Kubernetes
+     * и возвращает имя пространства имен
+     */
     public String getNamespace() {
-        log.info("Start runningInKubernetes");
+        log.info("Start getNamespace");
 
         if (!runningInKubernetes()) {
             log.error(ErrorCode.NOT_IN_CLUSTER.getMessage());
@@ -50,10 +57,18 @@ public class InitDetectorService {
         }
     }
 
+
+    @Deprecated(since = "Using only for test")
+    public String getKubernetesHostEnv() {
+        return System.getenv(ENV);
+    }
+
+    @Deprecated(since = "Using only for test")
     public static Path getTokenPath() {
         return SA_TOKEN;
     }
 
+    @Deprecated(since = "Using only for test")
     public static Path getNamespacePath() {
         return SA_NS;
     }

@@ -1,4 +1,4 @@
-package entities.services.init.parant;
+package entities.services.init.parent;
 
 import engine.RbacAnalyzer;
 import io.fabric8.kubernetes.client.KubernetesClient;

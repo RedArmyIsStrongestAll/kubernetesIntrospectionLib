@@ -65,7 +65,7 @@ public class KubernetesEnvironmentInfo {
      */
     private String collectionTimestamp;
 
-    
+
     /**
      * Ошибки, которые помещали собрать информацию
      */

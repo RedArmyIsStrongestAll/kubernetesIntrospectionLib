@@ -11,9 +11,15 @@ import java.nio.charset.StandardCharsets;
 import static kubernetes.introspection.entities.models.exceptions.ErrorCode.ERROR_READ_FILE_RBAC;
 import static kubernetes.introspection.entities.models.exceptions.ErrorCode.NO_STATIC_FILE_RBAC;
 
+/**
+ * Возвращает шаблон YAML файл для RBAC
+ */
 @Slf4j
 public class YamlGenerateService {
 
+    /**
+     * Возвращает шаблон YAML файл для RBAC
+     */
     public String readTestRbacYaml() {
         log.info("Start readTestRbacYaml");
 

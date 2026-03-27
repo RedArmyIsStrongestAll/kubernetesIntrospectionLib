@@ -4,11 +4,11 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
-    NOT_IN_CLUSTER(400, "Not in cluster",
+    NOT_IN_CLUSTER(500, "Not in cluster",
             "The application is not running in a Kubernetes cluster.",
             true),
 
-    NOT_NAMESPACE(400, "Not namespace",
+    NOT_NAMESPACE(500, "Not namespace",
             "The application is running in a Kubernetes cluster, but cannot read 'namespace' from file '/var/run/secrets/kubernetes.io/serviceaccount/namespace'",
             true),
 
@@ -22,7 +22,13 @@ public enum ErrorCode {
 
     FORBIDDEN(403, "Access denied",
             "The application (as pod) does not have access to the resource due to RBAC rules",
-            false);
+            false),
+
+    BROKEN_NAME_IN_POD(500, "Broken name in pod",
+            "The application does not have a pod name set for the pod.",
+            true),
+
+    POD_NOT_FOUND(404, "Resource not found", "Current pod not found",true);
 
     /**
      * Ресурс не найден
