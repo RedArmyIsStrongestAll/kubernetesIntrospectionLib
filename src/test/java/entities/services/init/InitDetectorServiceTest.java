@@ -116,4 +116,26 @@ class InitDetectorServiceTest {
             assertEquals("test-namespace", result);
         }
     }
+
+    @Test
+    void testGetNamespaceReturnsEmptyNamespace() {
+        InitDetectorService testService = new InitDetectorService() {
+            @Override
+            public String getKubernetesHostEnv() {
+                return "1.2.3.4";
+            }
+        };
+
+        try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
+            mockedFiles.when(() -> Files.exists(InitDetectorService.getTokenPath()))
+                    .thenReturn(true);
+            mockedFiles.when(() -> Files.exists(InitDetectorService.getNamespacePath()))
+                    .thenReturn(true);
+            mockedFiles.when(() -> Files.readString(InitDetectorService.getNamespacePath()))
+                    .thenReturn("");
+
+            KubernetesException ex = assertThrows(KubernetesException.class, testService::getNamespace);
+            assertEquals(ErrorCode.NOT_NAMESPACE, ex.getErrorCode());
+        }
+    }
 }

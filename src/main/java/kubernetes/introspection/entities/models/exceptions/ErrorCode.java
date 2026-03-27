@@ -12,6 +12,14 @@ public enum ErrorCode {
             "The application is running in a Kubernetes cluster, but cannot read 'namespace' from file '/var/run/secrets/kubernetes.io/serviceaccount/namespace'",
             true),
 
+    NO_STATIC_FILE_RBAC(400, "No static file RBAC",
+            "The application cannot return the RBAC file template, the file was not found.",
+            false),
+
+    ERROR_READ_FILE_RBAC(400, "Error read file RBAC",
+            "The application could not read the RBAC template file.",
+            false),
+
     FORBIDDEN(403, "Access denied",
             "The application (as pod) does not have access to the resource due to RBAC rules",
             false);

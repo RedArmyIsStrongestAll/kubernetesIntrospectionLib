@@ -14,11 +14,14 @@ public class InitDetectorService {
     private static final Path SA_NS = Path.of("/var/run/secrets/kubernetes.io/serviceaccount/namespace");
 
     public boolean runningInKubernetes() {
+        log.info("Start runningInKubernetes");
         String kubeHost = getKubernetesHostEnv();
         boolean hasKubeEnv = kubeHost != null && !kubeHost.isBlank();
         boolean hasToken = Files.exists(SA_TOKEN);
         boolean hasNs = Files.exists(SA_NS);
 
+        log.info("Result runningInKubernetes: hasKubeEnv {}, hasToken {}, hasNs {}",
+                hasKubeEnv, hasToken, hasNs);
         return hasKubeEnv && hasToken && hasNs;
     }
 
@@ -27,6 +30,8 @@ public class InitDetectorService {
     }
 
     public String getNamespace() {
+        log.info("Start runningInKubernetes");
+
         if (!runningInKubernetes()) {
             log.error(ErrorCode.NOT_IN_CLUSTER.getMessage());
             throw new KubernetesException(ErrorCode.NOT_IN_CLUSTER);

@@ -69,6 +69,7 @@ public class InitPermissionsService {
      * @return List<CollectionError> с результатами проверки прав
      */
     public List<CollectionError> convertToCollectionErrors(PermissionInfo permissionInfo, String namespace) {
+        log.info("Start convertToCollectionErrors");
         return permissionInfo.getPermissions().stream()
                 .filter(p -> !p.isAllowed())
                 .map(p -> {
