@@ -30,6 +30,7 @@ public class InitPermissionsService {
         this.kubernetesClient = kubernetesClient;
     }
 
+
     /**
      * Проверяет права доступа к ресурсам Kubernetes, необходимым для интроспекции
      *
@@ -61,23 +62,29 @@ public class InitPermissionsService {
     }
 
     /**
-     * Парсирует ответ checkPermissions метода в список CollectionError
+     * Парсирует ответ checkPermissions метода в список CollectionError.
+     *
+     * <p> Ресур имеет измененый вид от ресурса k8s: pods/get@namespace -> pods/get </p>
      *
      * @return List<CollectionError> с результатами проверки прав
      */
     public List<CollectionError> convertToCollectionErrors(PermissionInfo permissionInfo, String namespace) {
         return permissionInfo.getPermissions().stream()
                 .filter(p -> !p.isAllowed())
-                .map(p -> CollectionError.builder()
-                        .resourceType(p.getResource())
-                        .resourceName("unknown")
-                        .namespace(namespace)
-                        .errorCode(ErrorCode.FORBIDDEN)
-                        .message(ErrorCode.FORBIDDEN.getMessage())
-                        .timestamp(Instant.now().toString())
-                        .build())
+                .map(p -> {
+                    String resourceType = extractResourceType(p.getResource());
+                    return CollectionError.builder()
+                            .resourceType(resourceType)
+                            .resourceName("unknown")
+                            .namespace(namespace)
+                            .errorCode(ErrorCode.FORBIDDEN)
+                            .message(ErrorCode.FORBIDDEN.getMessage())
+                            .timestamp(Instant.now().toString())
+                            .build();
+                })
                 .toList();
     }
+
 
     /**
      * Проверка для Pods
@@ -159,6 +166,19 @@ public class InitPermissionsService {
             // Логирование если есть
             return new PermissionInfo.PermissionInfoDto(request.getResource() + "/" + request.getVerb(), false);
         }
+    }
+
+    /**
+     * Конвертация ресурса k8s в русурс CollectionError
+     * <p>
+     * pods/get@namespace -> pods/get
+     * </p>
+     */
+    private String extractResourceType(String resourceWithNamespace) {
+        if (resourceWithNamespace == null) return "unknown";
+        int atIndex = resourceWithNamespace.indexOf('@');
+        if (atIndex == -1) return resourceWithNamespace;
+        return resourceWithNamespace.substring(0, atIndex);
     }
 
 }

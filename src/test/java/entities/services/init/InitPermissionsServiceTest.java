@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
 
+import static kubernetes.introspection.entities.models.dto.permision.ResourcePermission.PODS_WATCH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -91,7 +92,7 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
         assertEquals(1, errors.size(), "Должна быть одна ошибка");
         CollectionError error = errors.get(0);
 
-        assertEquals("pods/watch" + "@" + testNamespace, error.getResourceType());
+        assertEquals(PODS_WATCH.getStringValue(), error.getResourceType());
         assertEquals("unknown", error.getResourceName());
         assertEquals(testNamespace, error.getNamespace());
         assertEquals("FORBIDDEN", error.getErrorCode().name());

@@ -8,52 +8,52 @@ import java.util.List;
 @Getter
 public enum ResourcePermission {
     // Pod ресурсы
-    POD_GET("pods", "get"),
-    POD_LIST("pods", "list"),
-    POD_WATCH("pods", "watch"),
+    PODS_GET("pods", "get"),
+    PODS_LIST("pods", "list"),
+    PODS_WATCH("pods", "watch"),
 
     // Service ресурсы
-    SERVICE_GET("services", "get"),
-    SERVICE_LIST("services", "list"),
-    SERVICE_WATCH("services", "watch"),
+    SERVICES_GET("services", "get"),
+    SERVICES_LIST("services", "list"),
+    SERVICES_WATCH("services", "watch"),
 
     // Owner ресурсы
-    DEPLOYMENT_GET("deployments", "get"),
-    DEPLOYMENT_LIST("deployments", "list"),
-    DEPLOYMENT_WATCH("deployments", "watch"),
+    DEPLOYMENTS_GET("deployments", "get"),
+    DEPLOYMENTS_LIST("deployments", "list"),
+    DEPLOYMENTS_WATCH("deployments", "watch"),
 
-    STATEFULSET_GET("statefulsets", "get"),
-    STATEFULSET_LIST("statefulsets", "list"),
-    STATEFULSET_WATCH("statefulsets", "watch"),
+    STATEFULSETS_GET("statefulsets", "get"),
+    STATEFULSETS_LIST("statefulsets", "list"),
+    STATEFULSETS_WATCH("statefulsets", "watch"),
 
-    DAEMONSET_GET("daemonsets", "get"),
-    DAEMONSET_LIST("daemonsets", "list"),
-    DAEMONSET_WATCH("daemonsets", "watch"),
+    DAEMONSETS_GET("daemonsets", "get"),
+    DAEMONSETS_LIST("daemonsets", "list"),
+    DAEMONSETS_WATCH("daemonsets", "watch"),
 
-    REPLICASET_GET("replicasets", "get"),
-    REPLICASET_LIST("replicasets", "list"),
-    REPLICASET_WATCH("replicasets", "watch"),
+    REPLICASETS_GET("replicasets", "get"),
+    REPLICASETS_LIST("replicasets", "list"),
+    REPLICASETS_WATCH("replicasets", "watch"),
 
-    REPLICATION_CONTROLLER_GET("replicationcontrollers", "get"),
-    REPLICATION_CONTROLLER_LIST("replicationcontrollers", "list"),
-    REPLICATION_CONTROLLER_WATCH("replicationcontrollers", "watch"),
+    REPLICATION_CONTROLLERS_GET("replicationcontrollers", "get"),
+    REPLICATION_CONTROLLERS_LIST("replicationcontrollers", "list"),
+    REPLICATION_CONTROLLERS_WATCH("replicationcontrollers", "watch"),
 
-    JOB_GET("jobs", "get"),
-    JOB_LIST("jobs", "list"),
-    JOB_WATCH("jobs", "watch"),
+    JOBS_GET("jobs", "get"),
+    JOBS_LIST("jobs", "list"),
+    JOBS_WATCH("jobs", "watch"),
 
-    CRONJOB_GET("cronjobs", "get"),
-    CRONJOB_LIST("cronjobs", "list"),
-    CRONJOB_WATCH("cronjobs", "watch"),
+    CRONJOBS_GET("cronjobs", "get"),
+    CRONJOBS_LIST("cronjobs", "list"),
+    CRONJOBS_WATCH("cronjobs", "watch"),
 
     // Config ресурсы
-    CONFIGMAP_GET("configmaps", "get"),
-    CONFIGMAP_LIST("configmaps", "list"),
-    CONFIGMAP_WATCH("configmaps", "watch"),
+    CONFIGMAPS_GET("configmaps", "get"),
+    CONFIGMAPS_LIST("configmaps", "list"),
+    CONFIGMAPS_WATCH("configmaps", "watch"),
 
-    SECRET_GET("secrets", "get"),
-    SECRET_LIST("secrets", "list"),
-    SECRET_WATCH("secrets", "watch");
+    SECRETS_GET("secrets", "get"),
+    SECRETS_LIST("secrets", "list"),
+    SECRETS_WATCH("secrets", "watch");
 
     private final String resource;
     private final String verb;
@@ -63,34 +63,49 @@ public enum ResourcePermission {
         this.verb = verb;
     }
 
+
     public SsarRequestDto toSsarRequest(String namespace) {
         return new SsarRequestDto(resource, verb, namespace);
     }
 
     public static List<ResourcePermission> getPodPermissions() {
-        return Arrays.asList(POD_GET, POD_LIST, POD_WATCH);
+        return Arrays.asList(PODS_GET, PODS_LIST, PODS_WATCH);
     }
 
     public static List<ResourcePermission> getServicePermissions() {
-        return Arrays.asList(SERVICE_GET, SERVICE_LIST, SERVICE_WATCH);
+        return Arrays.asList(SERVICES_GET, SERVICES_LIST, SERVICES_WATCH);
     }
 
     public static List<ResourcePermission> getOwnerPermissions() {
         return Arrays.asList(
-                DEPLOYMENT_GET, DEPLOYMENT_LIST, DEPLOYMENT_WATCH,
-                STATEFULSET_GET, STATEFULSET_LIST, STATEFULSET_WATCH,
-                DAEMONSET_GET, DAEMONSET_LIST, DAEMONSET_WATCH,
-                REPLICASET_GET, REPLICASET_LIST, REPLICASET_WATCH,
-                REPLICATION_CONTROLLER_GET, REPLICATION_CONTROLLER_LIST, REPLICATION_CONTROLLER_WATCH,
-                JOB_GET, JOB_LIST, JOB_WATCH,
-                CRONJOB_GET, CRONJOB_LIST, CRONJOB_WATCH
+                DEPLOYMENTS_GET, DEPLOYMENTS_LIST, DEPLOYMENTS_WATCH,
+                STATEFULSETS_GET, STATEFULSETS_LIST, STATEFULSETS_WATCH,
+                DAEMONSETS_GET, DAEMONSETS_LIST, DAEMONSETS_WATCH,
+                REPLICASETS_GET, REPLICASETS_LIST, REPLICASETS_WATCH,
+                REPLICATION_CONTROLLERS_GET, REPLICATION_CONTROLLERS_LIST, REPLICATION_CONTROLLERS_WATCH,
+                JOBS_GET, JOBS_LIST, JOBS_WATCH,
+                CRONJOBS_GET, CRONJOBS_LIST, CRONJOBS_WATCH
         );
     }
 
     public static List<ResourcePermission> getConfigPermissions() {
         return Arrays.asList(
-                CONFIGMAP_GET, CONFIGMAP_LIST, CONFIGMAP_WATCH,
-                SECRET_GET, SECRET_LIST, SECRET_WATCH
+                CONFIGMAPS_GET, CONFIGMAPS_LIST, CONFIGMAPS_WATCH,
+                SECRETS_GET, SECRETS_LIST, SECRETS_WATCH
         );
+    }
+
+
+    public String getStringValue() {
+        return resource + "/" + verb;
+    }
+
+    public static ResourcePermission getFromStringValue(String value) {
+        for (ResourcePermission rp : values()) {
+            if (rp.getStringValue().equals(value)) {
+                return rp;
+            }
+        }
+        return null;
     }
 }
