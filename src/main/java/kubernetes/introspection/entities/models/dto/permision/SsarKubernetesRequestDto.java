@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SsarRequestDto {
-    private String resource;
-    private String verb;
+public class SsarKubernetesRequestDto {
+    private ResourcePermission resourcePermission;
     private String namespace;
 }

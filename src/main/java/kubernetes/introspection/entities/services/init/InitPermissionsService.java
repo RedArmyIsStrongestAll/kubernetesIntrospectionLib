@@ -7,7 +7,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.models.dto.enviroment.CollectionError;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermission;
-import kubernetes.introspection.entities.models.dto.permision.SsarRequestDto;
+import kubernetes.introspection.entities.models.dto.permision.SsarKubernetesRequestDto;
 import kubernetes.introspection.entities.models.exceptions.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 
@@ -92,8 +92,8 @@ public class InitPermissionsService {
      */
     private List<PermissionInfo.PermissionInfoDto> checkPodResources(String namespace) {
         log.info("Checking pods resources for namespace: {}", namespace);
-        List<SsarRequestDto> requests = ResourcePermission.getPodPermissions().stream()
-                .map(permission -> permission.toSsarRequest(namespace))
+        List<SsarKubernetesRequestDto> requests = ResourcePermission.getPodPermissions().stream()
+                .map(permission -> new SsarKubernetesRequestDto(permission, namespace))
                 .collect(Collectors.toList());
         return executeAccessReviews(requests);
     }
@@ -103,8 +103,8 @@ public class InitPermissionsService {
      */
     private List<PermissionInfo.PermissionInfoDto> checkOwnerResources(String namespace) {
         log.info("Checking owner resources for namespace: {}", namespace);
-        List<SsarRequestDto> requests = ResourcePermission.getOwnerPermissions().stream()
-                .map(permission -> permission.toSsarRequest(namespace))
+        List<SsarKubernetesRequestDto> requests = ResourcePermission.getOwnerPermissions().stream()
+                .map(permission -> new SsarKubernetesRequestDto(permission, namespace))
                 .collect(Collectors.toList());
         return executeAccessReviews(requests);
     }
@@ -114,8 +114,8 @@ public class InitPermissionsService {
      */
     private List<PermissionInfo.PermissionInfoDto> checkServiceResources(String namespace) {
         log.info("Checking service resources for namespace: {}", namespace);
-        List<SsarRequestDto> requests = ResourcePermission.getServicePermissions().stream()
-                .map(permission -> permission.toSsarRequest(namespace))
+        List<SsarKubernetesRequestDto> requests = ResourcePermission.getServicePermissions().stream()
+                .map(permission -> new SsarKubernetesRequestDto(permission, namespace))
                 .collect(Collectors.toList());
         return executeAccessReviews(requests);
     }
@@ -125,26 +125,27 @@ public class InitPermissionsService {
      */
     private List<PermissionInfo.PermissionInfoDto> checkConfigResources(String namespace) {
         log.info("Checking config resources for namespace: {}", namespace);
-        List<SsarRequestDto> requests = ResourcePermission.getConfigPermissions().stream()
-                .map(permission -> permission.toSsarRequest(namespace))
+        List<SsarKubernetesRequestDto> requests = ResourcePermission.getConfigPermissions().stream()
+                .map(permission -> new SsarKubernetesRequestDto(permission, namespace))
                 .collect(Collectors.toList());
         return executeAccessReviews(requests);
     }
 
 
-    private List<PermissionInfo.PermissionInfoDto> executeAccessReviews(List<SsarRequestDto> requests) {
+    private List<PermissionInfo.PermissionInfoDto> executeAccessReviews(List<SsarKubernetesRequestDto> requests) {
+        log.info("Permission convert to PermissionInfo.PermissionInfoDto");
         return requests.parallelStream()
                 .map(this::executeSingleAccessReview)
                 .collect(Collectors.toList());
     }
 
-    private PermissionInfo.PermissionInfoDto executeSingleAccessReview(SsarRequestDto request) {
+    private PermissionInfo.PermissionInfoDto executeSingleAccessReview(SsarKubernetesRequestDto request) {
         try {
             SelfSubjectAccessReview review = new SelfSubjectAccessReviewBuilder()
                     .withNewSpec()
                     .withNewResourceAttributes()
-                    .withResource(request.getResource())
-                    .withVerb(request.getVerb())
+                    .withResource(request.getResourcePermission().getResource())
+                    .withVerb(request.getResourcePermission().getVerb())
                     .withNamespace(request.getNamespace())
                     .endResourceAttributes()
                     .endSpec()
@@ -156,7 +157,9 @@ public class InitPermissionsService {
 
             boolean allowed = response.getStatus() != null && Boolean.TRUE.equals(response.getStatus().getAllowed());
 
-            String permissionKey = String.format("%s/%s", request.getResource(), request.getVerb());
+            String permissionKey = String.format("%s/%s",
+                    request.getResourcePermission().getResource(),
+                    request.getResourcePermission().getVerb());
             if (request.getNamespace() != null && !request.getNamespace().isEmpty()) {
                 permissionKey += "@" + request.getNamespace();
             }
@@ -164,8 +167,9 @@ public class InitPermissionsService {
             return new PermissionInfo.PermissionInfoDto(permissionKey, allowed);
 
         } catch (Exception e) {
-            // Логирование если есть
-            return new PermissionInfo.PermissionInfoDto(request.getResource() + "/" + request.getVerb(), false);
+            log.error("Error executing kubernetes access review for resource: {}", request);
+            return new PermissionInfo.PermissionInfoDto(request.getResourcePermission().getResource() + "/" +
+                    request.getResourcePermission().getVerb(), false);
         }
     }
 

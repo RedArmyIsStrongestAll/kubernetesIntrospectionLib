@@ -64,10 +64,6 @@ public enum ResourcePermission {
     }
 
 
-    public SsarRequestDto toSsarRequest(String namespace) {
-        return new SsarRequestDto(resource, verb, namespace);
-    }
-
     public static List<ResourcePermission> getPodPermissions() {
         return Arrays.asList(PODS_GET, PODS_LIST, PODS_WATCH);
     }
