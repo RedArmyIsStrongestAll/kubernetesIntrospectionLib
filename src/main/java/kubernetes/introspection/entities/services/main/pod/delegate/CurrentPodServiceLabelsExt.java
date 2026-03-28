@@ -32,7 +32,7 @@ public class CurrentPodServiceLabelsExt extends CurrentPodService {
     }
 
     @Override
-    protected List<ResourcePermissionEnum> getPermission() {
+    protected List<ResourcePermissionEnum> getPermissionResource() {
         return new ArrayList<>(List.of(PODS_LIST, PODS_GET));
     }
 

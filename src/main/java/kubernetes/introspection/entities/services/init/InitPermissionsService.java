@@ -9,6 +9,7 @@ import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.dto.permision.SsarKubernetesRequestDto;
 import kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
@@ -17,25 +18,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Проверяет права доступа к ресурсам Kubernetes, необходимым для интроспекции
- * В коснтруктор требуется KubernetesClient
- */
+
 @Slf4j
+@AllArgsConstructor
 public class InitPermissionsService {
 
     private final KubernetesClient kubernetesClient;
 
-    public InitPermissionsService(KubernetesClient kubernetesClient) {
-        this.kubernetesClient = kubernetesClient;
-    }
 
-
-    /**
-     * Проверяет права доступа к ресурсам Kubernetes, необходимым для интроспекции
-     *
-     * @return DTO с результатами проверки прав
-     */
     public PermissionInfo checkPermissions(String currentNamespace) {
         try {
             log.info("Starting permission check for namespace: {}", currentNamespace);
@@ -62,9 +52,6 @@ public class InitPermissionsService {
     }
 
 
-    /**
-     * Проверка для Pods
-     */
     private List<PermissionInfo.PermissionInfoDto> checkPodResources(String namespace) {
         log.info("Checking pods resources for namespace: {}", namespace);
         List<SsarKubernetesRequestDto> requests = ResourcePermissionEnum.getPodPermissions().stream()
@@ -73,9 +60,6 @@ public class InitPermissionsService {
         return executeAccessReviews(requests);
     }
 
-    /**
-     * Проверка для Owners
-     */
     private List<PermissionInfo.PermissionInfoDto> checkOwnerResources(String namespace) {
         log.info("Checking owner resources for namespace: {}", namespace);
         List<SsarKubernetesRequestDto> requests = ResourcePermissionEnum.getOwnerPermissions().stream()
@@ -84,9 +68,6 @@ public class InitPermissionsService {
         return executeAccessReviews(requests);
     }
 
-    /**
-     * Проверка для Services
-     */
     private List<PermissionInfo.PermissionInfoDto> checkServiceResources(String namespace) {
         log.info("Checking service resources for namespace: {}", namespace);
         List<SsarKubernetesRequestDto> requests = ResourcePermissionEnum.getServicePermissions().stream()
@@ -95,9 +76,6 @@ public class InitPermissionsService {
         return executeAccessReviews(requests);
     }
 
-    /**
-     * Проверка для Resources
-     */
     private List<PermissionInfo.PermissionInfoDto> checkConfigResources(String namespace) {
         log.info("Checking config resources for namespace: {}", namespace);
         List<SsarKubernetesRequestDto> requests = ResourcePermissionEnum.getConfigPermissions().stream()

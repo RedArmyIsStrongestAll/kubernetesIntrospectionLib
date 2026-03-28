@@ -1,6 +1,6 @@
-package entities.services.init;
+package entities.services.init.permision;
 
-import entities.services.init.parent.InitPermissionsServiceTestAbstract;
+import entities.services.init.permision.parent.InitPermissionsServiceTestAbstract;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import kubernetes.introspection.entities.models.dto.enviroment.CollectionError;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;

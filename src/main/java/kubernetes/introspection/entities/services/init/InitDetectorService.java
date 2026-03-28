@@ -7,9 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/**
- * Проверяет находится ли приложение в кластере Kubernetes
- */
 @Slf4j
 public class InitDetectorService {
 
@@ -17,9 +14,6 @@ public class InitDetectorService {
     private static final Path SA_TOKEN = Path.of("/var/run/secrets/kubernetes.io/serviceaccount/token");
     private static final Path SA_NS = Path.of("/var/run/secrets/kubernetes.io/serviceaccount/namespace");
 
-    /**
-     * Проверяет находится ли приложение в кластере Kubernetes
-     */
     public boolean runningInKubernetes() {
         log.info("Start runningInKubernetes");
         String kubeHost = getKubernetesHostEnv();
@@ -32,10 +26,6 @@ public class InitDetectorService {
         return hasKubeEnv && hasToken && hasNs;
     }
 
-    /**
-     * Проверяет находится ли приложение в кластере Kubernetes
-     * и возвращает имя пространства имен
-     */
     public String getNamespace() {
         log.info("Start getNamespace");
 

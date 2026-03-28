@@ -1,4 +1,4 @@
-package entities.services.init.parent;
+package entities.services.init.permision.parent;
 
 import engine.RbacAnalyzer;
 import io.fabric8.kubernetes.client.KubernetesClient;

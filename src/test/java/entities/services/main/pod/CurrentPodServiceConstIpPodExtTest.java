@@ -2,6 +2,7 @@ package entities.services.main.pod;
 
 import engine.PodAnalyzer;
 import entities.services.main.pod.parent.CurrentPodServiceTestAbstract;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
@@ -33,7 +34,7 @@ class CurrentPodServiceConstIpPodExtTest extends CurrentPodServiceTestAbstract {
     }
 
     @Test
-    void getCurrentPodInfoWithCheckPermissionsValidTest() throws Exception {
+    void getCurrentPodWithCheckPermissionsValidTest() throws Exception {
         CurrentPodService service = new CurrentPodServiceConstIpPodExt(client, NAMESPACE, POD_IP);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
@@ -42,20 +43,20 @@ class CurrentPodServiceConstIpPodExtTest extends CurrentPodServiceTestAbstract {
         PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "pod/test-short-pod.yaml");
         setupMockServerWithValidPodListByIp(podAnalyzer, permission, POD_IP);
 
-        PodInfo pod = service.getCurrentPodInfoWithCheckPermissions(permission);
+        CurrentPodService.CurrentPodDto pod = service.getCurrentPodWithCheckPermissions(permission);
         log.info("Test result: {}", pod);
         Assertions.assertNotNull(pod);
     }
 
     @Test
-    void getCurrentPodInfoWithCheckPermissionsNoPermissionTest() {
+    void getCurrentPodWithCheckPermissionsNoPermissionTest() {
         CurrentPodService service = new CurrentPodServiceConstIpPodExt(client, NAMESPACE, POD_IP);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, false),
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, false)));
 
         Assertions.assertThrows(KubernetesException.class, () -> {
-            service.getCurrentPodInfoWithCheckPermissions(permission);
+            service.getCurrentPodWithCheckPermissions(permission);
         });
     }
 
@@ -67,7 +68,7 @@ class CurrentPodServiceConstIpPodExtTest extends CurrentPodServiceTestAbstract {
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true)));
 
         Assertions.assertThrows(KubernetesException.class, () -> {
-            service.getCurrentPodInfoWithCheckPermissions(permission);
+            service.getCurrentPodWithCheckPermissions(permission);
         });
     }
 
@@ -82,12 +83,12 @@ class CurrentPodServiceConstIpPodExtTest extends CurrentPodServiceTestAbstract {
         setupMockServerWithValidPodListByIp(podAnalyzer, permission, MISTAKE_POD_IP);
 
         Assertions.assertThrows(KubernetesException.class, () -> {
-            service.getCurrentPodInfoWithCheckPermissions(permission);
+            service.getCurrentPodWithCheckPermissions(permission);
         });
     }
 
     @Test
-    void getCurrentPodInfoWithCheckPermissionsKubernetes500Test() {
+    void getCurrentPodWithCheckPermissionsKubernetes500Test() {
         CurrentPodService service = new CurrentPodServiceConstIpPodExt(client, NAMESPACE, POD_IP);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
@@ -96,7 +97,7 @@ class CurrentPodServiceConstIpPodExtTest extends CurrentPodServiceTestAbstract {
         setupMockServerWith500();
 
         Assertions.assertThrows(KubernetesException.class, () -> {
-            service.getCurrentPodInfoWithCheckPermissions(permission);
+            service.getCurrentPodWithCheckPermissions(permission);
         });
     }
 

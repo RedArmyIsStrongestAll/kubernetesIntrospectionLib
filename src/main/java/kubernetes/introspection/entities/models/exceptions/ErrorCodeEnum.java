@@ -28,37 +28,14 @@ public enum ErrorCodeEnum {
             "The application does not have a pod name set for the pod.",
             true),
 
-    POD_NOT_FOUND(404, "Resource not found", "Current pod not found",true);
+    POD_NOT_FOUND(404, "Resource not found",
+            "Current pod not found",
+            true),
 
-    /**
-     * Ресурс не найден
-     */
-//    NOT_FOUND(404, "Resource not found", false),
+    OWNER_REFERENCE_NOT_FOUND(404, "Resource not found",
+            "Current owner reference (link on parent) not found",
+            false);
 
-    /**
-     * Нет доступа к ресурсу (RBAC)
-     */
-//    FORBIDDEN(403, "Access denied", true),
-
-    /**
-     * Таймаут при запросе к API
-     */
-//    TIMEOUT(408, "Request timeout", true),
-
-    /**
-     * Внутренняя ошибка Kubernetes API
-     */
-//    SERVER_ERROR(500, "Internal server error", true),
-
-    /**
-     * Ошибка парсинга ответа
-     */
-//    PARSE_ERROR(422, "Failed to parse response", false),
-
-    /**
-     * Неизвестная ошибка
-     */
-//    UNKNOWN(520, "Unknown error", true);
 
     private final int code;
     private final String name;
@@ -71,18 +48,4 @@ public enum ErrorCodeEnum {
         this.message = message;
         this.critical = critical;
     }
-
-    /**
-     * Создает ErrorCode из HTTP статуса.
-     */
-//    public static ErrorCode fromHttpCode(int httpCode) {
-//        return switch (httpCode) {
-//            case 404 -> NOT_FOUND;
-//            case 403 -> FORBIDDEN;
-//            case 408, 504 -> TIMEOUT;
-//            case 500, 502, 503 -> SERVER_ERROR;
-//            case 422 -> PARSE_ERROR;
-//            default -> UNKNOWN;
-//        };
-//    }
 }

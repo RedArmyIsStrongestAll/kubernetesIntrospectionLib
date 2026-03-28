@@ -23,8 +23,6 @@ import lombok.Getter;
  *       Полезно знать: на всех ли узлах под запущен.</li>
  *   <li><b>Job</b> - выполняет под до успешного завершения.
  *       Полезно знать: завершился ли успешно или упал.</li>
- *   <li><b>CronJob</b> - создает Job по расписанию.
- *       Полезно знать: был ли успешен последний запуск.</li>
  *   <li><b>ReplicaSet</b> - просто поддерживает заданное количество подов.
  *       Обычно управляется Deployment'ом.</li>
  *   <li><b>Pod</b> - под создан напрямую, без контроллера.
@@ -62,11 +60,6 @@ public enum OwnerTypeEnum {
      * Выполняет под до завершения (успех или ошибка)
      */
     JOB("job", "Job"),
-
-    /**
-     * Создает Job по расписанию (cron)
-     */
-    CRON_JOB("cronjob", "CronJob"),
 
     /**
      * Под создан напрямую, без контроллера
@@ -109,7 +102,6 @@ public enum OwnerTypeEnum {
             case "replicaset" -> REPLICASET;
             case "replicationcontroller" -> REPLICATION_CONTROLLER;
             case "job" -> JOB;
-            case "cronjob" -> CRON_JOB;
             case "pod" -> POD;
             default -> UNKNOWN;
         };

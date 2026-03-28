@@ -2,6 +2,7 @@ package entities.services.main.pod;
 
 import engine.PodAnalyzer;
 import entities.services.main.pod.parent.CurrentPodServiceTestAbstract;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
@@ -41,7 +42,7 @@ class CurrentPodServiceHostnameInetAddressExtTest extends CurrentPodServiceTestA
     }
 
     @Test
-    void getCurrentPodInfoWithCheckPermissionsValidTest() throws Exception {
+    void getCurrentPodWithCheckPermissionsValidTest() throws Exception {
         when(mockProvider.getInetAddressLocalHost()).thenReturn(POD_NAME);
 
         CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(client, NAMESPACE, mockProvider);
@@ -51,13 +52,13 @@ class CurrentPodServiceHostnameInetAddressExtTest extends CurrentPodServiceTestA
         PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "pod/test-short-pod.yaml");
         setupMockServerWithValidPodByName(podAnalyzer, permission, POD_NAME);
 
-        PodInfo pod = service.getCurrentPodInfoWithCheckPermissions(permission);
+        CurrentPodService.CurrentPodDto pod = service.getCurrentPodWithCheckPermissions(permission);
         log.info("Test result: {}", pod);
         Assertions.assertNotNull(pod);
     }
 
     @Test
-    void getCurrentPodInfoWithCheckPermissionsNoPermissionTest() throws Exception {
+    void getCurrentPodWithCheckPermissionsNoPermissionTest() throws Exception {
         when(mockProvider.getInetAddressLocalHost()).thenReturn(POD_NAME);
 
         CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(client, NAMESPACE, mockProvider);
@@ -65,7 +66,7 @@ class CurrentPodServiceHostnameInetAddressExtTest extends CurrentPodServiceTestA
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, false)));
 
         Assertions.assertThrows(KubernetesException.class, () -> {
-            service.getCurrentPodInfoWithCheckPermissions(permission);
+            service.getCurrentPodWithCheckPermissions(permission);
         });
     }
 
@@ -78,7 +79,7 @@ class CurrentPodServiceHostnameInetAddressExtTest extends CurrentPodServiceTestA
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
         Assertions.assertThrows(KubernetesException.class, () -> {
-            service.getCurrentPodInfoWithCheckPermissions(permission);
+            service.getCurrentPodWithCheckPermissions(permission);
         });
     }
 
@@ -94,12 +95,12 @@ class CurrentPodServiceHostnameInetAddressExtTest extends CurrentPodServiceTestA
         setupMockServerWithValidPodByName(podAnalyzer, permission, MISTAKE_POD_NAME);
 
         Assertions.assertThrows(KubernetesException.class, () -> {
-            service.getCurrentPodInfoWithCheckPermissions(permission);
+            service.getCurrentPodWithCheckPermissions(permission);
         });
     }
 
     @Test
-    void getCurrentPodInfoWithCheckPermissionsKubernetes500Test() throws Exception {
+    void getCurrentPodWithCheckPermissionsKubernetes500Test() throws Exception {
         when(mockProvider.getInetAddressLocalHost()).thenReturn(POD_NAME);
 
         CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(client, NAMESPACE, mockProvider);
@@ -109,7 +110,7 @@ class CurrentPodServiceHostnameInetAddressExtTest extends CurrentPodServiceTestA
         setupMockServerWith500();
 
         Assertions.assertThrows(KubernetesException.class, () -> {
-            service.getCurrentPodInfoWithCheckPermissions(permission);
+            service.getCurrentPodWithCheckPermissions(permission);
         });
     }
 }

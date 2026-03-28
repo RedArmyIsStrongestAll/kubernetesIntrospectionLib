@@ -1,4 +1,4 @@
-package entities.services.init;
+package entities.services.init.detector;
 
 import kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;

@@ -28,7 +28,7 @@ public class CurrentPodServiceConstDownwardApiExt extends CurrentPodService {
     }
 
     @Override
-    protected List<ResourcePermissionEnum> getPermission() {
+    protected List<ResourcePermissionEnum> getPermissionResource() {
         return new ArrayList<>(Collections.singleton(PODS_GET));
     }
 
