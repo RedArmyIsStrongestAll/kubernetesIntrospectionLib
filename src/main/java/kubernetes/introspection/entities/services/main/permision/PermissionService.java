@@ -37,7 +37,7 @@ public final class PermissionService {
                 .map(p -> p.getResource().getStringValue())
                 .collect(Collectors.joining(", ")));
 
-        boolean hasPermission = resourcePermissionList.stream().anyMatch(requiredPerm ->
+        boolean hasPermission = resourcePermissionList.stream().allMatch(requiredPerm ->
                 permissionInfo.getPermissions().stream()
                         .anyMatch(appPerm -> appPerm.isAllowed() &&
                                 appPerm.getResource().getResource().equals(requiredPerm.getResource()) &&

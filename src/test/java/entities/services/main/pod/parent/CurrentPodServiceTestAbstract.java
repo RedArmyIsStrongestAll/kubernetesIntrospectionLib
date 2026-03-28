@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static entities.services.utils.TestUtils.loadRbacYaml;
+
 @Slf4j
 public class CurrentPodServiceTestAbstract {
 
@@ -42,22 +44,6 @@ public class CurrentPodServiceTestAbstract {
         String yamlPodContent = loadRbacYaml(podFilename);
 
         return new PodAnalyzer(yamlPodContent, rbacAnalyzer);
-    }
-
-    protected String loadRbacYaml(String filename) throws IOException {
-        try {
-            URL resource = getClass().getClassLoader().getResource(filename);
-            if (resource != null) {
-                File file = new File(resource.getFile());
-                if (file.exists()) {
-                    return new String(Files.readAllBytes(file.toPath()));
-                }
-            }
-            throw new IOException("No " + filename + " file found");
-        } catch (Exception e) {
-            log.error("No have yaml file, using default RBAC rules: ", e);
-            throw e;
-        }
     }
 
 
@@ -117,7 +103,7 @@ public class CurrentPodServiceTestAbstract {
         return labels.entrySet().stream()
                 .map(entry ->
                         URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8) + "%3D" +
-                        URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
+                                URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
                 .collect(Collectors.joining("%2C"));
     }
 }

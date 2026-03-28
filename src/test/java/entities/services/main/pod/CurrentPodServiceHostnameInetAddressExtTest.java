@@ -2,11 +2,9 @@ package entities.services.main.pod;
 
 import engine.PodAnalyzer;
 import entities.services.main.pod.parent.CurrentPodServiceTestAbstract;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.models.dto.pod.PodInfo;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.env.EnvironmentProvider;
 import kubernetes.introspection.entities.services.main.pod.CurrentPodService;

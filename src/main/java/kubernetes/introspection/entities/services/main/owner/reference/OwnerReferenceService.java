@@ -3,7 +3,6 @@ package kubernetes.introspection.entities.services.main.owner.reference;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
@@ -17,11 +16,9 @@ import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.
 @Slf4j
 public class OwnerReferenceService {
 
-    protected final KubernetesClient kubernetesClient;
     protected final String namespace;
 
-    public OwnerReferenceService(KubernetesClient kubernetesClient, String namespace) {
-        this.kubernetesClient = kubernetesClient;
+    public OwnerReferenceService(String namespace) {
         this.namespace = namespace;
     }
 
@@ -45,7 +42,9 @@ public class OwnerReferenceService {
             if (metadata == null || metadata.getOwnerReferences() == null || metadata.getOwnerReferences().isEmpty()) {
                 log.info("Owner not found for pod: {}", pod.getMetadata().getName());
                 log.info("Owner is pod");
-                return new OwnerReference();
+                OwnerReference ownerReference = new OwnerReference();
+                ownerReference.setKind(null);
+                return ownerReference;
             }
 
             return metadata.getOwnerReferences().stream()

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static entities.services.utils.TestUtils.loadRbacYaml;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -37,23 +38,6 @@ public class InitPermissionsServiceTestAbstract {
 
     public List<CollectionError> convert(PermissionInfo info, String namespace) {
         return new InitPermissionsService(client).convertToCollectionErrors(info, namespace);
-    }
-
-
-    protected String loadRbacYaml(String filename) throws IOException {
-        try {
-            URL resource = getClass().getClassLoader().getResource(filename);
-            if (resource != null) {
-                File file = new File(resource.getFile());
-                if (file.exists()) {
-                    return new String(Files.readAllBytes(file.toPath()));
-                }
-            }
-            throw new IOException("No " + filename + " file found");
-        } catch (Exception e) {
-            log.error("No have yaml file, using default RBAC rules: ", e);
-            throw e;
-        }
     }
 
     protected void setupMockServerWithRbacAnalyzer(RbacAnalyzer analyzer) {
