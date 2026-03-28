@@ -42,7 +42,7 @@ public class OwnerReferenceServiceTest {
 
     @Test
     void getPodOwnerWithPermissionValidTest() throws IOException {
-        setPod("owner/test-short-pod-owner.yaml");
+        setPod("owner/reference/test-short-pod-owner.yaml");
 
         PermissionInfo permissionInfo = new PermissionInfo(true, List.of(
                 new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
@@ -63,7 +63,7 @@ public class OwnerReferenceServiceTest {
 
     @Test
     void getPodOwnerWithPermissionNoListPermissionTest() throws IOException {
-        setPod("owner/test-short-pod-owner.yaml");
+        setPod("owner/reference/test-short-pod-owner.yaml");
 
         PermissionInfo permissionInfo = new PermissionInfo(true, List.of(
                 new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)
@@ -74,7 +74,7 @@ public class OwnerReferenceServiceTest {
 
     @Test
     void getPodOwnerWithPermissionNoPodOwnerTest() throws IOException {
-        setPod("owner/test-short-pod-owner.yaml");
+        setPod("owner/reference/test-short-pod-owner.yaml");
 
         PermissionInfo permissionInfo = new PermissionInfo(true, List.of(
                 new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
@@ -91,7 +91,7 @@ public class OwnerReferenceServiceTest {
 
     @Test
     void getPodOwnerWithPermissionNoControllerValidTest() throws IOException {
-        setPod("owner/test-short-pod-owner-no-controller.yaml");
+        setPod("owner/reference/test-short-pod-owner-no-controller.yaml");
 
         PermissionInfo permissionInfo = new PermissionInfo(true, List.of(
                 new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
