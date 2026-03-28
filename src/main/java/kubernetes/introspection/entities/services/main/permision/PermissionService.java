@@ -20,12 +20,16 @@ public final class PermissionService {
 
         log.info("Start checkPermission");
 
+        List<ResourcePermissionEnum> resourcePermissionList = getPermissionResource.get();
+        if (resourcePermissionList.isEmpty()) {
+            return;
+        }
+
         if (permissionInfo == null || permissionInfo.getPermissions() == null) {
             log.error("Error start: no permission info");
             throw new KubernetesException(ErrorCodeEnum.FORBIDDEN);
         }
 
-        List<ResourcePermissionEnum> resourcePermissionList = getPermissionResource.get();
         log.info("Resource permissions: {}", resourcePermissionList.stream()
                 .map(ResourcePermissionEnum::getStringValue)
                 .collect(Collectors.joining(", ")));

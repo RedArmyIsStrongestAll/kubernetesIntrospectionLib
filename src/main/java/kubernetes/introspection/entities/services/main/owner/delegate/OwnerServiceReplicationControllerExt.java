@@ -1,7 +1,7 @@
 package kubernetes.introspection.entities.services.main.owner.delegate;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.ReplicationController;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.models.dto.owner.OwnerInfo;
 import kubernetes.introspection.entities.models.dto.owner.OwnerTypeEnum;
@@ -15,56 +15,56 @@ import java.util.List;
 import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.OWNER_REALIZED_NOT_FOUND;
 
 @Slf4j
-public class OwnerServiceDeploymentExt extends OwnerService {
+public class OwnerServiceReplicationControllerExt extends OwnerService {
 
-    public OwnerServiceDeploymentExt(KubernetesClient kubernetesClient, String namespace) {
+    private static final String SERVICE_NAME = "OwnerServiceReplicationControllerExt";
+    private static final OwnerTypeEnum OWNER_TYPE = OwnerTypeEnum.REPLICATION_CONTROLLER;
+
+    public OwnerServiceReplicationControllerExt(KubernetesClient kubernetesClient, String namespace) {
         super(kubernetesClient, namespace);
     }
 
-    private static final String OWNER_SERVICE_NAME = "OwnerServiceDeploymentExt";
-    private static final OwnerTypeEnum OWNER_SERVICE_TYPE = OwnerTypeEnum.DEPLOYMENT;
-
     @Override
     protected String getNameClassExt() {
-        return OWNER_SERVICE_NAME;
+        return SERVICE_NAME;
     }
 
     @Override
     protected OwnerTypeEnum getKindOwnerType() {
-        return OWNER_SERVICE_TYPE;
+        return OWNER_TYPE;
     }
 
     @Override
     protected List<ResourcePermissionEnum> getPermissionResource() {
-        return List.of(ResourcePermissionEnum.DEPLOYMENTS_GET);
+        return List.of(ResourcePermissionEnum.REPLICATION_CONTROLLERS_GET);
     }
 
     @Override
     public OwnerDto getOwnerDto(OwnerReference ownerRef) {
-        log.info("{}: fetching Deployment owner: {}", OWNER_SERVICE_NAME, ownerRef.getName());
+        log.info("{}: fetching ReplicationController owner: {}", SERVICE_NAME, ownerRef.getName());
 
-        Deployment deployment = kubernetesClient.apps()
-                .deployments()
+        ReplicationController rc = kubernetesClient
+                .replicationControllers()
                 .inNamespace(namespace)
                 .withName(ownerRef.getName())
                 .get();
 
-        if (deployment == null) {
-            log.error("{}: error fetching Deployment owner: return null", OWNER_SERVICE_NAME);
+        if (rc == null) {
+            log.error("{}: ReplicationController not found: {}", SERVICE_NAME, ownerRef.getName());
             throw new KubernetesException(OWNER_REALIZED_NOT_FOUND);
         }
-        log.info("{}: fetching Deployment owner: find", OWNER_SERVICE_NAME);
 
         OwnerInfo ownerInfo = OwnerInfo.builder()
-                .type(OwnerTypeEnum.DEPLOYMENT)
-                .name(deployment.getMetadata().getName())
+                .type(OwnerTypeEnum.REPLICATION_CONTROLLER)
+                .name(rc.getMetadata().getName())
                 .exists(true)
-                .selector(deployment.getSpec().getSelector().getMatchLabels())
-                .desiredReplicas(deployment.getSpec().getReplicas())
-                .availableReplicas(deployment.getStatus().getAvailableReplicas())
+                .selector(rc.getSpec().getSelector())
+                .desiredReplicas(rc.getSpec().getReplicas())
+                .availableReplicas(rc.getStatus().getReadyReplicas())
                 .build();
-        log.info("{}: created info: {}", OWNER_SERVICE_NAME, ownerInfo);
 
-        return new OwnerDto(ownerInfo, OwnerTypeEnum.DEPLOYMENT, deployment);
+        log.info("{}: created info: {}", SERVICE_NAME, ownerInfo);
+
+        return new OwnerDto(ownerInfo, OwnerTypeEnum.REPLICATION_CONTROLLER, rc);
     }
 }

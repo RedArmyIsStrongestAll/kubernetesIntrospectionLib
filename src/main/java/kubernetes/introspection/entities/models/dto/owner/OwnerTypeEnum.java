@@ -23,6 +23,8 @@ import lombok.Getter;
  *       Полезно знать: на всех ли узлах под запущен.</li>
  *   <li><b>Job</b> - выполняет под до успешного завершения.
  *       Полезно знать: завершился ли успешно или упал.</li>
+ *   <li><b>CronJob</b> - создает Job по расписанию.
+ *       Полезно знать: был ли успешен последний запуск.</li>
  *   <li><b>ReplicaSet</b> - просто поддерживает заданное количество подов.
  *       Обычно управляется Deployment'ом.</li>
  *   <li><b>Pod</b> - под создан напрямую, без контроллера.
@@ -62,14 +64,14 @@ public enum OwnerTypeEnum {
     JOB("job", "Job"),
 
     /**
-     * Под создан напрямую, без контроллера
+     * Создает Job по расписанию (cron)
      */
-    POD("pod", "Pod"),
+    CRON_JOB("cronjob", "CronJob"),
 
     /**
      * Тип не определен или неизвестен
      */
-    UNKNOWN("unknown", "Unknown");
+    UNKNOWN("unknown", null);
 
     /**
      * Имя для парсинга из Kubernetes API (в нижнем регистре)
@@ -84,27 +86,6 @@ public enum OwnerTypeEnum {
     OwnerTypeEnum(String name, String originalName) {
         this.name = name;
         this.originalName = originalName;
-    }
-
-    /**
-     * Создает WorkloadType из строки kind, полученной из ownerReference.
-     *
-     * @param kind строка kind из Kubernetes (Deployment, StatefulSet, и т.д.)
-     * @return соответствующий WorkloadType или UNKNOWN если тип не распознан
-     */
-    public static OwnerTypeEnum fromKubernetes(String kind) {
-        if (kind == null) return UNKNOWN;
-
-        return switch (kind.toLowerCase()) {
-            case "deployment" -> DEPLOYMENT;
-            case "statefulset" -> STATEFULSET;
-            case "daemonset" -> DAEMONSET;
-            case "replicaset" -> REPLICASET;
-            case "replicationcontroller" -> REPLICATION_CONTROLLER;
-            case "job" -> JOB;
-            case "pod" -> POD;
-            default -> UNKNOWN;
-        };
     }
 
     /**

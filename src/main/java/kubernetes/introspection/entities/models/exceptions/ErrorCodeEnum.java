@@ -34,6 +34,14 @@ public enum ErrorCodeEnum {
 
     OWNER_REFERENCE_NOT_FOUND(404, "Resource not found",
             "Current owner reference (link on parent) not found",
+            false),
+
+    OWNER_NOT_FOUND(400, "Resource not found",
+            "Current owner not found",
+            false),
+
+    OWNER_REALIZED_NOT_FOUND(400, "Resource not found",
+            "Owners resource not found: {}",
             false);
 
 
