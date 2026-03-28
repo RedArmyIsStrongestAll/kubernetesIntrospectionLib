@@ -29,7 +29,7 @@ public abstract class OwnerService {
         this.namespace = namespace;
     }
 
-    public Object getOwnerWithPermission(OwnerReference ownerRef, PermissionInfo permissionInfo) {
+    public OwnerService.OwnerDto getOwnerWithPermission(OwnerReference ownerRef, PermissionInfo permissionInfo) {
         log.info("Start getOwnerWithPermission");
 
         try {
