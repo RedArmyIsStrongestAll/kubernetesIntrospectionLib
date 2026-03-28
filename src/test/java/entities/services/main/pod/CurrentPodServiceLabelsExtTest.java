@@ -7,31 +7,25 @@ import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.dto.pod.PodInfo;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
-import kubernetes.introspection.entities.services.env.EnvironmentProviderSystemImpl;
 import kubernetes.introspection.entities.services.main.pod.CurrentPodService;
-import kubernetes.introspection.entities.services.main.pod.delegate.CurrentPodServiceConstDownwardApiExt;
+import kubernetes.introspection.entities.services.main.pod.delegate.CurrentPodServiceLabelsExt;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 @Slf4j
-class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbstract {
-
-    EnvironmentProviderSystemImpl mockProvider;
+class CurrentPodServiceLabelsExtTest extends CurrentPodServiceTestAbstract {
 
     @BeforeEach
     void setUp() {
         mockServer = new KubernetesMockServer();
         mockServer.init();
         client = mockServer.createClient();
-        mockProvider = mock(EnvironmentProviderSystemImpl.class);
     }
 
     @AfterEach
@@ -41,28 +35,25 @@ class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbst
 
     @Test
     void getCurrentPodInfoWithCheckPermissionsValidTest() throws Exception {
-        CurrentPodService service = new CurrentPodServiceConstDownwardApiExt(client, NAMESPACE, mockProvider);
-        when(mockProvider.getPodName()).thenReturn(POD_NAME);
-
-        PermissionInfo permission = new PermissionInfo(true,
-                List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
-
         PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "pod/test-short-pod.yaml");
-        setupMockServerWithValidPodByName(podAnalyzer, permission, POD_NAME);
+        PermissionInfo permission = new PermissionInfo(true,
+                List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
+                        new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true)));
 
+        setupMockServerWithPodsByLabels(podAnalyzer, permission, parseLabels(VALID_LABELS));
+
+        CurrentPodService service = new CurrentPodServiceLabelsExt(client, NAMESPACE, VALID_LABELS);
         PodInfo pod = service.getCurrentPodInfoWithCheckPermissions(permission);
         log.info("Test result: {}", pod);
-
         Assertions.assertNotNull(pod);
     }
 
     @Test
     void getCurrentPodInfoWithCheckPermissionsNoPermissionTest() {
-        CurrentPodService service = new CurrentPodServiceConstDownwardApiExt(client, NAMESPACE, mockProvider);
-        when(mockProvider.getPodName()).thenReturn(POD_NAME);
-
+        CurrentPodService service = new CurrentPodServiceLabelsExt(client, NAMESPACE, VALID_LABELS);
         PermissionInfo permission = new PermissionInfo(true,
-                List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, false)));
+                List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, false),
+                        new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, false)));
 
         Assertions.assertThrows(KubernetesException.class, () -> {
             service.getCurrentPodInfoWithCheckPermissions(permission);
@@ -71,11 +62,10 @@ class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbst
 
     @Test
     void getCurrentPodInfoWithCheckPermissionsNoPodNameTest() {
-        CurrentPodService service = new CurrentPodServiceConstDownwardApiExt(client, NAMESPACE, mockProvider);
-        when(mockProvider.getPodName()).thenReturn(null);
-
+        CurrentPodService service = new CurrentPodServiceLabelsExt(client, NAMESPACE, Collections.emptyList());
         PermissionInfo permission = new PermissionInfo(true,
-                List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
+                List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true),
+                        new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
         Assertions.assertThrows(KubernetesException.class, () -> {
             service.getCurrentPodInfoWithCheckPermissions(permission);
@@ -84,15 +74,14 @@ class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbst
 
     @Test
     void getCurrentPodInfoWithCheckPermissionsWrongPodNameTest() throws Exception {
-        CurrentPodService service = new CurrentPodServiceConstDownwardApiExt(client, NAMESPACE, mockProvider);
-        when(mockProvider.getPodName()).thenReturn(MISTAKE_POD_NAME);
-
+        PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "pod/test-pod.yaml");
         PermissionInfo permission = new PermissionInfo(true,
-                List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
+                List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
+                        new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true)));
 
-        PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "pod/test-short-pod.yaml");
-        setupMockServerWithValidPodByName(podAnalyzer, permission, MISTAKE_POD_NAME);
+        setupMockServerWithPodsByLabels(podAnalyzer, permission, parseLabels(INVALID_LABELS));
 
+        CurrentPodService service = new CurrentPodServiceLabelsExt(client, NAMESPACE, INVALID_LABELS);
         Assertions.assertThrows(KubernetesException.class, () -> {
             service.getCurrentPodInfoWithCheckPermissions(permission);
         });
@@ -100,11 +89,10 @@ class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbst
 
     @Test
     void getCurrentPodInfoWithCheckPermissionsKubernetes500Test() {
-        CurrentPodService service = new CurrentPodServiceConstDownwardApiExt(client, NAMESPACE, mockProvider);
-        when(mockProvider.getPodName()).thenReturn(POD_NAME);
-
+        CurrentPodService service = new CurrentPodServiceLabelsExt(client, NAMESPACE, VALID_LABELS);
         PermissionInfo permission = new PermissionInfo(true,
-                List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
+                List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true),
+                        new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
         setupMockServerWith500();
 
@@ -112,5 +100,4 @@ class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbst
             service.getCurrentPodInfoWithCheckPermissions(permission);
         });
     }
-
 }

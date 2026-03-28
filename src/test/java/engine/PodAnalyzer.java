@@ -1,6 +1,8 @@
 package engine;
 
+import io.fabric8.kubernetes.api.model.ListMeta;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodList;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -8,7 +10,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 public class PodAnalyzer {
@@ -16,9 +17,6 @@ public class PodAnalyzer {
     private final Pod pod;
     private final RbacAnalyzer rbacAnalyzer;
 
-
-    private final ResourcePermissionEnum PODS_GET = ResourcePermissionEnum.PODS_GET;
-    private final ResourcePermissionEnum PODS_LIST = ResourcePermissionEnum.PODS_LIST;
 
     public PodAnalyzer(String podYaml, RbacAnalyzer rbacAnalyzer) {
         Yaml yaml = new Yaml(new Constructor(new LoaderOptions()));
@@ -42,40 +40,59 @@ public class PodAnalyzer {
         return pod;
     }
 
-    public Pod getPodListByIp(PermissionInfo permissionInfo,
-                              String requestedIp,
-                              String requestedNamespace) {
+    public PodList getPodListByIp(PermissionInfo permissionInfo,
+                                  String requestedIp,
+                                  String requestedNamespace) {
+        if (!hasPermission(permissionInfo, ResourcePermissionEnum.PODS_LIST)) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
+        if (!rbacAnalyzer.isAllowed("pods", "list", requestedNamespace)) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
 
-        if (!hasPermission(permissionInfo, ResourcePermissionEnum.PODS_LIST)) return null;
-        if (!rbacAnalyzer.isAllowed("pods", "list", requestedNamespace)) return null;
+        if (pod.getMetadata() == null || pod.getStatus() == null || pod.getStatus().getPodIP() == null) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
 
-        if (pod.getMetadata() == null) return null;
+        if (!pod.getStatus().getPodIP().equals(requestedIp)) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
+        if (!pod.getMetadata().getNamespace().equals(requestedNamespace)) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
 
-        if (pod.getStatus() == null || pod.getStatus().getPodIP() == null) return null;
-        if (!pod.getStatus().getPodIP().equals(requestedIp)) return null;
-        if (!pod.getMetadata().getNamespace().equals(requestedNamespace)) return null;
-
-        return pod;
+        return new PodList(
+                "v1",
+                Collections.singletonList(pod),
+                "PodList",
+                new ListMeta()
+        );
     }
 
-    public List<Pod> getPodsByLabels(PermissionInfo permissionInfo,
-                                     Map<String, String> requestedLabels,
-                                     String requestedNamespace) {
+    public PodList getPodListByLabels(PermissionInfo permissionInfo,
+                                      Map<String, String> requestedLabels,
+                                      String requestedNamespace) {
+        if (!hasPermission(permissionInfo, ResourcePermissionEnum.PODS_LIST)) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
+        if (!rbacAnalyzer.isAllowed("pods", "list", requestedNamespace)) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
 
-        if (!hasPermission(permissionInfo, ResourcePermissionEnum.PODS_LIST)) return Collections.emptyList();
-        if (!rbacAnalyzer.isAllowed("pods", "list", requestedNamespace)) return Collections.emptyList();
+        if (pod.getMetadata() == null || pod.getMetadata().getLabels() == null) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
 
-        if (pod.getMetadata() == null || pod.getMetadata().getLabels() == null) return Collections.emptyList();
+        if (!pod.getMetadata().getNamespace().equals(requestedNamespace)) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
+        boolean allLabelsMatch = requestedLabels.entrySet().stream()
+                .allMatch(e -> e.getValue().equals(pod.getMetadata().getLabels().get(e.getKey())));
+        if (!allLabelsMatch) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
 
-        Map<String, String> podLabels = pod.getMetadata().getLabels();
-
-        boolean containsAllLabels = requestedLabels.entrySet().stream()
-                .allMatch(e -> e.getValue().equals(podLabels.get(e.getKey())));
-
-        if (!containsAllLabels) return Collections.emptyList();
-        if (!pod.getMetadata().getNamespace().equals(requestedNamespace)) return Collections.emptyList();
-
-        return Collections.singletonList(pod);
+        return new PodList("v1", Collections.singletonList(pod), "PodList", new ListMeta());
     }
 
 

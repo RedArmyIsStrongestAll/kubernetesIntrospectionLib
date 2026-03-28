@@ -7,31 +7,32 @@ import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.dto.pod.PodInfo;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
-import kubernetes.introspection.entities.services.env.EnvironmentProviderSystemImpl;
+import kubernetes.introspection.entities.services.env.EnvironmentProvider;
 import kubernetes.introspection.entities.services.main.pod.CurrentPodService;
-import kubernetes.introspection.entities.services.main.pod.delegate.CurrentPodServiceConstDownwardApiExt;
+import kubernetes.introspection.entities.services.main.pod.delegate.CurrentPodServiceHostnameInetAddressExt;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import java.net.UnknownHostException;
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @Slf4j
-class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbstract {
+class CurrentPodServiceHostnameInetAddressExtTest extends CurrentPodServiceTestAbstract {
 
-    EnvironmentProviderSystemImpl mockProvider;
+    private EnvironmentProvider mockProvider;
 
     @BeforeEach
     void setUp() {
         mockServer = new KubernetesMockServer();
         mockServer.init();
         client = mockServer.createClient();
-        mockProvider = mock(EnvironmentProviderSystemImpl.class);
+        mockProvider = Mockito.mock(EnvironmentProvider.class);
     }
 
     @AfterEach
@@ -41,9 +42,9 @@ class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbst
 
     @Test
     void getCurrentPodInfoWithCheckPermissionsValidTest() throws Exception {
-        CurrentPodService service = new CurrentPodServiceConstDownwardApiExt(client, NAMESPACE, mockProvider);
-        when(mockProvider.getPodName()).thenReturn(POD_NAME);
+        when(mockProvider.getInetAddressLocalHost()).thenReturn(POD_NAME);
 
+        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(client, NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
@@ -52,15 +53,14 @@ class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbst
 
         PodInfo pod = service.getCurrentPodInfoWithCheckPermissions(permission);
         log.info("Test result: {}", pod);
-
         Assertions.assertNotNull(pod);
     }
 
     @Test
-    void getCurrentPodInfoWithCheckPermissionsNoPermissionTest() {
-        CurrentPodService service = new CurrentPodServiceConstDownwardApiExt(client, NAMESPACE, mockProvider);
-        when(mockProvider.getPodName()).thenReturn(POD_NAME);
+    void getCurrentPodInfoWithCheckPermissionsNoPermissionTest() throws Exception {
+        when(mockProvider.getInetAddressLocalHost()).thenReturn(POD_NAME);
 
+        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(client, NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, false)));
 
@@ -70,10 +70,10 @@ class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbst
     }
 
     @Test
-    void getCurrentPodInfoWithCheckPermissionsNoPodNameTest() {
-        CurrentPodService service = new CurrentPodServiceConstDownwardApiExt(client, NAMESPACE, mockProvider);
-        when(mockProvider.getPodName()).thenReturn(null);
+    void getCurrentPodInfoWithCheckPermissionsNoPodNameTest() throws Exception {
+        when(mockProvider.getInetAddressLocalHost()).thenThrow(new UnknownHostException("Mocked exception"));
 
+        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(client, NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
@@ -84,9 +84,9 @@ class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbst
 
     @Test
     void getCurrentPodInfoWithCheckPermissionsWrongPodNameTest() throws Exception {
-        CurrentPodService service = new CurrentPodServiceConstDownwardApiExt(client, NAMESPACE, mockProvider);
-        when(mockProvider.getPodName()).thenReturn(MISTAKE_POD_NAME);
+        when(mockProvider.getInetAddressLocalHost()).thenReturn(MISTAKE_POD_NAME);
 
+        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(client, NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
@@ -99,10 +99,10 @@ class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbst
     }
 
     @Test
-    void getCurrentPodInfoWithCheckPermissionsKubernetes500Test() {
-        CurrentPodService service = new CurrentPodServiceConstDownwardApiExt(client, NAMESPACE, mockProvider);
-        when(mockProvider.getPodName()).thenReturn(POD_NAME);
+    void getCurrentPodInfoWithCheckPermissionsKubernetes500Test() throws Exception {
+        when(mockProvider.getInetAddressLocalHost()).thenReturn(POD_NAME);
 
+        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(client, NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
@@ -112,5 +112,4 @@ class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbst
             service.getCurrentPodInfoWithCheckPermissions(permission);
         });
     }
-
 }

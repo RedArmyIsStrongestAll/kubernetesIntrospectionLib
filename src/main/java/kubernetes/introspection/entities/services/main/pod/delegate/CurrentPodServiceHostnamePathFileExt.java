@@ -3,6 +3,7 @@ package kubernetes.introspection.entities.services.main.pod.delegate;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
+import kubernetes.introspection.entities.services.env.EnvironmentProvider;
 import kubernetes.introspection.entities.services.main.pod.CurrentPodService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,9 +19,11 @@ import static kubernetes.introspection.entities.models.dto.permision.ResourcePer
 public class CurrentPodServiceHostnamePathFileExt extends CurrentPodService {
 
     private static final String CURRENT_POD_SERVICE_NAME = "CurrentPodServiceHostnamePathFileExt";
+    protected final EnvironmentProvider environmentProviderSystemImpl;
 
-    public CurrentPodServiceHostnamePathFileExt(KubernetesClient kubernetesClient, String namespace) {
+    public CurrentPodServiceHostnamePathFileExt(KubernetesClient kubernetesClient, String namespace, EnvironmentProvider environmentProviderSystemImpl) {
         super(kubernetesClient, namespace);
+        this.environmentProviderSystemImpl = environmentProviderSystemImpl;
     }
 
     @Override
@@ -35,6 +38,9 @@ public class CurrentPodServiceHostnamePathFileExt extends CurrentPodService {
 
     @Override
     protected String getPodName() throws Exception {
+        if (environmentProviderSystemImpl != null) {
+            return environmentProviderSystemImpl.readHostNameFile();
+        }
         return new String(Files.readAllBytes(Paths.get("/etc/hostname"))).trim();
     }
 
