@@ -19,8 +19,8 @@ class YamlGenerateServiceTest {
     private final YamlGenerateService service = new YamlGenerateService();
 
     @Test
-    void testReadTestRbacYamlReturnsValidContent() throws Exception {
-        String resourcePath = "/rbac/test-rbac.yaml";
+    void readTestRbacYamlReturnsValidContentTest() throws Exception {
+        String resourcePath = "/rbac/template-rbac.yaml";
 
         // Проверяем, что файл доступен в classpath
         URL resourceUrl = getClass().getResource(resourcePath);

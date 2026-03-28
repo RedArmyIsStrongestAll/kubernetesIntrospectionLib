@@ -35,7 +35,7 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
     }
 
     @Test
-    void testCheckPermissionsWithAllAccess() throws Exception {
+    void checkPermissionsWithAllAccessTest() throws Exception {
         PermissionInfo result = getPermissionInfoForRbacFile("rbac/test-rbac.yaml", testNamespace);
         log.info("Test result: {}", result);
 
@@ -53,7 +53,7 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
     }
 
     @Test
-    void convertToCollectionErrorsWithAllAccess() throws IOException {
+    void convertToCollectionErrorsWithAllAccessTest() throws IOException {
         PermissionInfo info = getPermissionInfoForRbacFile("rbac/test-rbac.yaml", testNamespace);
         log.info("Call checkPermissions result: {}", info);
 
@@ -64,7 +64,7 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
     }
 
     @Test
-    void testCheckPermissionsNoPodWatch() throws Exception {
+    void checkPermissionsNoPodWatchTest() throws Exception {
         PermissionInfo result = getPermissionInfoForRbacFile("rbac/fail-test-rbac-no-pod-watch.yaml", testNamespace);
         log.info("Test result: {}", result);
 
@@ -82,7 +82,7 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
     }
 
     @Test
-    void convertToCollectionErrorsNoPodWatch() throws IOException {
+    void convertToCollectionErrorsNoPodWatchTest() throws IOException {
         PermissionInfo info = getPermissionInfoForRbacFile("rbac/fail-test-rbac-no-pod-watch.yaml", testNamespace);
         log.info("Call checkPermissions result: {}", info);
 
@@ -99,7 +99,7 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
     }
 
     @Test
-    void testCheckPermissionsWithDefaultRbac() throws Exception {
+    void checkPermissionsWithDefaultRbacTest() throws Exception {
         PermissionInfo result = getPermissionInfoForRbacFile("rbac/fail-test-rbac-default.yaml", testNamespace);
         log.info("Test result: {}", result);
 
@@ -129,7 +129,7 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
     }
 
     @Test
-    void convertToCollectionErrorsWithDefaultRbac() throws IOException {
+    void convertToCollectionErrorsWithDefaultRbacTest() throws IOException {
         PermissionInfo info = getPermissionInfoForRbacFile("rbac/fail-test-rbac-default.yaml", testNamespace);
         log.info("Call checkPermissions result: {}", info);
 
@@ -140,7 +140,7 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
     }
 
     @Test
-    void testCheckPermissionsNoAllPermissions() throws Exception {
+    void checkPermissionsNoAllPermissionsTest() throws Exception {
         PermissionInfo result = getPermissionInfoForRbacFile("rbac/fail-test-rbac-no-all.yaml", testNamespace);
         log.info("Test result: {}", result);
 
@@ -168,7 +168,7 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
     }
 
     @Test
-    void convertToCollectionErrors_noPermissions_allDenied_sixErrors() throws IOException {
+    void convertToCollectionErrorsNoAllPermissionsTest() throws IOException {
         PermissionInfo info = getPermissionInfoForRbacFile("rbac/fail-test-rbac-no-all.yaml", testNamespace);
         log.info("Call checkPermissions result: {}", info);
 

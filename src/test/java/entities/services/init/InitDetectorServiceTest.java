@@ -17,7 +17,7 @@ import static org.mockito.Mockito.mockStatic;
 class InitDetectorServiceTest {
 
     @Test
-    void testRunningInKubernetesNoKubernetesHostEnv() {
+    void runningInKubernetesNoKubernetesHostEnvTest() {
         InitDetectorService testService = new InitDetectorService() {
             @Override
             public String getKubernetesHostEnv() {
@@ -37,7 +37,7 @@ class InitDetectorServiceTest {
     }
 
     @Test
-    void testRunningInKubernetesNoTokenFile() {
+    void runningInKubernetesNoTokenFileTest() {
         InitDetectorService testService = new InitDetectorService() {
             @Override
             public String getKubernetesHostEnv() {
@@ -58,7 +58,7 @@ class InitDetectorServiceTest {
 
 
     @Test
-    void testRunningInKubernetesSuccess() {
+    void runningInKubernetesSuccessTest() {
         InitDetectorService testService = new InitDetectorService() {
             @Override
             public String getKubernetesHostEnv() {
@@ -78,7 +78,7 @@ class InitDetectorServiceTest {
     }
 
     @Test
-    void testGetNamespaceNoNamespaceFile() {
+    void getNamespaceNoNamespaceFileTest() {
         InitDetectorService testService = new InitDetectorService() {
             @Override
             public String getKubernetesHostEnv() {
@@ -96,7 +96,7 @@ class InitDetectorServiceTest {
     }
 
     @Test
-    void testGetNamespaceReturnsValidNamespace() {
+    void getNamespaceReturnsValidNamespaceTest() {
         InitDetectorService testService = new InitDetectorService() {
             @Override
             public String getKubernetesHostEnv() {
@@ -118,7 +118,7 @@ class InitDetectorServiceTest {
     }
 
     @Test
-    void testGetNamespaceReturnsEmptyNamespace() {
+    void getNamespaceReturnsEmptyNamespaceTest() {
         InitDetectorService testService = new InitDetectorService() {
             @Override
             public String getKubernetesHostEnv() {

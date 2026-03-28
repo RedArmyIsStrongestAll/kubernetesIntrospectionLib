@@ -1,4 +1,4 @@
-package entities.services.init.parent;
+package entities.services.main.pod.parent;
 
 import engine.RbacAnalyzer;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
-public class InitPermissionsServiceTestAbstract {
+public class CurrentPodServiceTestAbstract {
     protected KubernetesMockServer mockServer;
     protected KubernetesClient client;
     protected final String testNamespace = "test-namespace";
@@ -65,6 +65,7 @@ public class InitPermissionsServiceTestAbstract {
                     log.info("Received SSAR request: {}", body);
 
 
+                    // Извлекаем параметры из SSAR запроса
                     String resource = extractJsonValue(body, "resource");
                     String verb = extractJsonValue(body, "verb");
                     String namespace = extractJsonValue(body, "namespace");

@@ -23,7 +23,7 @@ public class YamlGenerateService {
     public String readTestRbacYaml() {
         log.info("Start readTestRbacYaml");
 
-        try (InputStream is = getClass().getResourceAsStream("/rbac/test-rbac.yaml")) {
+        try (InputStream is = getClass().getResourceAsStream("/rbac/template-rbac.yaml")) {
             if (is == null) {
                 log.error(NO_STATIC_FILE_RBAC.getMessage());
                 throw new KubernetesException(NO_STATIC_FILE_RBAC);

@@ -4,6 +4,7 @@ package kubernetes.introspection.entities.services.main.pod.delegate;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
+import kubernetes.introspection.entities.services.env.EnvironmentProviderSystemImpl;
 import kubernetes.introspection.entities.services.main.pod.CurrentPodService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,8 +19,11 @@ public class CurrentPodServiceConstDownwardApiExt extends CurrentPodService {
 
     private static final String CURRENT_POD_SERVICE_NAME = "CurrentPodServiceConstDownwardApiExt";
 
-    public CurrentPodServiceConstDownwardApiExt(KubernetesClient kubernetesClient, String namespace) {
+    protected final EnvironmentProviderSystemImpl environmentProviderSystemImpl;
+
+    public CurrentPodServiceConstDownwardApiExt(KubernetesClient kubernetesClient, String namespace, EnvironmentProviderSystemImpl environmentProviderSystemImpl) {
         super(kubernetesClient, namespace);
+        this.environmentProviderSystemImpl = environmentProviderSystemImpl;
     }
 
     @Override
@@ -34,6 +38,9 @@ public class CurrentPodServiceConstDownwardApiExt extends CurrentPodService {
 
     @Override
     protected String getPodName() throws Exception {
+        if (environmentProviderSystemImpl != null) {
+            return environmentProviderSystemImpl.getPodName();
+        }
         return System.getenv("POD_NAME");
     }
 

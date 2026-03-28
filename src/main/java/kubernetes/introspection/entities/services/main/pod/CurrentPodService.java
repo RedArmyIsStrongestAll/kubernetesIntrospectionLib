@@ -16,7 +16,6 @@ import kubernetes.introspection.entities.services.main.pod.delegate.CurrentPodSe
 import kubernetes.introspection.entities.services.main.pod.delegate.CurrentPodServiceHostnameInetAddressExt;
 import kubernetes.introspection.entities.services.main.pod.delegate.CurrentPodServiceHostnamePathFileExt;
 import kubernetes.introspection.entities.services.main.pod.delegate.CurrentPodServiceLabelsExt;
-import kubernetes.introspection.entities.services.main.pod.delegate.CurrentPodServiceRegexDownwardApiExt;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -52,7 +51,6 @@ import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.
  *   <li>{@link CurrentPodServiceHostnameInetAddressExt} — получает имя Pod'а через {@link java.net.InetAddress}.</li>
  *   <li>{@link CurrentPodServiceHostnamePathFileExt} — читает имя Pod'а из файла {@code /etc/hostname}.</li>
  *   <li>{@link CurrentPodServiceLabelsExt} — ищет Pod по набору меток (labels).</li>
- *   <li>{@link CurrentPodServiceRegexDownwardApiExt} — извлекает имя Pod'а из переменной окружения с помощью регулярного выражения.</li>
  * </ul>
  *
  * <p>Каждая реализация использует свою стратегию обнаружения Pod'а, но все они возвращают унифицированный объект {@link PodInfo}.
@@ -66,7 +64,6 @@ public abstract class CurrentPodService {
     protected final KubernetesClient kubernetesClient;
     protected String podName;
     protected final String namespace;
-
 
     public CurrentPodService(KubernetesClient kubernetesClient, String namespace) {
         this.kubernetesClient = kubernetesClient;

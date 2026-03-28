@@ -26,7 +26,7 @@ public class CurrentPodServiceLabelsExt extends CurrentPodService {
      * Принимает List<String> формата "key=value"
      * <p> Пример: List.of("app=my-app", "env=prod", "version=1.0")</p>
      */
-    public CurrentPodServiceLabelsExt(KubernetesClient kubernetesClient, String namespace, String podId, List<String> labelList) {
+    public CurrentPodServiceLabelsExt(KubernetesClient kubernetesClient, String namespace, List<String> labelList) {
         super(kubernetesClient, namespace);
         this.labelList = labelList;
     }
