@@ -11,7 +11,6 @@ import kubernetes.introspection.entities.services.main.owner.OwnerService.OwnerD
 import kubernetes.introspection.entities.services.main.pod.CurrentPodService;
 import kubernetes.introspection.entities.services.main.replics.owner.OwnerLabelCallChainService;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -23,10 +22,14 @@ import java.util.stream.Collectors;
 import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.REPLICA_PODS_NOT_FOUND;
 
 @Slf4j
-@RequiredArgsConstructor
 public class ReplicaPodsService {
     private final KubernetesClient kubernetesClient;
     private final OwnerLabelCallChainService ownerLabelCallChainService;
+
+    public ReplicaPodsService(KubernetesClient kubernetesClient, OwnerLabelCallChainService ownerLabelCallChainService) {
+        this.kubernetesClient = kubernetesClient;
+        this.ownerLabelCallChainService = ownerLabelCallChainService;
+    }
 
 
     public ReplicaPodsInfo getReplicaPods(OwnerReference ownerRef, OwnerDto ownerDto, Pod currentPod) {

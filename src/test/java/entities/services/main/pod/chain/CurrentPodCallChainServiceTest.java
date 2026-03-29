@@ -1,6 +1,5 @@
 package entities.services.main.pod.chain;
 
-import entities.services.main.pod.parent.CurrentPodServiceTestAbstract;
 import io.fabric8.kubernetes.api.model.Pod;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.pod.PodInfo;
@@ -19,7 +18,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class CurrentPorCallChainServiceTest extends CurrentPodServiceTestAbstract {
+public class CurrentPodCallChainServiceTest {
 
     private CurrentPorCallChainService callChainService;
     private List<CurrentPodService> mockServices;

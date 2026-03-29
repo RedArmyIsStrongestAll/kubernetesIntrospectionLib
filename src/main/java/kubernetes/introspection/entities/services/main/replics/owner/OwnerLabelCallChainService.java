@@ -41,9 +41,8 @@ public class OwnerLabelCallChainService {
                     log.info("Using {} to extract LabelSelector", service.getNameClassImpl());
                     return service.extractLabelSelectorWithPermission(hasMetadata, permissionInfo);
                 }
-            } catch (Exception e) {
+            } catch (KubernetesException e) {
                 log.error("Service {} failed to extract LabelSelector: {}", service.getNameClassImpl(), e.getMessage(), e);
-                throw new KubernetesException(OWNER_NOT_FOUND);
             }
         }
 
@@ -66,9 +65,8 @@ public class OwnerLabelCallChainService {
                     log.info("Using {} to extract LabelSelector", service.getNameClassImpl());
                     return service.extractLabelSelector(hasMetadata);
                 }
-            } catch (Exception e) {
+            } catch (KubernetesException e) {
                 log.error("Service {} failed to extract LabelSelector: {}", service.getNameClassImpl(), e.getMessage(), e);
-                throw new KubernetesException(OWNER_NOT_FOUND);
             }
         }
 

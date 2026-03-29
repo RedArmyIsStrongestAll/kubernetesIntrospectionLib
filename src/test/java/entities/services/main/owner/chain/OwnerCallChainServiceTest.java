@@ -1,6 +1,5 @@
 package entities.services.main.owner.chain;
 
-import entities.services.main.pod.parent.CurrentPodServiceTestAbstract;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import kubernetes.introspection.entities.models.dto.owner.OwnerInfo;
@@ -21,7 +20,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class OwnerCallChainServiceTest extends CurrentPodServiceTestAbstract {
+public class OwnerCallChainServiceTest {
 
     private OwnerCallChainService callChainService;
     private List<OwnerService> mockServices;
@@ -51,8 +50,8 @@ public class OwnerCallChainServiceTest extends CurrentPodServiceTestAbstract {
         OwnerService second = mockServices.get(1);
         OwnerService third = mockServices.get(2);
 
-        when(first.getOwnerWithPermission(ownerRef, permissionInfo)).thenThrow(new KubernetesException(ErrorCodeEnum.POD_NOT_FOUND));
-        when(second.getOwnerWithPermission(ownerRef, permissionInfo)).thenThrow(new KubernetesException(ErrorCodeEnum.POD_NOT_FOUND));
+        when(first.getOwnerWithPermission(ownerRef, permissionInfo)).thenThrow(new KubernetesException(ErrorCodeEnum.OWNER_NOT_FOUND));
+        when(second.getOwnerWithPermission(ownerRef, permissionInfo)).thenThrow(new KubernetesException(ErrorCodeEnum.OWNER_NOT_FOUND));
         when(third.getOwnerWithPermission(ownerRef, permissionInfo)).thenReturn(mockDto);
 
         OwnerService.OwnerDto result = callChainService.getOwnerWithPermission(ownerRef, permissionInfo);
@@ -70,19 +69,13 @@ public class OwnerCallChainServiceTest extends CurrentPodServiceTestAbstract {
         PermissionInfo permissionInfo = new PermissionInfo();
         OwnerReference ownerRef = new OwnerReference();
 
-        OwnerInfo mockOwnerInfo = mock(OwnerInfo.class);
-        OwnerTypeEnum mockType = mock(OwnerTypeEnum.class);
-        HasMetadata mockObject = mock(HasMetadata.class);
-
-        OwnerService.OwnerDto mockDto = new OwnerService.OwnerDto(mockOwnerInfo, mockType, mockObject);
-
         OwnerService first = mockServices.get(0);
         OwnerService second = mockServices.get(1);
         OwnerService third = mockServices.get(2);
 
-        when(first.getOwnerWithPermission(ownerRef, permissionInfo)).thenThrow(new KubernetesException(ErrorCodeEnum.POD_NOT_FOUND));
-        when(second.getOwnerWithPermission(ownerRef, permissionInfo)).thenThrow(new KubernetesException(ErrorCodeEnum.POD_NOT_FOUND));
-        when(third.getOwnerWithPermission(ownerRef, permissionInfo)).thenThrow(new KubernetesException(ErrorCodeEnum.POD_NOT_FOUND));
+        when(first.getOwnerWithPermission(ownerRef, permissionInfo)).thenThrow(new KubernetesException(ErrorCodeEnum.OWNER_NOT_FOUND));
+        when(second.getOwnerWithPermission(ownerRef, permissionInfo)).thenThrow(new KubernetesException(ErrorCodeEnum.OWNER_NOT_FOUND));
+        when(third.getOwnerWithPermission(ownerRef, permissionInfo)).thenThrow(new KubernetesException(ErrorCodeEnum.OWNER_NOT_FOUND));
 
         Assertions.assertThrows(KubernetesException.class, () -> callChainService.getOwnerWithPermission(ownerRef, permissionInfo));
 
@@ -105,8 +98,8 @@ public class OwnerCallChainServiceTest extends CurrentPodServiceTestAbstract {
         OwnerService second = mockServices.get(1);
         OwnerService third = mockServices.get(2);
 
-        when(first.getOwner(ownerRef)).thenThrow(new KubernetesException(ErrorCodeEnum.POD_NOT_FOUND));
-        when(second.getOwner(ownerRef)).thenThrow(new KubernetesException(ErrorCodeEnum.POD_NOT_FOUND));
+        when(first.getOwner(ownerRef)).thenThrow(new KubernetesException(ErrorCodeEnum.OWNER_NOT_FOUND));
+        when(second.getOwner(ownerRef)).thenThrow(new KubernetesException(ErrorCodeEnum.OWNER_NOT_FOUND));
         when(third.getOwner(ownerRef)).thenReturn(mockDto);
 
         OwnerService.OwnerDto result = callChainService.getOwner(ownerRef);
@@ -127,9 +120,9 @@ public class OwnerCallChainServiceTest extends CurrentPodServiceTestAbstract {
         OwnerService second = mockServices.get(1);
         OwnerService third = mockServices.get(2);
 
-        when(first.getOwner(ownerRef)).thenThrow(new KubernetesException(ErrorCodeEnum.POD_NOT_FOUND));
-        when(second.getOwner(ownerRef)).thenThrow(new KubernetesException(ErrorCodeEnum.POD_NOT_FOUND));
-        when(third.getOwner(ownerRef)).thenThrow(new KubernetesException(ErrorCodeEnum.POD_NOT_FOUND));
+        when(first.getOwner(ownerRef)).thenThrow(new KubernetesException(ErrorCodeEnum.OWNER_NOT_FOUND));
+        when(second.getOwner(ownerRef)).thenThrow(new KubernetesException(ErrorCodeEnum.OWNER_NOT_FOUND));
+        when(third.getOwner(ownerRef)).thenThrow(new KubernetesException(ErrorCodeEnum.OWNER_NOT_FOUND));
 
         Assertions.assertThrows(KubernetesException.class, () -> callChainService.getOwner(ownerRef));
 
