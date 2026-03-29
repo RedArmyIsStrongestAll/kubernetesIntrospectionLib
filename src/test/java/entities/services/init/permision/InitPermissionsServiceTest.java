@@ -136,7 +136,7 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
         List<CollectionError> errors = convert(info, testNamespace);
         log.info("Test result: {}", errors);
 
-        assertEquals(33, errors.size(), "Должна быть одна ошибка");
+        assertEquals(36, errors.size(), "Должна быть одна ошибка");
     }
 
     @Test
@@ -175,7 +175,7 @@ class InitPermissionsServiceTest extends InitPermissionsServiceTestAbstract {
         List<CollectionError> errors = convert(info, testNamespace);
         log.info("Test result: {}", info);
 
-        assertEquals(33, errors.size(), "Должно быть 6 ошибок");
+        assertEquals(36, errors.size(), "Должно быть 6 ошибок");
     }
 
 }
