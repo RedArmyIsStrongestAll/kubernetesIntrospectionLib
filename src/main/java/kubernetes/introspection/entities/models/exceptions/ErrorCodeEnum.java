@@ -42,6 +42,10 @@ public enum ErrorCodeEnum {
 
     OWNER_REALIZED_NOT_FOUND(400, "Resource not found",
             "Owners resource not found: {}",
+            false),
+
+    REPLICA_PODS_NOT_FOUND(400, "Resource not found",
+            "Replica pods not found",
             false);
 
 

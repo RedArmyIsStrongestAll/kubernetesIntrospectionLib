@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
-public class OwnerServiceDeploymentExtTest extends OwnerServiceTestAbstract {
+public class OwnerLabelServiceDeploymentExtTest extends OwnerServiceTestAbstract {
     private static final String DEPLOYMENT_NAME = "test-deployment";
 
     @BeforeEach

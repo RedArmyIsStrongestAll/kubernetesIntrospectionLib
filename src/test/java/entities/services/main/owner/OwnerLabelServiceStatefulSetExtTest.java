@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
-public class OwnerServiceStatefulSetExtTest extends OwnerServiceTestAbstract {
+public class OwnerLabelServiceStatefulSetExtTest extends OwnerServiceTestAbstract {
     private static final String STATEFULSET_NAME = "test-statefulset";
 
     @BeforeEach

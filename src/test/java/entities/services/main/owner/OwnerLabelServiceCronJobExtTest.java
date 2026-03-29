@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
-public class OwnerServiceCronJobExtTest extends OwnerServiceTestAbstract {
+public class OwnerLabelServiceCronJobExtTest extends OwnerServiceTestAbstract {
     private static final String CRONJOB_NAME = "test-cronjob";
 
     @BeforeEach

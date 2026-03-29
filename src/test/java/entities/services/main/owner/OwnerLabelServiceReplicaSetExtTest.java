@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
-public class OwnerServiceReplicaSetExtTest extends OwnerServiceTestAbstract {
+public class OwnerLabelServiceReplicaSetExtTest extends OwnerServiceTestAbstract {
     private static final String REPLICASET_NAME = "test-replicaset";
 
     @BeforeEach

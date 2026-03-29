@@ -29,6 +29,7 @@ public abstract class OwnerService {
         this.namespace = namespace;
     }
 
+
     public OwnerService.OwnerDto getOwnerWithPermission(OwnerReference ownerRef, PermissionInfo permissionInfo) {
         log.info("Start getOwnerWithPermission");
 
@@ -62,6 +63,7 @@ public abstract class OwnerService {
         return null;
     }
 
+
     protected abstract List<ResourcePermissionEnum> getPermissionResource();
 
     protected abstract String getNameClassExt();
@@ -69,6 +71,7 @@ public abstract class OwnerService {
     protected abstract OwnerTypeEnum getKindOwnerType();
 
     protected abstract OwnerDto getOwnerDto(OwnerReference ownerRef);
+
 
     @AllArgsConstructor
     @Getter

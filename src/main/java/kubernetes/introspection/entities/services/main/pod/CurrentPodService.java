@@ -35,56 +35,8 @@ public abstract class CurrentPodService {
     protected String podName;
     protected final String namespace;
 
-    public CurrentPodDto getCurrentPodWithCheckPermissions(PermissionInfo permissionInfo) {
-        log.info("Start getCurrentPodInfoWithCheckPermissions in {}", getNameClassExt());
-        try {
-            PermissionService.checkPermission(permissionInfo, this::getPermissionResource);
 
-            return getCurrentPod();
-        } catch (Exception e) {
-            log.error("Error getCurrentPodInfoWithCheckPermissions in {}, ", getNameClassExt(), e);
-            throw new KubernetesException(POD_NOT_FOUND);
-        }
-    }
-
-    public CurrentPodDto getCurrentPod() {
-        log.info("Start getCurrentPodInfo in {}", getNameClassExt());
-
-        try {
-            podName = getPodName();
-            log.info("Possible name of the pod is {}", podName);
-
-            if (podName == null || podName.isBlank()) {
-                log.error("Error start getCurrentPodInfo in {}", getNameClassExt());
-                log.error(BROKEN_NAME_IN_POD.getMessage());
-                throw new Exception();
-            }
-
-            Pod pod = getPod();
-            if (pod == null) {
-                log.error(POD_NOT_FOUND.getMessage());
-                throw new Exception();
-            }
-            log.info("{}: current pod was found", getNameClassExt());
-
-            PodInfo podInfo = getPodInfo(pod);
-            log.info("{}: create info for current pod ", getNameClassExt());
-
-            return new CurrentPodDto(pod, podInfo);
-
-        } catch (Exception e) {
-            log.error("Error getCurrentPod in {}, ", getNameClassExt(), e);
-            log.error(POD_NOT_FOUND.getMessage());
-            throw new KubernetesException(POD_NOT_FOUND);
-        }
-    }
-
-    public PodInfo getPodInfo(Pod pod) {
-        log.info("Start getPodInfo");
-        return mapToPodInfo(pod);
-    }
-
-    protected PodInfo mapToPodInfo(Pod pod) {
+    public static PodInfo mapToPodInfo(Pod pod) {
         log.info("Start mapToPodInfo");
         try {
             if (pod == null) {
@@ -115,7 +67,7 @@ public abstract class CurrentPodService {
         }
     }
 
-    protected List<ContainerInfo> extractContainers(Pod pod) {
+    public static List<ContainerInfo> extractContainers(Pod pod) {
         log.info("Start extractContainers");
         try {
             PodSpec podSpec = pod.getSpec();
@@ -175,6 +127,52 @@ public abstract class CurrentPodService {
             throw e;
         }
     }
+
+
+    public CurrentPodDto getCurrentPodWithCheckPermissions(PermissionInfo permissionInfo) {
+        log.info("Start getCurrentPodInfoWithCheckPermissions in {}", getNameClassExt());
+        try {
+            PermissionService.checkPermission(permissionInfo, this::getPermissionResource);
+
+            return getCurrentPod();
+        } catch (Exception e) {
+            log.error("Error getCurrentPodInfoWithCheckPermissions in {}, ", getNameClassExt(), e);
+            throw new KubernetesException(POD_NOT_FOUND);
+        }
+    }
+
+    public CurrentPodDto getCurrentPod() {
+        log.info("Start getCurrentPodInfo in {}", getNameClassExt());
+
+        try {
+            podName = getPodName();
+            log.info("Possible name of the pod is {}", podName);
+
+            if (podName == null || podName.isBlank()) {
+                log.error("Error start getCurrentPodInfo in {}", getNameClassExt());
+                log.error(BROKEN_NAME_IN_POD.getMessage());
+                throw new Exception();
+            }
+
+            Pod pod = getPod();
+            if (pod == null) {
+                log.error(POD_NOT_FOUND.getMessage());
+                throw new Exception();
+            }
+            log.info("{}: current pod was found", getNameClassExt());
+
+            PodInfo podInfo = mapToPodInfo(pod);
+            log.info("{}: create info for current pod ", getNameClassExt());
+
+            return new CurrentPodDto(pod, podInfo);
+
+        } catch (Exception e) {
+            log.error("Error getCurrentPod in {}, ", getNameClassExt(), e);
+            log.error(POD_NOT_FOUND.getMessage());
+            throw new KubernetesException(POD_NOT_FOUND);
+        }
+    }
+
 
     protected abstract List<ResourcePermissionEnum> getPermissionResource();
 
