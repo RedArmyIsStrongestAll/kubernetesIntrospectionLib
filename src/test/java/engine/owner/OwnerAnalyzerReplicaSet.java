@@ -12,7 +12,7 @@ public class OwnerAnalyzerReplicaSet implements OwnerAnalyzer<ReplicaSet> {
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerReplicaSet(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.replicaSet = (ReplicaSet) TestUtils.changeSetYamlObject(yamlContent, ReplicaSet.class);
+        this.replicaSet = TestUtils.trySetYamlObject(yamlContent, ReplicaSet.class);
 
         this.rbacAnalyzer = rbacAnalyzer;
     }

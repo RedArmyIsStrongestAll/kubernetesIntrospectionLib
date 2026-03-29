@@ -13,7 +13,7 @@ public class OwnerAnalyzerDeployment implements OwnerAnalyzer<Deployment> {
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerDeployment(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.deployment = (Deployment) TestUtils.changeSetYamlObject(yamlContent, Deployment.class);
+        this.deployment = TestUtils.trySetYamlObject(yamlContent, Deployment.class);
 
         this.rbacAnalyzer = rbacAnalyzer;
     }

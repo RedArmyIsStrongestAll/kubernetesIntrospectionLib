@@ -9,6 +9,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class TestUtils {
     public static ObjectMapper objectMapper = new ObjectMapper();
@@ -24,9 +27,10 @@ public class TestUtils {
         throw new IOException("No " + filename + " file found");
     }
 
-    public static Object changeSetYamlObject(String yamlObjects, Class<?> classObject) throws IOException {
-        Object object = null;
+    public static <T> T trySetYamlObject(String yamlObjects, Class<T> classObject) throws IOException {
+        T object = null;
         Yaml yaml = new Yaml(new Constructor(new LoaderOptions()));
+
         for (Object doc : yaml.loadAll(yamlObjects)) {
             try {
                 object = objectMapper.convertValue(doc, classObject);
@@ -37,5 +41,25 @@ public class TestUtils {
             throw new IllegalArgumentException(String.format("Invalid YAML: {} to {}", yamlObjects, classObject));
         }
         return object;
+    }
+
+    public static <T> List<T> trySetYamlObjectList(String yamlContent, Class<T> classObject, String k8sKindNameOrig) throws IOException {
+        List<T> objectList = new ArrayList<>();
+        Yaml yaml = new Yaml(new Constructor(new LoaderOptions()));
+        for (Object doc : yaml.loadAll(yamlContent)) {
+            try {
+                if (!(doc instanceof Map)) continue;
+                Map<String, Object> map = (Map<String, Object>) doc;
+                if (k8sKindNameOrig.equals(map.get("kind"))) {
+                    T object = objectMapper.convertValue(doc, classObject);
+                    objectList.add(object);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        if (objectList.isEmpty()) {
+            throw new IllegalArgumentException(String.format("Invalid YAML: %s for type %s", yamlContent, classObject));
+        }
+        return objectList;
     }
 }

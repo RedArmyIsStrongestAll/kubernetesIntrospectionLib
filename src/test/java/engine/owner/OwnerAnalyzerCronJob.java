@@ -12,7 +12,7 @@ public class OwnerAnalyzerCronJob implements OwnerAnalyzer<CronJob> {
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerCronJob(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.cronJob = (CronJob) TestUtils.changeSetYamlObject(yamlContent, CronJob.class);
+        this.cronJob = TestUtils.trySetYamlObject(yamlContent, CronJob.class);
 
         this.rbacAnalyzer = rbacAnalyzer;
     }
