@@ -5,5 +5,6 @@ public class Main {
         //todo логи проверить многие error в warn
         //todo может ошибками подроьбными джополнить
         //todo парсер ошибки в CollectionErrorInfo
+        //todo срезать число проверок rbac через методы отдачи
     }
 }
