@@ -4,15 +4,11 @@ import engine.PodAnalyzer;
 import engine.RbacAnalyzer;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
-import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -58,12 +54,12 @@ public class CurrentPodServiceTestAbstract {
     }
 
 
-    protected void setupMockServerWithValidPodByName(PodAnalyzer analyzer, PermissionInfo permissionApp, String podName) {
+    protected void setupMockServerWithValidPodByName(PodAnalyzer analyzer, String podName) {
         mockServer.expect().get()
                 .withPath("/api/v1/namespaces/" + NAMESPACE + "/pods/" + podName)
                 .andReply(200, request -> {
                     log.info("Received GET request for pod: {}/{}", NAMESPACE, podName);
-                    return analyzer.getPodByName(permissionApp, podName, NAMESPACE);
+                    return analyzer.getPodByName(podName, NAMESPACE);
                 })
                 .always();
     }
@@ -75,17 +71,17 @@ public class CurrentPodServiceTestAbstract {
                 .always();
     }
 
-    protected void setupMockServerWithValidPodListByIp(PodAnalyzer analyzer, PermissionInfo permissionApp, String podIp) {
+    protected void setupMockServerWithValidPodListByIp(PodAnalyzer analyzer, String podIp) {
         mockServer.expect().get()
                 .withPath("/api/v1/namespaces/" + NAMESPACE + "/pods")
                 .andReply(200, request -> {
                     log.info("Received LIST request for pods on ip {} in namespace: {}", podIp, NAMESPACE);
-                    return analyzer.getPodListByIp(permissionApp, podIp, NAMESPACE);
+                    return analyzer.getPodListByIp(podIp, NAMESPACE);
                 })
                 .always();
     }
 
-    protected void setupMockServerWithPodsByLabels(PodAnalyzer analyzer, PermissionInfo permissionApp, Map<String, String> labels) {
+    protected void setupMockServerWithPodsByLabels(PodAnalyzer analyzer, Map<String, String> labels) {
         String labelSelector = buildLabelSelectorQuery(labels);
         String query = "/api/v1/namespaces/" + NAMESPACE + "/pods" + "?labelSelector=" + labelSelector;
 
@@ -94,7 +90,7 @@ public class CurrentPodServiceTestAbstract {
                 .withPath(query)
                 .andReply(200, request -> {
                     log.info("Received LIST request for pods in namespace: {}", NAMESPACE);
-                    return analyzer.getPodListByLabels(permissionApp, labels, NAMESPACE);
+                    return analyzer.getPodListByLabels(labels, NAMESPACE);
                 })
                 .always();
     }

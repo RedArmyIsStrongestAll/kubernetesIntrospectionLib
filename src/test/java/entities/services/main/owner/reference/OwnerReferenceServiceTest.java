@@ -24,14 +24,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OwnerReferenceServiceTest {
-    private final String NAMESAPCE = "test-namespace";
+    private final String NAMESPACE = "test-namespace";
 
     private OwnerReferenceService ownerReferenceService;
     private Pod pod;
 
     @BeforeEach
     void setUp() throws Exception {
-        this.ownerReferenceService = new OwnerReferenceService(NAMESAPCE);
+        this.ownerReferenceService = new OwnerReferenceService(NAMESPACE);
     }
 
     private void setPod(String fileName) throws IOException {

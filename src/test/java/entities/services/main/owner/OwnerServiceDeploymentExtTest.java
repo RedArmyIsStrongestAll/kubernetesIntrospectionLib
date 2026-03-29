@@ -46,7 +46,7 @@ public class OwnerServiceDeploymentExtTest {
     }
 
     @Test
-    void getOwnerDto_withValidDeploymentOwner_returnsOwnerInfo() throws IOException {
+    void getOwnerDtoWithValidDeploymentOwner() throws IOException {
         String yamlContent = loadRbacYaml("owner/pod-with-deployment-owner.yaml");
 
         PodAnalyzer podAnalyzer = new PodAnalyzer(yamlContent, new RbacAnalyzer(yamlContent));
@@ -60,7 +60,7 @@ public class OwnerServiceDeploymentExtTest {
 
         mockServer.expect().get()
                 .withPath("/api/v1/namespaces/" + NAMESPACE + "/pods/" + POD_NAME)
-                .andReturn(200, podAnalyzer.getPodByName(permission, POD_NAME, NAMESPACE))
+                .andReturn(200, podAnalyzer.getPodByName(POD_NAME, NAMESPACE))
                 .once();
 
         mockServer.expect().get()

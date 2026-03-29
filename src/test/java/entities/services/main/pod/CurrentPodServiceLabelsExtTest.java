@@ -41,7 +41,7 @@ class CurrentPodServiceLabelsExtTest extends CurrentPodServiceTestAbstract {
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true)));
 
-        setupMockServerWithPodsByLabels(podAnalyzer, permission, parseLabels(VALID_LABELS));
+        setupMockServerWithPodsByLabels(podAnalyzer, parseLabels(VALID_LABELS));
 
         CurrentPodService service = new CurrentPodServiceLabelsExt(client, NAMESPACE, VALID_LABELS);
         CurrentPodService.CurrentPodDto pod = service.getCurrentPodWithCheckPermissions(permission);
@@ -80,7 +80,7 @@ class CurrentPodServiceLabelsExtTest extends CurrentPodServiceTestAbstract {
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true)));
 
-        setupMockServerWithPodsByLabels(podAnalyzer, permission, parseLabels(INVALID_LABELS));
+        setupMockServerWithPodsByLabels(podAnalyzer, parseLabels(INVALID_LABELS));
 
         CurrentPodService service = new CurrentPodServiceLabelsExt(client, NAMESPACE, INVALID_LABELS);
         Assertions.assertThrows(KubernetesException.class, () -> {

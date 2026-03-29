@@ -41,7 +41,7 @@ class CurrentPodServiceConstIpPodExtTest extends CurrentPodServiceTestAbstract {
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true)));
 
         PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "pod/test-short-pod.yaml");
-        setupMockServerWithValidPodListByIp(podAnalyzer, permission, POD_IP);
+        setupMockServerWithValidPodListByIp(podAnalyzer, POD_IP);
 
         CurrentPodService.CurrentPodDto pod = service.getCurrentPodWithCheckPermissions(permission);
         log.info("Test result: {}", pod);
@@ -80,7 +80,7 @@ class CurrentPodServiceConstIpPodExtTest extends CurrentPodServiceTestAbstract {
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true)));
 
         PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "pod/test-short-pod.yaml");
-        setupMockServerWithValidPodListByIp(podAnalyzer, permission, MISTAKE_POD_IP);
+        setupMockServerWithValidPodListByIp(podAnalyzer, MISTAKE_POD_IP);
 
         Assertions.assertThrows(KubernetesException.class, () -> {
             service.getCurrentPodWithCheckPermissions(permission);

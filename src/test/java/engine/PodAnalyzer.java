@@ -3,8 +3,6 @@ package engine;
 import io.fabric8.kubernetes.api.model.ListMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
-import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
-import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -25,11 +23,8 @@ public class PodAnalyzer {
         this.rbacAnalyzer = rbacAnalyzer;
     }
 
-    public Pod getPodByName(PermissionInfo permissionInfo,
-                            String requestedName,
+    public Pod getPodByName(String requestedName,
                             String requestedNamespace) {
-
-        if (!hasPermission(permissionInfo, ResourcePermissionEnum.PODS_GET)) return null;
         if (!rbacAnalyzer.isAllowed("pods", "get", requestedNamespace)) return null;
 
         if (pod.getMetadata() == null) return null;
@@ -40,13 +35,12 @@ public class PodAnalyzer {
         return pod;
     }
 
-    public PodList getPodListByIp(PermissionInfo permissionInfo,
-                                  String requestedIp,
+    public PodList getPodListByIp(String requestedIp,
                                   String requestedNamespace) {
-        if (!hasPermission(permissionInfo, ResourcePermissionEnum.PODS_LIST)) {
+        if (!rbacAnalyzer.isAllowed("pods", "list", requestedNamespace)) {
             return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
         }
-        if (!rbacAnalyzer.isAllowed("pods", "list", requestedNamespace)) {
+        if (!rbacAnalyzer.isAllowed("pods", "get", requestedNamespace)) {
             return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
         }
 
@@ -69,13 +63,12 @@ public class PodAnalyzer {
         );
     }
 
-    public PodList getPodListByLabels(PermissionInfo permissionInfo,
-                                      Map<String, String> requestedLabels,
+    public PodList getPodListByLabels(Map<String, String> requestedLabels,
                                       String requestedNamespace) {
-        if (!hasPermission(permissionInfo, ResourcePermissionEnum.PODS_LIST)) {
+        if (!rbacAnalyzer.isAllowed("pods", "list", requestedNamespace)) {
             return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
         }
-        if (!rbacAnalyzer.isAllowed("pods", "list", requestedNamespace)) {
+        if (!rbacAnalyzer.isAllowed("pods", "get", requestedNamespace)) {
             return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
         }
 
@@ -93,11 +86,5 @@ public class PodAnalyzer {
         }
 
         return new PodList("v1", Collections.singletonList(pod), "PodList", new ListMeta());
-    }
-
-
-    private boolean hasPermission(PermissionInfo permissionInfo, ResourcePermissionEnum requiredPermission) {
-        return permissionInfo.getPermissions().stream()
-                .anyMatch(p -> p.getResource() == requiredPermission && p.isAllowed());
     }
 }

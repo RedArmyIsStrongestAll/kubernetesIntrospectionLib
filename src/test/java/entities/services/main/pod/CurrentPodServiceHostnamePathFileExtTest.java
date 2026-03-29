@@ -48,7 +48,7 @@ class CurrentPodServiceHostnamePathFileExtTest extends CurrentPodServiceTestAbst
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
         PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "pod/test-short-pod.yaml");
-        setupMockServerWithValidPodByName(podAnalyzer, permission, POD_NAME);
+        setupMockServerWithValidPodByName(podAnalyzer, POD_NAME);
         CurrentPodService.CurrentPodDto pod = service.getCurrentPodWithCheckPermissions(permission);
         log.info("Test result: {}", pod);
         Assertions.assertNotNull(pod);
@@ -86,7 +86,7 @@ class CurrentPodServiceHostnamePathFileExtTest extends CurrentPodServiceTestAbst
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
         PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "pod/test-short-pod.yaml");
-        setupMockServerWithValidPodByName(podAnalyzer, permission, MISTAKE_POD_NAME);
+        setupMockServerWithValidPodByName(podAnalyzer, MISTAKE_POD_NAME);
         Assertions.assertThrows(KubernetesException.class, () -> {
             service.getCurrentPodWithCheckPermissions(permission);
         });

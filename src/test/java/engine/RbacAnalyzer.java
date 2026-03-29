@@ -69,33 +69,6 @@ public class RbacAnalyzer {
         parseYamlRules(yamlContent);
     }
 
-    /**
-     * Проверяет, разрешен ли доступ к ресурсу с указанной операцией в заданном namespace.
-     *
-     * <p>Метод анализирует загруженные правила RBAC и определяет, есть ли правило,
-     * которое разрешает данную операцию над ресурсом в указанном namespace.</p>
-     *
-     * <p><strong>Логика работы:</strong></p>
-     * <ol>
-     *   <li>Проходит по всем загруженным правилам RBAC</li>
-     *   <li>Для каждого правила проверяет:
-     *     <ul>
-     *       <li>Соответствие ресурса (resources)</li>
-     *       <li>Соответствие операции (verbs)</li>
-     *       <li>Соответствие namespace (с учетом ClusterRole/Role различий)</li>
-     *     </ul>
-     *   </li>
-     *   <li>Возвращает true при первом совпадении, иначе false</li>
-     * </ol>
-     *
-     * @param resource  название ресурса Kubernetes (например: "pods", "services", "deployments")
-     * @param verb      операция над ресурсом (например: "get", "list", "watch", "create", "delete")
-     * @param namespace namespace, в котором запрашивается доступ (null или пустая строка
-     *                  будут заменены на namespace ServiceAccount)
-     * @return true если доступ разрешен хотя бы одним правилом RBAC, false если доступ запрещен
-     * @throws IllegalArgumentException если resource или verb равны null
-     * @see #RbacAnalyzer(String) конструктор, загружающий правила из YAML
-     */
     public boolean isAllowed(String resource, String verb, String namespace) {
         if (!serviceAccountNamespace.equals(namespace)) {
             return false;
