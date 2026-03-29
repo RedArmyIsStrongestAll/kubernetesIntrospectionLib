@@ -1,7 +1,11 @@
 package kubernetes.introspection.entities.services.main.owner.delegate;
 
+import io.fabric8.kubernetes.api.model.LabelSelector;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import io.fabric8.kubernetes.api.model.apps.StatefulSetSpec;
+import io.fabric8.kubernetes.api.model.apps.StatefulSetStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.models.dto.owner.OwnerInfo;
 import kubernetes.introspection.entities.models.dto.owner.OwnerTypeEnum;
@@ -10,7 +14,9 @@ import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.main.owner.OwnerService;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.OWNER_REALIZED_NOT_FOUND;
 
@@ -54,17 +60,40 @@ public class OwnerServiceStatefulSetExt extends OwnerService {
             throw new KubernetesException(OWNER_REALIZED_NOT_FOUND);
         }
 
-        OwnerInfo ownerInfo = OwnerInfo.builder()
-                .type(OwnerTypeEnum.STATEFULSET)
-                .name(statefulSet.getMetadata().getName())
-                .exists(true)
-                .selector(statefulSet.getSpec().getSelector().getMatchLabels())
-                .desiredReplicas(statefulSet.getSpec().getReplicas())
-                .availableReplicas(statefulSet.getStatus().getReadyReplicas())
-                .build();
+        OwnerInfo ownerInfo = createOwnerInfo(statefulSet);
 
         log.info("{}: created info: {}", SERVICE_NAME, ownerInfo);
 
         return new OwnerDto(ownerInfo, OwnerTypeEnum.STATEFULSET, statefulSet);
+    }
+
+    private OwnerInfo createOwnerInfo(StatefulSet statefulSet) {
+        return OwnerInfo.builder()
+                .type(OwnerTypeEnum.STATEFULSET)
+                .name(
+                        Optional.ofNullable(statefulSet.getMetadata())
+                                .map(ObjectMeta::getName)
+                                .orElse(null)
+                )
+                .exists(true)
+                .selector(
+                        Optional.ofNullable(statefulSet.getSpec())
+                                .map(StatefulSetSpec::getSelector)
+                                .map(LabelSelector::getMatchLabels)
+                                .orElse(Collections.emptyMap())
+                )
+                .desiredReplicas(
+                        Optional.ofNullable(statefulSet.getSpec())
+                                .map(StatefulSetSpec::getReplicas)
+                                .orElse(null)
+                )
+                .availableReplicas(
+                        Optional.ofNullable(statefulSet.getStatus())
+                                .map(StatefulSetStatus::getReadyReplicas)
+                                .orElse(null)
+                )
+                .jobStatus(null)
+                .lastSuccessfulTime(null)
+                .build();
     }
 }

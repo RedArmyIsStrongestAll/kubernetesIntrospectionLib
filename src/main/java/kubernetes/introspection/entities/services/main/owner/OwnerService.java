@@ -45,7 +45,8 @@ public abstract class OwnerService {
     public OwnerService.OwnerDto getOwner(OwnerReference ownerRef) {
         log.info("Starting getOwner in {}", getNameClassExt());
 
-        if (ownerRef.getKind().equals(getKindOwnerType().getOriginalName())) {
+        if (ownerRef.getKind() == null && getKindOwnerType().getOriginalName() == null ||
+                ownerRef.getKind().equals(getKindOwnerType().getOriginalName())) {
             log.info("Switch getOwner in {}", getNameClassExt());
 
             try {

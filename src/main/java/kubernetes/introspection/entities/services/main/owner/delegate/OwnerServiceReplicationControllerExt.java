@@ -1,7 +1,10 @@
 package kubernetes.introspection.entities.services.main.owner.delegate;
 
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.ReplicationController;
+import io.fabric8.kubernetes.api.model.ReplicationControllerSpec;
+import io.fabric8.kubernetes.api.model.ReplicationControllerStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.models.dto.owner.OwnerInfo;
 import kubernetes.introspection.entities.models.dto.owner.OwnerTypeEnum;
@@ -10,7 +13,9 @@ import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.main.owner.OwnerService;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.OWNER_REALIZED_NOT_FOUND;
 
@@ -54,6 +59,14 @@ public class OwnerServiceReplicationControllerExt extends OwnerService {
             throw new KubernetesException(OWNER_REALIZED_NOT_FOUND);
         }
 
+        OwnerInfo ownerInfo = createOwnerInfo(rc);
+
+        log.info("{}: created info: {}", SERVICE_NAME, ownerInfo);
+
+        return new OwnerDto(ownerInfo, OwnerTypeEnum.REPLICATION_CONTROLLER, rc);
+    }
+
+    private OwnerInfo createOwnerInfo(ReplicationController rc) {
         OwnerInfo ownerInfo = OwnerInfo.builder()
                 .type(OwnerTypeEnum.REPLICATION_CONTROLLER)
                 .name(rc.getMetadata().getName())
@@ -63,8 +76,31 @@ public class OwnerServiceReplicationControllerExt extends OwnerService {
                 .availableReplicas(rc.getStatus().getReadyReplicas())
                 .build();
 
-        log.info("{}: created info: {}", SERVICE_NAME, ownerInfo);
-
-        return new OwnerDto(ownerInfo, OwnerTypeEnum.REPLICATION_CONTROLLER, rc);
+        return OwnerInfo.builder()
+                .type(OwnerTypeEnum.REPLICATION_CONTROLLER)
+                .name(
+                        Optional.ofNullable(rc.getMetadata())
+                                .map(ObjectMeta::getName)
+                                .orElse(null)
+                )
+                .exists(true)
+                .selector(
+                        Optional.ofNullable(rc.getSpec())
+                                .map(ReplicationControllerSpec::getSelector)
+                                .orElse(Collections.emptyMap())
+                )
+                .desiredReplicas(
+                        Optional.ofNullable(rc.getSpec())
+                                .map(ReplicationControllerSpec::getReplicas)
+                                .orElse(null)
+                )
+                .availableReplicas(
+                        Optional.ofNullable(rc.getStatus())
+                                .map(ReplicationControllerStatus::getReadyReplicas)
+                                .orElse(null)
+                )
+                .jobStatus(null)
+                .lastSuccessfulTime(null)
+                .build();
     }
 }

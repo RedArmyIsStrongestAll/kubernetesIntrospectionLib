@@ -2,7 +2,10 @@ package kubernetes.introspection.entities.services.main.pod;
 
 
 import io.fabric8.kubernetes.api.model.ContainerStatus;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
@@ -16,7 +19,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.BROKEN_NAME_IN_POD;
@@ -82,21 +87,30 @@ public abstract class CurrentPodService {
     protected PodInfo mapToPodInfo(Pod pod) {
         log.info("Start mapToPodInfo");
         try {
+            if (pod == null) {
+                log.warn("Pod is null in mapToPodInfo");
+                return null;
+            }
+
+            ObjectMeta metadata = pod.getMetadata();
+            PodSpec spec = pod.getSpec();
+            PodStatus status = pod.getStatus();
+
             return PodInfo.builder()
-                    .name(pod.getMetadata().getName())
-                    .uid(pod.getMetadata().getUid())
-                    .namespace(pod.getMetadata().getNamespace())
-                    .labels(pod.getMetadata().getLabels())
-                    .phase(pod.getStatus().getPhase())
-                    .qosClass(pod.getStatus().getQosClass())
-                    .creationTimestamp(pod.getMetadata().getCreationTimestamp())
-                    .deletionTimestamp(pod.getMetadata().getDeletionTimestamp() != null ? pod.getMetadata().getDeletionTimestamp() : null)
-                    .nodeName(pod.getSpec().getNodeName())
-                    .podIP(pod.getStatus().getPodIP())
+                    .name(metadata != null ? metadata.getName() : null)
+                    .uid(metadata != null ? metadata.getUid() : null)
+                    .namespace(metadata != null ? metadata.getNamespace() : null)
+                    .labels(metadata != null ? metadata.getLabels() : Collections.emptyMap())
+                    .phase(status != null ? status.getPhase() : null)
+                    .qosClass(status != null ? status.getQosClass() : null)
+                    .creationTimestamp(metadata != null ? metadata.getCreationTimestamp() : null)
+                    .deletionTimestamp(metadata != null ? metadata.getDeletionTimestamp() : null)
+                    .nodeName(spec != null ? spec.getNodeName() : null)
+                    .podIP(status != null ? status.getPodIP() : null)
                     .containers(extractContainers(pod))
                     .build();
         } catch (Exception e) {
-            log.error("Error on mapToPodInfo, ", e);
+            log.error("Error on mapToPodInfo", e);
             throw e;
         }
     }
@@ -104,10 +118,20 @@ public abstract class CurrentPodService {
     protected List<ContainerInfo> extractContainers(Pod pod) {
         log.info("Start extractContainers");
         try {
-            return pod.getSpec().getContainers().stream()
+            PodSpec podSpec = pod.getSpec();
+            if (podSpec == null || podSpec.getContainers() == null) {
+                log.warn("PodSpec or containers list is null");
+                return Collections.emptyList();
+            }
+
+            List<ContainerStatus> containerStatuses = Optional.ofNullable(pod.getStatus())
+                    .map(PodStatus::getContainerStatuses)
+                    .orElse(Collections.emptyList());
+
+            return podSpec.getContainers().stream()
                     .map(container -> {
-                        ContainerStatus status = pod.getStatus().getContainerStatuses().stream()
-                                .filter(s -> s.getName().equals(container.getName()))
+                        ContainerStatus status = containerStatuses.stream()
+                                .filter(s -> container.getName().equals(s.getName()))
                                 .findFirst()
                                 .orElse(null);
 
@@ -116,18 +140,38 @@ public abstract class CurrentPodService {
                                 .image(container.getImage())
                                 .imageID(status != null ? status.getImageID() : null)
                                 .containerID(status != null ? status.getContainerID() : null)
-                                .state(status != null ? ContainerStateEnum.parserFromKubernetes(status.getState().toString()) : null)
-                                .stateReason(status != null && status.getState().getWaiting() != null ? status.getState().getWaiting().getReason() : null)
+                                .state(
+                                        status != null && status.getState() != null
+                                                ? ContainerStateEnum.parserFromKubernetes(status.getState().toString())
+                                                : null
+                                )
+                                .stateReason(
+                                        status != null
+                                                && status.getState() != null
+                                                && status.getState().getWaiting() != null
+                                                ? status.getState().getWaiting().getReason()
+                                                : null
+                                )
                                 .restartCount(status != null ? status.getRestartCount() : 0)
-                                .lastTerminationReason(status != null && status.getLastState() != null && status.getLastState().getTerminated() != null
-                                        ? status.getLastState().getTerminated().getReason() : null)
-                                .waitingMessage(status != null && status.getState().getWaiting() != null
-                                        ? status.getState().getWaiting().getMessage() : null)
+                                .lastTerminationReason(
+                                        status != null
+                                                && status.getLastState() != null
+                                                && status.getLastState().getTerminated() != null
+                                                ? status.getLastState().getTerminated().getReason()
+                                                : null
+                                )
+                                .waitingMessage(
+                                        status != null
+                                                && status.getState() != null
+                                                && status.getState().getWaiting() != null
+                                                ? status.getState().getWaiting().getMessage()
+                                                : null
+                                )
                                 .build();
                     })
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("Error on extractContainers, ", e);
+            log.error("Error on extractContainers", e);
             throw e;
         }
     }

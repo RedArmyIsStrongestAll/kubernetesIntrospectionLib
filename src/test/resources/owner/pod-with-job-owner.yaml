@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+  namespace: test-namespace
+  labels:
+    app: test-app
+    env: prod
+  ownerReferences:
+    - apiVersion: batch/v1
+      kind: Job
+      name: test-job
+      uid: 12345
+      controller: true
+spec:
+  containers:
+    - name: main-app
+      image: my-app:1.0
+status:
+  phase: Succeeded
+  podIP: 10.244.0.1
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-job
+  namespace: test-namespace
+  labels:
+    app: test-job
+spec:
+  selector:
+    matchLabels:
+      app: test-job
+  template:
+    metadata:
+      labels:
+        app: test-job
+    spec:
+      containers:
+        - name: main-app
+          image: my-app:1.0
+status:
+  succeeded: 1

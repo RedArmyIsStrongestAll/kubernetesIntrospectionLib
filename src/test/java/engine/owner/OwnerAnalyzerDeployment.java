@@ -15,7 +15,6 @@ public class OwnerAnalyzerDeployment implements OwnerAnalyzer<Deployment> {
     public OwnerAnalyzerDeployment(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
         this.deployment = (Deployment) TestUtils.changeSetYamlObject(yamlContent, Deployment.class);
 
-
         this.rbacAnalyzer = rbacAnalyzer;
     }
 

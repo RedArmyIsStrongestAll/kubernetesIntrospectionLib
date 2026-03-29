@@ -1,7 +1,11 @@
 package kubernetes.introspection.entities.services.main.owner.delegate;
 
+import io.fabric8.kubernetes.api.model.LabelSelector;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
+import io.fabric8.kubernetes.api.model.apps.ReplicaSetSpec;
+import io.fabric8.kubernetes.api.model.apps.ReplicaSetStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.models.dto.owner.OwnerInfo;
 import kubernetes.introspection.entities.models.dto.owner.OwnerTypeEnum;
@@ -10,7 +14,9 @@ import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.main.owner.OwnerService;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.OWNER_REALIZED_NOT_FOUND;
 
@@ -54,17 +60,40 @@ public class OwnerServiceReplicaSetExt extends OwnerService {
             throw new KubernetesException(OWNER_REALIZED_NOT_FOUND);
         }
 
-        OwnerInfo ownerInfo = OwnerInfo.builder()
-                .type(OwnerTypeEnum.REPLICASET)
-                .name(replicaSet.getMetadata().getName())
-                .exists(true)
-                .selector(replicaSet.getSpec().getSelector().getMatchLabels())
-                .desiredReplicas(replicaSet.getSpec().getReplicas())
-                .availableReplicas(replicaSet.getStatus().getReadyReplicas())
-                .build();
+        OwnerInfo ownerInfo = createOwnerInfo(replicaSet);
 
         log.info("{}: created info: {}", SERVICE_NAME, ownerInfo);
 
         return new OwnerDto(ownerInfo, OwnerTypeEnum.REPLICASET, replicaSet);
+    }
+
+    private OwnerInfo createOwnerInfo(ReplicaSet replicaSet) {
+        return OwnerInfo.builder()
+                .type(OwnerTypeEnum.REPLICASET)
+                .name(
+                        Optional.ofNullable(replicaSet.getMetadata())
+                                .map(ObjectMeta::getName)
+                                .orElse(null)
+                )
+                .exists(true)
+                .selector(
+                        Optional.ofNullable(replicaSet.getSpec())
+                                .map(ReplicaSetSpec::getSelector)
+                                .map(LabelSelector::getMatchLabels)
+                                .orElse(Collections.emptyMap())
+                )
+                .desiredReplicas(
+                        Optional.ofNullable(replicaSet.getSpec())
+                                .map(ReplicaSetSpec::getReplicas)
+                                .orElse(null)
+                )
+                .availableReplicas(
+                        Optional.ofNullable(replicaSet.getStatus())
+                                .map(ReplicaSetStatus::getReadyReplicas)
+                                .orElse(null)
+                )
+                .jobStatus(null)
+                .lastSuccessfulTime(null)
+                .build();
     }
 }

@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,11 +39,11 @@ public class OwnerServiceDeploymentExtTest extends OwnerServiceTestAbstract {
     }
 
     @Test
-    void getOwnerWithPermissionValidDeploymentOwner() throws IOException {
+    void getOwnerWithPermissionValidDeploymentOwner() throws Exception {
         OwnerAnalyzerDeployment ownerEngine = (OwnerAnalyzerDeployment) getOwnerAnalyzer("rbac/test-rbac.yaml",
-                "owner/pod-with-deployment-owner.yaml");
+                "owner/pod-with-deployment-owner.yaml", OwnerAnalyzerDeployment.class);
 
-        setupMockServerWithValidOwner(ownerEngine, DEPLOYMENT_NAME);
+        setupMockServerWithValidOwnerDeployment(ownerEngine, DEPLOYMENT_NAME);
 
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
@@ -64,10 +63,10 @@ public class OwnerServiceDeploymentExtTest extends OwnerServiceTestAbstract {
     }
 
     @Test
-    void getOwnerWithPermissionNoValidNoPermissionDeploymentOwner() throws IOException {
+    void getOwnerWithPermissionNoValidNoPermissionDeploymentOwner() throws Exception {
         OwnerAnalyzerDeployment ownerEngine = (OwnerAnalyzerDeployment) getOwnerAnalyzer("rbac/test-rbac.yaml",
-                "owner/pod-with-deployment-owner.yaml");
-        setupMockServerWithValidOwner(ownerEngine, DEPLOYMENT_NAME);
+                "owner/pod-with-deployment-owner.yaml", OwnerAnalyzerDeployment.class);
+        setupMockServerWithValidOwnerDeployment(ownerEngine, DEPLOYMENT_NAME);
 
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(
@@ -84,10 +83,10 @@ public class OwnerServiceDeploymentExtTest extends OwnerServiceTestAbstract {
     }
 
     @Test
-    void getOwnerNoValidNoPermissionDeploymentOwner() throws IOException {
+    void getOwnerNoValidNoPermissionDeploymentOwner() throws Exception {
         OwnerAnalyzerDeployment ownerEngine = (OwnerAnalyzerDeployment) getOwnerAnalyzer("rbac/fail-test-rbac-default.yaml",
-                "owner/pod-with-deployment-owner.yaml");
-        setupMockServerWithValidOwner(ownerEngine, DEPLOYMENT_NAME);
+                "owner/pod-with-deployment-owner.yaml", OwnerAnalyzerDeployment.class);
+        setupMockServerWithValidOwnerDeployment(ownerEngine, DEPLOYMENT_NAME);
 
         OwnerReference ownerRef = getOwnerReference(DEPLOYMENT_NAME, OwnerTypeEnum.DEPLOYMENT);
         OwnerService ownerService = new OwnerServiceDeploymentExt(client, NAMESPACE);
@@ -98,9 +97,9 @@ public class OwnerServiceDeploymentExtTest extends OwnerServiceTestAbstract {
     }
 
     @Test
-    void getOwnerWithPermissionNoValidNoKubernetesAnswerDeploymentOwner() throws IOException {
+    void getOwnerWithPermissionNoValidNoKubernetesAnswerDeploymentOwner() throws Exception {
         OwnerAnalyzerDeployment ownerEngine = (OwnerAnalyzerDeployment) getOwnerAnalyzer("rbac/test-rbac.yaml",
-                "owner/pod-with-deployment-owner.yaml");
+                "owner/pod-with-deployment-owner.yaml", OwnerAnalyzerDeployment.class);
         setupMockServerWithError();
 
         PermissionInfo permission = new PermissionInfo(true,
