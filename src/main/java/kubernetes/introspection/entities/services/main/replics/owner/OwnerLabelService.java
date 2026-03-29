@@ -3,8 +3,16 @@ package kubernetes.introspection.entities.services.main.replics.owner;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import kubernetes.introspection.entities.models.dto.owner.OwnerTypeEnum;
+import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
+import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
+import kubernetes.introspection.entities.models.exceptions.KubernetesException;
+import kubernetes.introspection.entities.services.main.permision.PermissionService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+
+import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.OWNER_NOT_FOUND;
 
 
 @Slf4j
@@ -19,9 +27,21 @@ public abstract class OwnerLabelService {
     }
 
 
-    public final LabelSelector extractLabelSelector(HasMetadata hasMetadata) throws Exception {
+    public LabelSelector extractLabelSelectorWithPermission(HasMetadata hasMetadata, PermissionInfo permissionInfo) {
+        log.info("Start extractLabelSelectorWithPermission");
         try {
-            log.info("Start {} extractLabelSelector", nameClassImpl);
+            PermissionService.checkPermission(permissionInfo, this::getPermissionResource);
+
+            return extractLabelSelector(hasMetadata);
+        } catch (Exception e) {
+            log.error("Error extractLabelSelectorWithPermission: ", e);
+            throw new KubernetesException(OWNER_NOT_FOUND);
+        }
+    }
+
+    public LabelSelector extractLabelSelector(HasMetadata hasMetadata) throws Exception {
+        log.info("Start {} extractLabelSelector", nameClassImpl);
+        try {
             if (!isValidType(hasMetadata)) {
                 log.warn("Invalid type for {}: {}", nameClassImpl, hasMetadata.getKind());
                 return null;
@@ -36,12 +56,13 @@ public abstract class OwnerLabelService {
         }
     }
 
-
-    protected boolean isValidType(HasMetadata hasMetadata) {
+    private boolean isValidType(HasMetadata hasMetadata) {
         return hasMetadata.getKind().equalsIgnoreCase(kindOwnerType.getOriginalName());
     }
 
+
     protected abstract LabelSelector doExtractLabelSelector(HasMetadata hasMetadata) throws Exception;
 
+    protected abstract List<ResourcePermissionEnum> getPermissionResource();
 
 }

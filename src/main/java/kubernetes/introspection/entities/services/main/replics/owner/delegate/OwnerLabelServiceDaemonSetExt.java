@@ -4,8 +4,11 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 import kubernetes.introspection.entities.models.dto.owner.OwnerTypeEnum;
+import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.services.main.replics.owner.OwnerLabelService;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 
 @Slf4j
@@ -21,5 +24,10 @@ public class OwnerLabelServiceDaemonSetExt extends OwnerLabelService {
     protected LabelSelector doExtractLabelSelector(HasMetadata hasMetadata) {
         DaemonSet daemonSet = (DaemonSet) hasMetadata;
         return daemonSet.getSpec().getSelector();
+    }
+
+    @Override
+    protected List<ResourcePermissionEnum> getPermissionResource() {
+        return List.of(ResourcePermissionEnum.DAEMONSETS_GET);
     }
 }
