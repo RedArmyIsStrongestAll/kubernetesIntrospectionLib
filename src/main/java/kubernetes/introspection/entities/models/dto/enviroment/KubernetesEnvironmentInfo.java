@@ -32,7 +32,7 @@ public class KubernetesEnvironmentInfo {
      * Список родственных подов (другие реплики того же владельца).
      * Содержит базовую информацию о состоянии других экземпляров приложения.
      */
-    private List<PodInfo> siblingPods;
+    private List<PodInfo> replicaPods;
 
     /**
      * Информация о ресурсе, управляющем подом (Deployment/StatefulSet/Job/etc).
