@@ -11,10 +11,10 @@ public class OwnerAnalyzerStatefulSet implements OwnerAnalyzer<StatefulSet> {
     private final StatefulSet statefulSet;
     private final RbacAnalyzer rbacAnalyzer;
 
-    public OwnerAnalyzerStatefulSet(String yamlContent) throws IOException {
+    public OwnerAnalyzerStatefulSet(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
         this.statefulSet = (StatefulSet) TestUtils.changeSetYamlObject(yamlContent, StatefulSet.class);
 
-        this.rbacAnalyzer = new RbacAnalyzer(yamlContent);
+        this.rbacAnalyzer = rbacAnalyzer;
     }
 
     @Override

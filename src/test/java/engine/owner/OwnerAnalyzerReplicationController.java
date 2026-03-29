@@ -15,10 +15,10 @@ public class OwnerAnalyzerReplicationController implements OwnerAnalyzer<Replica
     private final ReplicationController replicationController;
     private final RbacAnalyzer rbacAnalyzer;
 
-    public OwnerAnalyzerReplicationController(String yamlContent) throws IOException {
+    public OwnerAnalyzerReplicationController(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
         this.replicationController = (ReplicationController) TestUtils.changeSetYamlObject(yamlContent, ReplicationController.class);
 
-        this.rbacAnalyzer = new RbacAnalyzer(yamlContent);
+        this.rbacAnalyzer = rbacAnalyzer;
     }
 
     @Override

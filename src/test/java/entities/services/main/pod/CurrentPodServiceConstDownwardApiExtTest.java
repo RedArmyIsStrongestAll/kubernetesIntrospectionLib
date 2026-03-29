@@ -105,7 +105,7 @@ class CurrentPodServiceConstDownwardApiExtTest extends CurrentPodServiceTestAbst
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
-        setupMockServerWith500();
+        setupMockServerWithError();
 
         Assertions.assertThrows(KubernetesException.class, () -> {
             service.getCurrentPodWithCheckPermissions(permission);

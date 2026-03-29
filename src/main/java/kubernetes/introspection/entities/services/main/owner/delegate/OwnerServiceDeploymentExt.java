@@ -5,11 +5,13 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.models.dto.owner.OwnerInfo;
 import kubernetes.introspection.entities.models.dto.owner.OwnerTypeEnum;
+import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.main.owner.OwnerService;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.util.List;
 
 import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.OWNER_REALIZED_NOT_FOUND;
@@ -61,7 +63,7 @@ public class OwnerServiceDeploymentExt extends OwnerService {
                 .exists(true)
                 .selector(deployment.getSpec().getSelector().getMatchLabels())
                 .desiredReplicas(deployment.getSpec().getReplicas())
-                .availableReplicas(deployment.getStatus().getAvailableReplicas())
+                .availableReplicas(deployment.getStatus() != null ? deployment.getStatus().getAvailableReplicas() : null)
                 .build();
         log.info("{}: created info: {}", OWNER_SERVICE_NAME, ownerInfo);
 

@@ -11,10 +11,10 @@ public class OwnerAnalyzerCronJob implements OwnerAnalyzer<CronJob> {
     private final CronJob cronJob;
     private final RbacAnalyzer rbacAnalyzer;
 
-    public OwnerAnalyzerCronJob(String yamlContent) throws IOException {
+    public OwnerAnalyzerCronJob(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
         this.cronJob = (CronJob) TestUtils.changeSetYamlObject(yamlContent, CronJob.class);
 
-        this.rbacAnalyzer = new RbacAnalyzer(yamlContent);
+        this.rbacAnalyzer = rbacAnalyzer;
     }
 
     @Override

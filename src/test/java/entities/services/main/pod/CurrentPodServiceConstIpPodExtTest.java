@@ -2,11 +2,9 @@ package entities.services.main.pod;
 
 import engine.PodAnalyzer;
 import entities.services.main.pod.parent.CurrentPodServiceTestAbstract;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.models.dto.pod.PodInfo;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.main.pod.CurrentPodService;
 import kubernetes.introspection.entities.services.main.pod.delegate.CurrentPodServiceConstIpPodExt;
@@ -94,7 +92,7 @@ class CurrentPodServiceConstIpPodExtTest extends CurrentPodServiceTestAbstract {
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true)));
 
-        setupMockServerWith500();
+        setupMockServerWithError();
 
         Assertions.assertThrows(KubernetesException.class, () -> {
             service.getCurrentPodWithCheckPermissions(permission);

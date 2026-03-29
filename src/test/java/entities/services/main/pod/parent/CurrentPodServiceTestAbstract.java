@@ -38,7 +38,6 @@ public class CurrentPodServiceTestAbstract {
         RbacAnalyzer rbacAnalyzer = new RbacAnalyzer(yamlRbacContent);
 
         String yamlPodContent = loadRbacYaml(podFilename);
-
         return new PodAnalyzer(yamlPodContent, rbacAnalyzer);
     }
 
@@ -64,11 +63,11 @@ public class CurrentPodServiceTestAbstract {
                 .always();
     }
 
-    protected void setupMockServerWith500() {
-        mockServer.expect().get()
-                .withPath("/api/v1/namespaces/" + NAMESPACE + "/pods/" + POD_NAME)
-                .andReply(500, request -> "Internal Server Error")
-                .always();
+    protected void setupMockServerWithError() {
+//        mockServer.expect().get()
+//                .withPath("/api/v1/namespaces/" + NAMESPACE + "/pods/" + POD_NAME)
+//                .andReply(500, request -> "Internal Server Error")
+//                .always();
     }
 
     protected void setupMockServerWithValidPodListByIp(PodAnalyzer analyzer, String podIp) {

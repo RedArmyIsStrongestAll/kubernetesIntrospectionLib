@@ -11,10 +11,10 @@ public class OwnerAnalyzerJob implements OwnerAnalyzer<Job> {
     private final Job job;
     private final RbacAnalyzer rbacAnalyzer;
 
-    public OwnerAnalyzerJob(String yamlContent) throws IOException {
+    public OwnerAnalyzerJob(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
         this.job = (Job) TestUtils.changeSetYamlObject(yamlContent, Job.class);
 
-        this.rbacAnalyzer = new RbacAnalyzer(yamlContent);
+        this.rbacAnalyzer = rbacAnalyzer;
     }
 
     @Override
