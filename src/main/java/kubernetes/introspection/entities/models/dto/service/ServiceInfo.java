@@ -67,7 +67,7 @@ public class ServiceInfo {
      * Реальные эндпоинты (поды), которые получают трафик от сервиса.
      * Содержат IP, имя пода и порт для каждого готового пода.
      */
-    private List<EndpointAddress> endpoints;
+    private List<ServiceEndpointAddress> endpoints;
 
     /**
      * Количество готовых эндпоинтов.

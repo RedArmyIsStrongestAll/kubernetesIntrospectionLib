@@ -49,6 +49,7 @@ public class OwnerServiceDeploymentExt extends OwnerService {
     public OwnerDto getOwnerDto(OwnerReference ownerRef) {
         log.info("{}: fetching Deployment owner: {}", OWNER_SERVICE_NAME, ownerRef.getName());
 
+        log.info("Start k8s request");
         Deployment deployment = kubernetesClient.apps()
                 .deployments()
                 .inNamespace(namespace)

@@ -46,6 +46,18 @@ public enum ErrorCodeEnum {
 
     REPLICA_PODS_NOT_FOUND(400, "Resource not found",
             "Replica pods not found",
+            false),
+
+    SERVICE_NOT_FOUND(400, "Resource not found",
+            "Service not found",
+            false),
+
+    SERVICE_MANY_FOUND(400, "Resource not found",
+            "Service more than one found",
+            false),
+
+    ENDPOINTS_NOT_FOUND(400, "Resource not found",
+            "Endpoint not found",
             false);
 
 

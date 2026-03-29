@@ -49,6 +49,7 @@ public class OwnerServiceReplicaSetExt extends OwnerService {
     public OwnerDto getOwnerDto(OwnerReference ownerRef) {
         log.info("{}: fetching ReplicaSet owner: {}", SERVICE_NAME, ownerRef.getName());
 
+        log.info("Start k8s request");
         ReplicaSet replicaSet = kubernetesClient.apps()
                 .replicaSets()
                 .inNamespace(namespace)

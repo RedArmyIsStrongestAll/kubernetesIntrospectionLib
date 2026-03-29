@@ -47,6 +47,7 @@ public class CurrentPodServiceHostnameInetAddressExt extends CurrentPodService {
 
     @Override
     protected Pod getPod() throws Exception {
+        log.info("Start k8s request");
         return kubernetesClient.pods().inNamespace(namespace).withName(podName).get();
     }
 }

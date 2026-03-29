@@ -59,6 +59,7 @@ public class CurrentPodServiceLabelsExt extends CurrentPodService {
                         parts -> parts[1].trim()
                 ));
 
+        log.info("Start k8s request");
         List<Pod> pods = kubernetesClient.pods()
                 .inNamespace(namespace)
                 .withLabels(labels)

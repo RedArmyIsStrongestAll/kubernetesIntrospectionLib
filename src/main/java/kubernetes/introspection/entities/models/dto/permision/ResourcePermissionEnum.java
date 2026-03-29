@@ -17,6 +17,10 @@ public enum ResourcePermissionEnum {
     SERVICES_LIST("services", "list"),
     SERVICES_WATCH("services", "watch"),
 
+    ENDPOINTS_GET("secrets", "get"),
+    ENDPOINTS_LIST("secrets", "list"),
+    ENDPOINTS_WATCH("secrets", "watch"),
+
     // Owner ресурсы
     DEPLOYMENTS_GET("deployments", "get"),
     DEPLOYMENTS_LIST("deployments", "list"),
@@ -69,7 +73,8 @@ public enum ResourcePermissionEnum {
     }
 
     public static List<ResourcePermissionEnum> getServicePermissions() {
-        return Arrays.asList(SERVICES_GET, SERVICES_LIST, SERVICES_WATCH);
+        return Arrays.asList(SERVICES_GET, SERVICES_LIST, SERVICES_WATCH,
+                ENDPOINTS_GET, ENDPOINTS_LIST, ENDPOINTS_WATCH);
     }
 
     public static List<ResourcePermissionEnum> getOwnerPermissions() {

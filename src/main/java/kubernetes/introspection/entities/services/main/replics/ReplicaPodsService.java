@@ -35,8 +35,8 @@ public class ReplicaPodsService {
     }
 
 
-    public ReplicaPodsInfo getReplicaPodsWithPermission(OwnerReference ownerRef, OwnerDto ownerDto,
-                                                        Pod currentPod, PermissionInfo permissionInfo) {
+    public ReplicaPodsDto getReplicaPodsWithPermission(OwnerReference ownerRef, OwnerDto ownerDto,
+                                                       Pod currentPod, PermissionInfo permissionInfo) {
         log.info("Start getReplicaPodsWithPermission for owner: {} from pod {}", ownerDto.getK8sType().getOriginalName(), currentPod);
         try {
             PermissionService.checkPermission(permissionInfo, () -> List.of(ResourcePermissionEnum.PODS_LIST,
@@ -49,7 +49,7 @@ public class ReplicaPodsService {
         }
     }
 
-    public ReplicaPodsInfo getReplicaPods(OwnerReference ownerRef, OwnerDto ownerDto, Pod currentPod) {
+    public ReplicaPodsDto getReplicaPods(OwnerReference ownerRef, OwnerDto ownerDto, Pod currentPod) {
         log.info("Start getReplicaPods for owner: {} from pod {}", ownerDto.getK8sType().getOriginalName(), currentPod);
         try {
             List<Pod> replicas = new ArrayList<>();
@@ -65,7 +65,7 @@ public class ReplicaPodsService {
                 throw new KubernetesException(REPLICA_PODS_NOT_FOUND);
             }
 
-            return new ReplicaPodsInfo(replicas);
+            return new ReplicaPodsDto(replicas);
         } catch (KubernetesException e) {
             log.error("Stop getReplicaPods: ", e);
             throw new KubernetesException(REPLICA_PODS_NOT_FOUND);
@@ -83,6 +83,7 @@ public class ReplicaPodsService {
 
             String namespace = currentPod.getMetadata().getNamespace();
 
+            log.info("Start k8s request");
             return kubernetesClient.pods()
                     .inNamespace(namespace)
                     .withLabels(matchLabels)
@@ -103,6 +104,8 @@ public class ReplicaPodsService {
             String namespace = currentPod.getMetadata().getNamespace();
             String stsName = ownerRef.getName();
             String podNamePrefix = stsName + "-";
+
+            log.info("Start k8s request");
             return kubernetesClient.pods()
                     .inNamespace(namespace)
                     .list()
@@ -124,11 +127,11 @@ public class ReplicaPodsService {
 
 
     @Getter
-    public static class ReplicaPodsInfo {
+    public static class ReplicaPodsDto {
         private final List<Pod> k8sPodList;
         private final List<PodInfo> podInfoList;
 
-        public ReplicaPodsInfo(List<Pod> k8sPodList) {
+        public ReplicaPodsDto(List<Pod> k8sPodList) {
             this.k8sPodList = k8sPodList;
             this.podInfoList = k8sPodList.stream()
                     .map(CurrentPodService::mapToPodInfo)

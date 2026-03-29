@@ -74,7 +74,7 @@ public class ReplicaPodsServiceTest extends ReplicaPodsServiceTestAbstract {
         OwnerReference ownerRef = createOwnerReference(OwnerTypeEnum.DEPLOYMENT, DEPLOYMENT_NAME);
         OwnerService.OwnerDto ownerDto = mockOwnerDto(OwnerTypeEnum.DEPLOYMENT);
 
-        ReplicaPodsService.ReplicaPodsInfo result = replicaPodsService.getReplicaPodsWithPermission(ownerRef, ownerDto, currentPod, permission);
+        ReplicaPodsService.ReplicaPodsDto result = replicaPodsService.getReplicaPodsWithPermission(ownerRef, ownerDto, currentPod, permission);
 
         assertNotNull(result);
         assertNotNull(result.getPodInfoList());
@@ -122,7 +122,7 @@ public class ReplicaPodsServiceTest extends ReplicaPodsServiceTestAbstract {
         String podNamePrefix = stsName + "-";
         setupMockServerWithPodsByLabels(podAnalyzer, podNamePrefix);
 
-        ReplicaPodsService.ReplicaPodsInfo result = replicaPodsService.getReplicaPods(ownerRef, ownerDto, currentPod);
+        ReplicaPodsService.ReplicaPodsDto result = replicaPodsService.getReplicaPods(ownerRef, ownerDto, currentPod);
 
         assertNotNull(result);
         List<Pod> replicas = result.getK8sPodList();

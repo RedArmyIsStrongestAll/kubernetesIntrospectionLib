@@ -49,6 +49,7 @@ public class OwnerServiceStatefulSetExt extends OwnerService {
     public OwnerDto getOwnerDto(OwnerReference ownerRef) {
         log.info("{}: fetching StatefulSet owner: {}", SERVICE_NAME, ownerRef.getName());
 
+        log.info("Start k8s request");
         StatefulSet statefulSet = kubernetesClient.apps()
                 .statefulSets()
                 .inNamespace(namespace)

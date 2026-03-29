@@ -11,7 +11,7 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
 @Data
-public class EndpointAddress {
+public class ServiceEndpointAddress {
     /**
      * IP адрес пода
      */

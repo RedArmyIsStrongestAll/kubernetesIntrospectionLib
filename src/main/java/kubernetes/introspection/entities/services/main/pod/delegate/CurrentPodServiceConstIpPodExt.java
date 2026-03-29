@@ -40,6 +40,7 @@ public class CurrentPodServiceConstIpPodExt extends CurrentPodService {
 
     @Override
     protected Pod getPod() throws Exception {
+        log.info("Start k8s request");
         return kubernetesClient.pods()
                 .inNamespace(namespace)
                 .list()

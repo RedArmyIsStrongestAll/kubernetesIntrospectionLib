@@ -49,6 +49,7 @@ public class OwnerServiceDaemonSetExt extends OwnerService {
     public OwnerDto getOwnerDto(OwnerReference ownerRef) {
         log.info("{}: fetching DaemonSet owner: {}", SERVICE_NAME, ownerRef.getName());
 
+        log.info("Start k8s request");
         DaemonSet daemonSet = kubernetesClient.apps()
                 .daemonSets()
                 .inNamespace(namespace)
