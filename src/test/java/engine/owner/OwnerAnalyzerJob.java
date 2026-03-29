@@ -1,19 +1,19 @@
 package engine.owner;
 
 import engine.RbacAnalyzer;
+import entities.services.utils.TestUtils;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
+
+import java.io.IOException;
 
 public class OwnerAnalyzerJob implements OwnerAnalyzer<Job> {
     private final Job job;
     private final RbacAnalyzer rbacAnalyzer;
 
-    public OwnerAnalyzerJob(String yamlContent) {
-        Yaml yaml = new Yaml(new Constructor(new LoaderOptions()));
-        this.job = yaml.loadAs(yamlContent, Job.class);
+    public OwnerAnalyzerJob(String yamlContent) throws IOException {
+        this.job = (Job) TestUtils.changeSetYamlObject(yamlContent, Job.class);
+
         this.rbacAnalyzer = new RbacAnalyzer(yamlContent);
     }
 

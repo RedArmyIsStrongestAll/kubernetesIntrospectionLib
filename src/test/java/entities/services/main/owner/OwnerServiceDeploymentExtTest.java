@@ -9,6 +9,7 @@ import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import kubernetes.introspection.entities.models.dto.owner.OwnerTypeEnum;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
+import kubernetes.introspection.entities.services.main.owner.OwnerService;
 import kubernetes.introspection.entities.services.main.owner.OwnerService.OwnerDto;
 import kubernetes.introspection.entities.services.main.owner.delegate.OwnerServiceDeploymentExt;
 import lombok.extern.slf4j.Slf4j;
@@ -59,11 +60,6 @@ public class OwnerServiceDeploymentExtTest {
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.DEPLOYMENTS_LIST, true)));
 
         mockServer.expect().get()
-                .withPath("/api/v1/namespaces/" + NAMESPACE + "/pods/" + POD_NAME)
-                .andReturn(200, podAnalyzer.getPodByName(POD_NAME, NAMESPACE))
-                .once();
-
-        mockServer.expect().get()
                 .withPath("/apis/apps/v1/namespaces/" + NAMESPACE + "/deployments/" + DEPLOYMENT_NAME)
                 .andReturn(200, ownerEngine.getOwner(DEPLOYMENT_NAME, NAMESPACE))
                 .once();
@@ -72,7 +68,7 @@ public class OwnerServiceDeploymentExtTest {
         ownerRef.setKind(OwnerTypeEnum.DEPLOYMENT.getOriginalName());
         ownerRef.setName(DEPLOYMENT_NAME);
 
-        OwnerServiceDeploymentExt ownerService = new OwnerServiceDeploymentExt(client, NAMESPACE);
+        OwnerService ownerService = new OwnerServiceDeploymentExt(client, NAMESPACE);
         OwnerDto ownerDto = ownerService.getOwnerWithPermission(ownerRef, permission);
 
         assertNotNull(ownerDto);

@@ -1,19 +1,23 @@
 package engine.owner;
 
 import engine.RbacAnalyzer;
+import entities.services.utils.TestUtils;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ReplicationController;
+import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+
+import java.io.IOException;
 
 public class OwnerAnalyzerReplicationController implements OwnerAnalyzer<ReplicationController> {
     private final ReplicationController replicationController;
     private final RbacAnalyzer rbacAnalyzer;
 
-    public OwnerAnalyzerReplicationController(String yamlContent) {
-        Yaml yaml = new Yaml(new Constructor(new LoaderOptions()));
-        this.replicationController = yaml.loadAs(yamlContent, ReplicationController.class);
+    public OwnerAnalyzerReplicationController(String yamlContent) throws IOException {
+        this.replicationController = (ReplicationController) TestUtils.changeSetYamlObject(yamlContent, ReplicationController.class);
+
         this.rbacAnalyzer = new RbacAnalyzer(yamlContent);
     }
 

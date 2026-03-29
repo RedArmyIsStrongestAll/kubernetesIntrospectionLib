@@ -1,12 +1,11 @@
 package engine;
 
+import entities.services.utils.TestUtils;
 import io.fabric8.kubernetes.api.model.ListMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -15,10 +14,8 @@ public class PodAnalyzer {
     private final Pod pod;
     private final RbacAnalyzer rbacAnalyzer;
 
-
-    public PodAnalyzer(String podYaml, RbacAnalyzer rbacAnalyzer) {
-        Yaml yaml = new Yaml(new Constructor(new LoaderOptions()));
-        this.pod = yaml.loadAs(podYaml, Pod.class);
+    public PodAnalyzer(String podYaml, RbacAnalyzer rbacAnalyzer) throws IOException {
+        this.pod = (Pod) TestUtils.changeSetYamlObject(podYaml, Pod.class);
 
         this.rbacAnalyzer = rbacAnalyzer;
     }

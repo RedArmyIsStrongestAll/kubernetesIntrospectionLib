@@ -1,19 +1,19 @@
 package engine.owner;
 
 import engine.RbacAnalyzer;
+import entities.services.utils.TestUtils;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
+
+import java.io.IOException;
 
 public class OwnerAnalyzerCronJob implements OwnerAnalyzer<CronJob> {
     private final CronJob cronJob;
     private final RbacAnalyzer rbacAnalyzer;
 
-    public OwnerAnalyzerCronJob(String yamlContent) {
-        Yaml yaml = new Yaml(new Constructor(new LoaderOptions()));
-        this.cronJob = yaml.loadAs(yamlContent, CronJob.class);
+    public OwnerAnalyzerCronJob(String yamlContent) throws IOException {
+        this.cronJob = (CronJob) TestUtils.changeSetYamlObject(yamlContent, CronJob.class);
+
         this.rbacAnalyzer = new RbacAnalyzer(yamlContent);
     }
 
