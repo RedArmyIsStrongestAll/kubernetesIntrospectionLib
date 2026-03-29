@@ -5,9 +5,12 @@ import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.models.dto.owner.OwnerTypeEnum;
+import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
+import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.dto.pod.PodInfo;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.main.owner.OwnerService.OwnerDto;
+import kubernetes.introspection.entities.services.main.permision.PermissionService;
 import kubernetes.introspection.entities.services.main.pod.CurrentPodService;
 import kubernetes.introspection.entities.services.main.replics.owner.OwnerLabelCallChainService;
 import lombok.Getter;
@@ -32,24 +35,43 @@ public class ReplicaPodsService {
     }
 
 
-    public ReplicaPodsInfo getReplicaPods(OwnerReference ownerRef, OwnerDto ownerDto, Pod currentPod) {
+    public ReplicaPodsInfo getReplicaPodsWithPermission(OwnerReference ownerRef, OwnerDto ownerDto,
+                                                        Pod currentPod, PermissionInfo permissionInfo) {
+        log.info("Start getReplicaPodsWithPermission for owner: {} from pod {}", ownerDto.getK8sType().getOriginalName(), currentPod);
+        try {
+            PermissionService.checkPermission(permissionInfo, () -> List.of(ResourcePermissionEnum.PODS_LIST,
+                    ResourcePermissionEnum.PODS_GET));
 
-        log.info("Start getReplicaPods for owner: {} from pod {}", ownerDto.getK8sType().getOriginalName(), currentPod);
-        List<Pod> replicas = new ArrayList<>();
-
-        if (OwnerTypeEnum.STATEFULSET.equals(ownerDto.getK8sType())) {
-            replicas.addAll(findStatefulSetPods(ownerRef, currentPod));
-        } else {
-            replicas.addAll(findPodsByOwnerSelector(ownerDto, currentPod));
-        }
-
-        if (replicas.isEmpty()) {
-            log.warn("No replicas found for owner {} from pod {}", ownerDto.getK8sType().getOriginalName(), currentPod);
+            return getReplicaPods(ownerRef, ownerDto, currentPod);
+        } catch (KubernetesException e) {
+            log.error("Stop getReplicaPodsWithPermission: ", e);
             throw new KubernetesException(REPLICA_PODS_NOT_FOUND);
         }
-
-        return new ReplicaPodsInfo(replicas);
     }
+
+    public ReplicaPodsInfo getReplicaPods(OwnerReference ownerRef, OwnerDto ownerDto, Pod currentPod) {
+        log.info("Start getReplicaPods for owner: {} from pod {}", ownerDto.getK8sType().getOriginalName(), currentPod);
+        try {
+            List<Pod> replicas = new ArrayList<>();
+
+            if (OwnerTypeEnum.STATEFULSET.equals(ownerDto.getK8sType())) {
+                replicas.addAll(findStatefulSetPods(ownerRef, currentPod));
+            } else {
+                replicas.addAll(findPodsByOwnerSelector(ownerDto, currentPod));
+            }
+
+            if (replicas.isEmpty()) {
+                log.warn("No replicas found for owner {} from pod {}", ownerDto.getK8sType().getOriginalName(), currentPod);
+                throw new KubernetesException(REPLICA_PODS_NOT_FOUND);
+            }
+
+            return new ReplicaPodsInfo(replicas);
+        } catch (KubernetesException e) {
+            log.error("Stop getReplicaPods: ", e);
+            throw new KubernetesException(REPLICA_PODS_NOT_FOUND);
+        }
+    }
+
 
     private List<Pod> findPodsByOwnerSelector(OwnerDto ownerDto, Pod currentPod) {
         log.info("Start findPodsByOwnerSelector");

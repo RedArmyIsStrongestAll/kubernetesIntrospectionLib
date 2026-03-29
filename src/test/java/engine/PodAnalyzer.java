@@ -84,4 +84,32 @@ public class PodAnalyzer {
 
         return new PodList("v1", Collections.singletonList(pod), "PodList", new ListMeta());
     }
+
+    public PodList listAllPods(String requestedNamespace) {
+        if (!rbacAnalyzer.isAllowed("pods", "list", requestedNamespace)) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
+
+        if (pod.getMetadata() == null || !pod.getMetadata().getNamespace().equals(requestedNamespace)) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
+
+        return new PodList("v1", Collections.singletonList(pod), "PodList", new ListMeta());
+    }
+
+    public PodList listPodsByPrefix(String requestedNamespace, String prefix) {
+        if (!rbacAnalyzer.isAllowed("pods", "list", requestedNamespace)) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
+
+        if (pod.getMetadata() == null || !pod.getMetadata().getNamespace().equals(requestedNamespace)) {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
+
+        if (pod.getMetadata().getName().startsWith(prefix)) {
+            return new PodList("v1", Collections.singletonList(pod), "PodList", new ListMeta());
+        } else {
+            return new PodList("v1", Collections.emptyList(), "PodList", new ListMeta());
+        }
+    }
 }
