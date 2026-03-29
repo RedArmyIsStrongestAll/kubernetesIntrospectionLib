@@ -1,7 +1,7 @@
 package engine.owner;
 
 import engine.RbacAnalyzer;
-import entities.services.utils.TestUtils;
+import entities.services.utils.KubernetesYamlUtils;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 
@@ -12,7 +12,7 @@ public class OwnerAnalyzerStatefulSet implements OwnerAnalyzer<StatefulSet> {
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerStatefulSet(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.statefulSet = TestUtils.trySetYamlObject(yamlContent, StatefulSet.class);
+        this.statefulSet = KubernetesYamlUtils.trySetYamlObject(yamlContent, StatefulSet.class);
 
         this.rbacAnalyzer = rbacAnalyzer;
     }

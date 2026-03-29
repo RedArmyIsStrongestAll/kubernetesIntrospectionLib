@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static entities.services.utils.TestUtils.loadRbacYaml;
+import static entities.services.utils.KubernetesYamlUtils.loadRbacYaml;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

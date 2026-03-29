@@ -1,7 +1,7 @@
 package engine.owner;
 
 import engine.RbacAnalyzer;
-import entities.services.utils.TestUtils;
+import entities.services.utils.KubernetesYamlUtils;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 
@@ -12,7 +12,7 @@ public class OwnerAnalyzerDaemonSet implements OwnerAnalyzer<DaemonSet> {
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerDaemonSet(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.daemonSet = TestUtils.trySetYamlObject(yamlContent, DaemonSet.class);
+        this.daemonSet = KubernetesYamlUtils.trySetYamlObject(yamlContent, DaemonSet.class);
 
         this.rbacAnalyzer = rbacAnalyzer;
     }

@@ -1,7 +1,7 @@
 package engine.owner;
 
 import engine.RbacAnalyzer;
-import entities.services.utils.TestUtils;
+import entities.services.utils.KubernetesYamlUtils;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ReplicationController;
 
@@ -12,7 +12,7 @@ public class OwnerAnalyzerReplicationController implements OwnerAnalyzer<Replica
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerReplicationController(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.replicationController = TestUtils.trySetYamlObject(yamlContent, ReplicationController.class);
+        this.replicationController = KubernetesYamlUtils.trySetYamlObject(yamlContent, ReplicationController.class);
 
         this.rbacAnalyzer = rbacAnalyzer;
     }

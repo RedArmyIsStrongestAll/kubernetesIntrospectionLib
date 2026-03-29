@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static entities.services.utils.TestUtils.loadRbacYaml;
+import static entities.services.utils.KubernetesYamlUtils.loadRbacYaml;
 
 @Slf4j
 public class CurrentPodServiceTestAbstract {
@@ -64,10 +64,6 @@ public class CurrentPodServiceTestAbstract {
     }
 
     protected void setupMockServerWithError() {
-//        mockServer.expect().get()
-//                .withPath("/api/v1/namespaces/" + NAMESPACE + "/pods/" + POD_NAME)
-//                .andReply(500, request -> "Internal Server Error")
-//                .always();
     }
 
     protected void setupMockServerWithValidPodListByIp(PodAnalyzer analyzer, String podIp) {

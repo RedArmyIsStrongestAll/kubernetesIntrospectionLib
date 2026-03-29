@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Constructor;
 
-import static entities.services.utils.TestUtils.loadRbacYaml;
+import static entities.services.utils.KubernetesYamlUtils.loadRbacYaml;
 
 @Slf4j
 public class OwnerServiceTestAbstract {
@@ -115,10 +115,6 @@ public class OwnerServiceTestAbstract {
     }
 
     protected void setupMockServerWithError() {
-//        mockServer.expect().get()
-//                .withPath("/api/v1/namespaces/" + NAMESPACE + "/pods/" + POD_NAME)
-//                .andReply(500, request -> "Internal Server Error")
-//                .always();
     }
 
 }

@@ -1,7 +1,7 @@
 package engine.owner;
 
 import engine.RbacAnalyzer;
-import entities.services.utils.TestUtils;
+import entities.services.utils.KubernetesYamlUtils;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 
@@ -12,7 +12,7 @@ public class OwnerAnalyzerCronJob implements OwnerAnalyzer<CronJob> {
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerCronJob(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.cronJob = TestUtils.trySetYamlObject(yamlContent, CronJob.class);
+        this.cronJob = KubernetesYamlUtils.trySetYamlObject(yamlContent, CronJob.class);
 
         this.rbacAnalyzer = rbacAnalyzer;
     }

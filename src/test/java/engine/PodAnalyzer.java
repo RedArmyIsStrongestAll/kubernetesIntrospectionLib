@@ -1,19 +1,15 @@
 package engine;
 
-import entities.services.utils.TestUtils;
+import entities.services.utils.KubernetesYamlUtils;
 import io.fabric8.kubernetes.api.model.ListMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public class PodAnalyzer {
     private final List<Pod> podList;
@@ -22,7 +18,7 @@ public class PodAnalyzer {
     public PodAnalyzer(String podYaml, RbacAnalyzer rbacAnalyzer) throws IOException {
         this.rbacAnalyzer = rbacAnalyzer;
 
-        this.podList = TestUtils.trySetYamlObjectList(podYaml, Pod.class, "Pod");
+        this.podList = KubernetesYamlUtils.trySetYamlObjectList(podYaml, Pod.class, "Pod");
     }
 
     public Pod getPodByName(String requestedName, String requestedNamespace) {

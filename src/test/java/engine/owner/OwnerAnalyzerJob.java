@@ -1,7 +1,7 @@
 package engine.owner;
 
 import engine.RbacAnalyzer;
-import entities.services.utils.TestUtils;
+import entities.services.utils.KubernetesYamlUtils;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 
@@ -12,7 +12,7 @@ public class OwnerAnalyzerJob implements OwnerAnalyzer<Job> {
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerJob(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.job = TestUtils.trySetYamlObject(yamlContent, Job.class);
+        this.job = KubernetesYamlUtils.trySetYamlObject(yamlContent, Job.class);
 
         this.rbacAnalyzer = rbacAnalyzer;
     }

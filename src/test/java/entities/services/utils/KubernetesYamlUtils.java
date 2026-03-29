@@ -8,16 +8,18 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public class TestUtils {
+public class KubernetesYamlUtils {
     public static ObjectMapper objectMapper = new ObjectMapper();
 
     public static String loadRbacYaml(String filename) throws IOException {
-        URL resource = TestUtils.class.getClassLoader().getResource(filename);
+        URL resource = KubernetesYamlUtils.class.getClassLoader().getResource(filename);
         if (resource != null) {
             File file = new File(resource.getFile());
             if (file.exists()) {
@@ -61,5 +63,15 @@ public class TestUtils {
             throw new IllegalArgumentException(String.format("Invalid YAML: %s for type %s", yamlContent, classObject));
         }
         return objectList;
+    }
+
+    public static String buildLabelSelectorQuery(Map<String, String> labels) {
+        return labels.entrySet().stream()
+                .map(entry -> {
+                    String key = java.net.URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8);
+                    String value = java.net.URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8);
+                    return key + "%3D" + value;
+                })
+                .collect(Collectors.joining("%2C")); // , → %2C
     }
 }

@@ -16,7 +16,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import java.io.IOException;
 import java.util.List;
 
-import static entities.services.utils.TestUtils.loadRbacYaml;
+import static entities.services.utils.KubernetesYamlUtils.loadRbacYaml;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
