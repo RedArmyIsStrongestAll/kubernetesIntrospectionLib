@@ -4,6 +4,7 @@ import kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -18,8 +19,8 @@ public class InitDetectorService {
         log.info("Start runningInKubernetes");
         String kubeHost = getKubernetesHostEnv();
         boolean hasKubeEnv = kubeHost != null && !kubeHost.isBlank();
-        boolean hasToken = Files.exists(SA_TOKEN);
-        boolean hasNs = Files.exists(SA_NS);
+        boolean hasToken = isFileExists(SA_TOKEN);
+        boolean hasNs = isFileExists(SA_NS);
 
         log.info("Result runningInKubernetes: hasKubeEnv {}, hasToken {}, hasNs {}",
                 hasKubeEnv, hasToken, hasNs);
@@ -35,18 +36,27 @@ public class InitDetectorService {
         }
 
         try {
-            String ns = Files.readString(SA_NS).trim();
+            String ns = readFileContent(SA_NS).trim();
             if (ns.isBlank()) {
-                throw new Exception();
+                throw new IOException("Namespace content is blank");
             }
             return ns;
 
         } catch (Exception e) {
-            log.error(ErrorCodeEnum.NOT_NAMESPACE.getMessage());
+            log.error(ErrorCodeEnum.NOT_NAMESPACE.getMessage(), e);
             throw new KubernetesException(ErrorCodeEnum.NOT_NAMESPACE);
         }
     }
 
+    @Deprecated(since = "Using only for test")
+    public boolean isFileExists(Path path) {
+        return Files.exists(path);
+    }
+
+    @Deprecated(since = "Using only for test")
+    public String readFileContent(Path path) throws IOException {
+        return Files.readString(path);
+    }
 
     @Deprecated(since = "Using only for test")
     public String getKubernetesHostEnv() {
@@ -62,5 +72,4 @@ public class InitDetectorService {
     public static Path getNamespacePath() {
         return SA_NS;
     }
-
 }

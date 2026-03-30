@@ -65,6 +65,7 @@ public class KubernetesIntrospectionEnvironmentServiceImpl implements Kubernetes
         this.initDetectorService = new InitDetectorService();
     }
 
+    @Deprecated(since = "Using only for test")
     public KubernetesIntrospectionEnvironmentServiceImpl(InitDetectorService initDetectorService) {
         this.initDetectorService = initDetectorService;
     }

@@ -21,11 +21,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -33,7 +32,6 @@ import java.util.regex.Pattern;
 
 import static entities.services.utils.KubernetesYamlUtils.loadRbacYaml;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -128,19 +126,24 @@ public class KubernetesIntrospectionEnvironmentServiceImplTest {
     }
 
     protected InitDetectorService getInitDetectorService() {
-        MockedStatic<Files> mockedFiles = mockStatic(Files.class);
         InitDetectorService testService = new InitDetectorService() {
             @Override
             public String getKubernetesHostEnv() {
                 return "1.2.3.4";
             }
+
+            @Override
+            public boolean isFileExists(Path path) {
+                return true;
+            }
+
+            @Override
+            public String readFileContent(Path path) throws IOException {
+                return "test-namespace";
+            }
+
         };
-        mockedFiles.when(() -> Files.exists(InitDetectorService.getTokenPath()))
-                .thenReturn(true);
-        mockedFiles.when(() -> Files.exists(InitDetectorService.getNamespacePath()))
-                .thenReturn(true);
-        mockedFiles.when(() -> Files.readString(InitDetectorService.getNamespacePath()))
-                .thenReturn("test-namespace");
+
         return testService;
     }
 
