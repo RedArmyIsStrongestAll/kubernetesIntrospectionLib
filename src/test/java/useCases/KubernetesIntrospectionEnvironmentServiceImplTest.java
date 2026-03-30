@@ -17,10 +17,10 @@ import kubernetes.introspection.entities.services.env.GetVarsServicesDtoService;
 import kubernetes.introspection.entities.services.init.InitDetectorService;
 import kubernetes.introspection.useCases.KubernetesIntrospectionEnvironmentServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
 import java.io.IOException;
