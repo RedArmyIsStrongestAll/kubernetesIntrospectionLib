@@ -1,7 +1,12 @@
 package kubernetes.introspection.entities.services.env;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
+@NoArgsConstructor
+@AllArgsConstructor
 public class GetVarsServicesDtoService implements GetVarsServices {
     private EnvironmentProviderSystemImpl environmentProviderSystemImpl;
     private String podConstIp;

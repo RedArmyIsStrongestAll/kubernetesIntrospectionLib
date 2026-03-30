@@ -34,7 +34,7 @@ public class ServiceServiceTestAbstract {
     protected void setupMockServerWithError() {
     }
 
-    protected void setupMockServerWithPodsByLabels(ServiceAnalyzer analyzer) {
+    protected void setupMockServerWithServiceList(ServiceAnalyzer analyzer) {
         mockServer.expect()
                 .get()
                 .withPath("/api/v1/namespaces/" + NAMESPACE + "/services")

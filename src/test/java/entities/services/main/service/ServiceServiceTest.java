@@ -48,7 +48,7 @@ public class ServiceServiceTest extends ServiceServiceTestAbstract {
     @Test
     void testFindServicesForPodWithPermissionSuccessPodHasMoreLabelsThanSelector() throws IOException {
         ServiceAnalyzer serviceAnalyzer = getServiceAnalyzer("rbac/test-rbac.yaml", "services/many-services.yaml");
-        setupMockServerWithPodsByLabels(serviceAnalyzer);
+        setupMockServerWithServiceList(serviceAnalyzer);
 
         Map<String, String> podLabels = new HashMap<>();
         podLabels.put("app", "test-app");
@@ -114,7 +114,7 @@ public class ServiceServiceTest extends ServiceServiceTestAbstract {
     @Test
     void testFindServicesForPodNoServiceMatchesSelector() throws IOException {
         ServiceAnalyzer analyzer = getServiceAnalyzer("rbac/test-rbac.yaml", "services/no-match-service.yaml");
-        setupMockServerWithPodsByLabels(analyzer);
+        setupMockServerWithServiceList(analyzer);
 
         PodInfo podInfo = mock(PodInfo.class);
         when(podInfo.getLabels()).thenReturn(Collections.singletonMap("app", "test-app"));
@@ -132,7 +132,7 @@ public class ServiceServiceTest extends ServiceServiceTestAbstract {
     @Test
     void testFindServicesForPodMultipleServicesFound() throws IOException {
         ServiceAnalyzer analyzer = getServiceAnalyzer("rbac/test-rbac.yaml", "services/two-services.yaml");
-        setupMockServerWithPodsByLabels(analyzer);
+        setupMockServerWithServiceList(analyzer);
 
         PodInfo podInfo = mock(PodInfo.class);
         when(podInfo.getLabels()).thenReturn(Collections.singletonMap("app", "test-app"));
@@ -156,7 +156,7 @@ public class ServiceServiceTest extends ServiceServiceTestAbstract {
     @Test
     void testFindServicesForPodServiceWithoutSelector() throws IOException {
         ServiceAnalyzer analyzer = getServiceAnalyzer("rbac/test-rbac.yaml", "services/no-selector-service.yaml");
-        setupMockServerWithPodsByLabels(analyzer);
+        setupMockServerWithServiceList(analyzer);
 
         PodInfo podInfo = mock(PodInfo.class);
         when(podInfo.getLabels()).thenReturn(Collections.singletonMap("app", "test-app"));

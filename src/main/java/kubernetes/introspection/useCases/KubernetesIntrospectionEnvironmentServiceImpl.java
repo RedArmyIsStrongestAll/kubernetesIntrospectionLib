@@ -7,6 +7,7 @@ import kubernetes.introspection.entities.models.enviroment.CollectionError;
 import kubernetes.introspection.entities.models.enviroment.KubernetesEnvironmentInfo;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.models.permision.PermissionInfo;
+import kubernetes.introspection.entities.models.service.ServiceEndpointAddress;
 import kubernetes.introspection.entities.models.source.ConfigSourceInfo;
 import kubernetes.introspection.entities.services.env.GetVarsServicesDtoService;
 import kubernetes.introspection.entities.services.init.InitDetectorService;
@@ -53,15 +54,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class kubernetesIntrospectionEnvironmentServiceImpl implements kubernetesIntrospectionEnvironmentService {
+public class KubernetesIntrospectionEnvironmentServiceImpl implements KubernetesIntrospectionEnvironmentService {
 
     private final InitDetectorService initDetectorService;
     List<CurrentPodService> podCallServiceList;
     List<OwnerService> ownerCallServiceList;
     List<OwnerLabelService> replicCallServiceList;
 
-    public kubernetesIntrospectionEnvironmentServiceImpl() {
-        initDetectorService = new InitDetectorService();
+    public KubernetesIntrospectionEnvironmentServiceImpl() {
+        this.initDetectorService = new InitDetectorService();
+    }
+
+    public KubernetesIntrospectionEnvironmentServiceImpl(InitDetectorService initDetectorService) {
+        this.initDetectorService = initDetectorService;
     }
 
     @Override
@@ -73,13 +78,19 @@ public class kubernetesIntrospectionEnvironmentServiceImpl implements kubernetes
             try (KubernetesClient client = new KubernetesClientBuilder().build()) {
                 PermissionInfo permissionInfo = getPermission(client, namespace);
                 List<CollectionError> collectionErrorList = ConvertorToCollectionErrorUtil.convertToCollectionErrors(permissionInfo, namespace);
+
                 initServices(client, namespace, vars);
+
                 CurrentPodService.CurrentPodDto currentPodDto = getCurrentPod(permissionInfo);
                 OwnerReference k8sOwnerReference = getOwnerReference(currentPodDto, collectionErrorList);
+
                 OwnerService.OwnerDto ownerDto = getOwner(permissionInfo, k8sOwnerReference, collectionErrorList);
                 ReplicaPodsService.ReplicaPodsDto replicaPodsDto = getReplicaPods(permissionInfo, client, k8sOwnerReference, ownerDto, currentPodDto, collectionErrorList);
+
                 ServiceService.ServiceDto serviceDto = getServices(permissionInfo, namespace, client, currentPodDto, collectionErrorList);
                 EndpointService.EndpointDto endpointDto = getEndpoints(serviceDto.getServiceInfo().getName(), namespace, client, permissionInfo, collectionErrorList);
+                fillEndpointToService(endpointDto, serviceDto);
+
                 ConfigMapSourceService.ConfigMapDto configMapDto = getConfigMaps(client, namespace, currentPodDto, permissionInfo, collectionErrorList);
                 SecretSourceService.SecretDto secretDto = getSecrets(client, namespace, currentPodDto, permissionInfo, collectionErrorList);
                 List<ConfigSourceInfo> configSourceInfoList = mergerConfigSourceInfo(configMapDto.getConfigSourceInfoList(), secretDto.getConfigSourceInfoList());
@@ -89,7 +100,7 @@ public class kubernetesIntrospectionEnvironmentServiceImpl implements kubernetes
                         .owner(ownerDto.getOwnerInfo())
                         .replicaPods(replicaPodsDto.getPodInfoList())
                         .services(serviceDto.getServiceInfo())
-                        .configSources(configMapDto.getConfigSourceInfoList())
+                        .configSources(configSourceInfoList)
                         .collectionTimestamp(Instant.now().toString())
                         .errors(collectionErrorList).build();
 
@@ -250,6 +261,14 @@ public class kubernetesIntrospectionEnvironmentServiceImpl implements kubernetes
             collectionErrorList.add(ConvertorToCollectionErrorUtil.convertToCollectionErrors(e.getErrorCodeEnum()));
             return new EndpointService.EndpointDto(null, null);
         }
+    }
+
+    private static void fillEndpointToService(EndpointService.EndpointDto endpointDto, ServiceService.ServiceDto serviceDto) {
+        List<ServiceEndpointAddress> endpoints = endpointDto.getEndpointsInfo();
+        int readyEndpoints = (int) endpoints.stream().filter(ServiceEndpointAddress::isReady).count();
+        serviceDto.getServiceInfo().setEndpoints(endpoints);
+        serviceDto.getServiceInfo().setReadyEndpoints(readyEndpoints);
+        serviceDto.getServiceInfo().setFullyReady(readyEndpoints > 0 && readyEndpoints == endpoints.size());
     }
 
     private ConfigMapSourceService.ConfigMapDto getConfigMaps(KubernetesClient client, String namespace, CurrentPodService.CurrentPodDto currentPodDto, PermissionInfo permissionInfo, List<CollectionError> collectionErrorList) {
