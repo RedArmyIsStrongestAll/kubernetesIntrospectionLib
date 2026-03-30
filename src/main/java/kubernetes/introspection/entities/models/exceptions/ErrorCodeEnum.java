@@ -4,12 +4,20 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorCodeEnum {
-    NOT_IN_CLUSTER(500, "Not in cluster",
+    NOT_IN_CLUSTER(400, "Not in cluster",
             "The application is not running in a Kubernetes cluster.",
             true),
 
-    NOT_NAMESPACE(500, "Not namespace",
+    NOT_NAMESPACE(400, "Not namespace",
             "The application is running in a Kubernetes cluster, but cannot read 'namespace' from file '/var/run/secrets/kubernetes.io/serviceaccount/namespace'",
+            true),
+
+    NOT_CREATE_K8S_CLIENT(500, "Failed to create kubernetes client: {}",
+            "Failed to create a client to access the Kubernetes cluster",
+            true),
+
+    RBAC_NOT_FOUND(400, "Resource not found",
+            "Current RBAC rules not found",
             true),
 
     NO_STATIC_FILE_RBAC(400, "No static file RBAC",
@@ -24,11 +32,11 @@ public enum ErrorCodeEnum {
             "The application (as pod) does not have access to the resource due to RBAC rules",
             false),
 
-    BROKEN_NAME_IN_POD(500, "Broken name in pod",
+    BROKEN_NAME_IN_POD(400, "Broken name in pod",
             "The application does not have a pod name set for the pod.",
             true),
 
-    POD_NOT_FOUND(404, "Resource not found",
+    POD_NOT_FOUND(400, "Resource not found",
             "Current pod not found",
             true),
 
@@ -62,10 +70,6 @@ public enum ErrorCodeEnum {
 
     ENDPOINTS_MANY_FOUND(400, "Resource not found",
             "Endpoint more than one found",
-            false),
-
-    CONFIG_SOURCE_NOT_FOUND(400, "Resource not found",
-            "Source (ConfigMap or Secrets) not found",
             false),
 
     CONFIG_MAP_NOT_FOUND(400, "Resource not found",

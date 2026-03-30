@@ -1,7 +1,7 @@
 package kubernetes.introspection.entities.services.main.pod;
 
-import kubernetes.introspection.entities.models.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
+import kubernetes.introspection.entities.models.permision.PermissionInfo;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +27,7 @@ public class CurrentPorCallChainService {
                 log.info("Start service {}", service.getNameClassExt());
 
                 CurrentPodService.CurrentPodDto pod = service.getCurrentPodWithCheckPermissions(permissionInfo);
+
                 if (pod != null) {
                     return pod;
                 }

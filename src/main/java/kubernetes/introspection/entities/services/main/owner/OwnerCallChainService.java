@@ -1,15 +1,15 @@
 package kubernetes.introspection.entities.services.main.owner;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
-import kubernetes.introspection.entities.models.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
+import kubernetes.introspection.entities.models.permision.PermissionInfo;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
-import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.POD_NOT_FOUND;
+import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.OWNER_NOT_FOUND;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,7 +37,7 @@ public class OwnerCallChainService {
         }
 
         log.error("No service was able to get the current Owner information.");
-        throw new KubernetesException(POD_NOT_FOUND);
+        throw new KubernetesException(OWNER_NOT_FOUND);
     }
 
     public OwnerService.OwnerDto getOwner(OwnerReference ownerRef) {
@@ -56,7 +56,7 @@ public class OwnerCallChainService {
         }
 
         log.error("No service was able to get the current Owner information.");
-        throw new KubernetesException(POD_NOT_FOUND);
+        throw new KubernetesException(OWNER_NOT_FOUND);
     }
 
 }

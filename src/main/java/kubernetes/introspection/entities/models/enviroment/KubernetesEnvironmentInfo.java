@@ -42,23 +42,16 @@ public class KubernetesEnvironmentInfo {
 
 
     /**
-     * Список сервисов, через которые можно достучаться до приложения.
-     * Включает информацию о типах сервисов, портах и реальных эндпоинтах.
+     * Сервис, через которые можно достучаться до приложения.
+     * Включает информацию о типе сервиса, портах и реальных эндпоинтах.
      */
-    private List<ServiceInfo> services;
+    private ServiceInfo services;
 
     /**
      * Список источников конфигурации, используемых подом.
      * ConfigMap и Secret с их ключами (только имена, без значений).
      */
     private List<ConfigSourceInfo> configSources;
-
-
-    /**
-     * Версия Kubernetes API кластера.
-     * Полезно для диагностики совместимости.
-     */
-    private String kubernetesVersion;
 
     /**
      * Время сбора информации (timestamp).

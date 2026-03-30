@@ -10,7 +10,7 @@ import kubernetes.introspection.entities.models.permision.ResourcePermissionEnum
 import kubernetes.introspection.entities.models.service.ServiceEndpointAddress;
 import kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
-import kubernetes.introspection.entities.services.main.permision.PermissionService;
+import kubernetes.introspection.entities.services.utils.PermissionServiceUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -83,7 +83,7 @@ public class EndpointService {
                                                             PermissionInfo permissionInfo) {
         log.info("Start getEndpointsForServiceWithPermission");
         try {
-            PermissionService.checkPermission(permissionInfo, () -> List.of(
+            PermissionServiceUtil.checkPermission(permissionInfo, () -> List.of(
                     ResourcePermissionEnum.ENDPOINTS_GET,
                     ResourcePermissionEnum.ENDPOINTS_LIST
             ));

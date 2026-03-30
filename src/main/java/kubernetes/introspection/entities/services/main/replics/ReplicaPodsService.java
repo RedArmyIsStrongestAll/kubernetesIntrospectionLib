@@ -4,15 +4,15 @@ import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.models.owner.OwnerTypeEnum;
 import kubernetes.introspection.entities.models.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.pod.PodInfo;
-import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.main.owner.OwnerService.OwnerDto;
-import kubernetes.introspection.entities.services.main.permision.PermissionService;
 import kubernetes.introspection.entities.services.main.pod.CurrentPodService;
 import kubernetes.introspection.entities.services.main.replics.owner.OwnerLabelCallChainService;
+import kubernetes.introspection.entities.services.utils.PermissionServiceUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,7 +39,7 @@ public class ReplicaPodsService {
                                                        Pod currentPod, PermissionInfo permissionInfo) {
         log.info("Start getReplicaPodsWithPermission for owner: {} from pod {}", ownerDto.getK8sType().getOriginalName(), currentPod);
         try {
-            PermissionService.checkPermission(permissionInfo, () -> List.of(ResourcePermissionEnum.PODS_LIST,
+            PermissionServiceUtil.checkPermission(permissionInfo, () -> List.of(ResourcePermissionEnum.PODS_LIST,
                     ResourcePermissionEnum.PODS_GET));
 
             return getReplicaPods(ownerRef, ownerDto, currentPod);
@@ -136,6 +136,11 @@ public class ReplicaPodsService {
             this.podInfoList = k8sPodList.stream()
                     .map(CurrentPodService::mapToPodInfo)
                     .collect(Collectors.toList());
+        }
+
+        public ReplicaPodsDto(List<Pod> k8sPodList, List<PodInfo> podInfoList) {
+            this.k8sPodList = k8sPodList;
+            this.podInfoList = podInfoList;
         }
     }
 }

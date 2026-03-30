@@ -10,7 +10,7 @@ import kubernetes.introspection.entities.models.permision.ResourcePermissionEnum
 import kubernetes.introspection.entities.models.source.ConfigSourceInfo;
 import kubernetes.introspection.entities.models.source.ConfigSourceTypeEnum;
 import kubernetes.introspection.entities.models.source.ConfigUsageTypeEnum;
-import kubernetes.introspection.entities.services.main.permision.PermissionService;
+import kubernetes.introspection.entities.services.utils.PermissionServiceUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -70,14 +70,14 @@ public class SecretSourceService {
 
     public SecretDto getSecretSourcesWithPermission(Pod currentPod, PermissionInfo permissionInfo) {
         try {
-            PermissionService.checkPermission(permissionInfo, () -> List.of(
+            PermissionServiceUtil.checkPermission(permissionInfo, () -> List.of(
                     ResourcePermissionEnum.SECRETS_GET,
                     ResourcePermissionEnum.SECRETS_LIST
             ));
             return getSecretSources(currentPod);
         } catch (Exception e) {
             log.error("Error getting Secret sources", e);
-            throw new KubernetesException(ErrorCodeEnum.CONFIG_SOURCE_NOT_FOUND);
+            throw new KubernetesException(ErrorCodeEnum.SECRET_NOT_FOUND);
         }
     }
 
@@ -91,7 +91,7 @@ public class SecretSourceService {
             extractFromVolumes(currentPod, secretNames, usageTypeMap);
 
             if (secretNames.isEmpty()) {
-                throw new KubernetesException(ErrorCodeEnum.CONFIG_SOURCE_NOT_FOUND);
+                throw new KubernetesException(ErrorCodeEnum.SECRET_NOT_FOUND);
             }
 
             List<Secret> secrets = secretNames.stream()
@@ -103,7 +103,7 @@ public class SecretSourceService {
 
         } catch (Exception e) {
             log.error("Error getting Secret sources", e);
-            throw new KubernetesException(ErrorCodeEnum.CONFIG_SOURCE_NOT_FOUND);
+            throw new KubernetesException(ErrorCodeEnum.SECRET_NOT_FOUND);
         }
     }
 
@@ -153,6 +153,11 @@ public class SecretSourceService {
         public SecretDto(List<Secret> k8sSecretList, Map<String, Set<ConfigUsageTypeEnum>> usageTypeMap) {
             this.k8sSecretList = k8sSecretList;
             this.configSourceInfoList = mapToConfigSourceInfoList(k8sSecretList, usageTypeMap);
+        }
+
+        public SecretDto(List<Secret> k8sSecretList, List<ConfigSourceInfo> configSourceInfoList) {
+            this.k8sSecretList = k8sSecretList;
+            this.configSourceInfoList = configSourceInfoList;
         }
     }
 }

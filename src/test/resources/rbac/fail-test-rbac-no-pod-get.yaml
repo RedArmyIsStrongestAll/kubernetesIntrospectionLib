@@ -13,7 +13,7 @@ rules:
   # checkPodResources
   - apiGroups: [ "" ]
     resources: [ "pods" ]
-    verbs: [ "get", "list" ] # NO WATCH
+    verbs: [ "list" ]
 
 
   # checkOwnerResources
@@ -46,18 +46,18 @@ rules:
     verbs: [ "get", "list", "watch" ]
 
   # checkServiceResources
-  - apiGroups: [""]
-    resources: ["services"]
-    verbs: ["get", "list", "watch"]
+  - apiGroups: [ "" ]
+    resources: [ "services" ]
+    verbs: [ "get", "list", "watch" ]
 
   # checkServiceResources
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["get", "list", "watch"]
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "get", "list", "watch" ]
 
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list", "watch"]
+  - apiGroups: [ "" ]
+    resources: [ "secrets" ]
+    verbs: [ "get", "list", "watch" ]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1

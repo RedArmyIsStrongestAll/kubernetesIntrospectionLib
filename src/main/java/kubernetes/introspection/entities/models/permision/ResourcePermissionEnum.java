@@ -12,15 +12,6 @@ public enum ResourcePermissionEnum {
     PODS_LIST("pods", "list"),
     PODS_WATCH("pods", "watch"),
 
-    // Service ресурсы
-    SERVICES_GET("services", "get"),
-    SERVICES_LIST("services", "list"),
-    SERVICES_WATCH("services", "watch"),
-
-    ENDPOINTS_GET("secrets", "get"),
-    ENDPOINTS_LIST("secrets", "list"),
-    ENDPOINTS_WATCH("secrets", "watch"),
-
     // Owner ресурсы
     DEPLOYMENTS_GET("deployments", "get"),
     DEPLOYMENTS_LIST("deployments", "list"),
@@ -50,6 +41,15 @@ public enum ResourcePermissionEnum {
     CRONJOBS_LIST("cronjobs", "list"),
     CRONJOBS_WATCH("cronjobs", "watch"),
 
+    // Service ресурсы
+    SERVICES_GET("services", "get"),
+    SERVICES_LIST("services", "list"),
+    SERVICES_WATCH("services", "watch"),
+
+    ENDPOINTS_GET("secrets", "get"),
+    ENDPOINTS_LIST("secrets", "list"),
+    ENDPOINTS_WATCH("secrets", "watch"),
+
     // Config ресурсы
     CONFIGMAPS_GET("configmaps", "get"),
     CONFIGMAPS_LIST("configmaps", "list"),
@@ -68,31 +68,23 @@ public enum ResourcePermissionEnum {
     }
 
 
-    public static List<ResourcePermissionEnum> getPodPermissions() {
-        return Arrays.asList(PODS_GET, PODS_LIST, PODS_WATCH);
-    }
-
-    public static List<ResourcePermissionEnum> getServicePermissions() {
-        return Arrays.asList(SERVICES_GET, SERVICES_LIST, SERVICES_WATCH,
-                ENDPOINTS_GET, ENDPOINTS_LIST, ENDPOINTS_WATCH);
-    }
-
-    public static List<ResourcePermissionEnum> getOwnerPermissions() {
+    public static List<ResourcePermissionEnum> getActualPermissions() {
         return Arrays.asList(
-                DEPLOYMENTS_GET, DEPLOYMENTS_LIST, DEPLOYMENTS_WATCH,
-                STATEFULSETS_GET, STATEFULSETS_LIST, STATEFULSETS_WATCH,
-                DAEMONSETS_GET, DAEMONSETS_LIST, DAEMONSETS_WATCH,
-                REPLICASETS_GET, REPLICASETS_LIST, REPLICASETS_WATCH,
-                REPLICATION_CONTROLLERS_GET, REPLICATION_CONTROLLERS_LIST, REPLICATION_CONTROLLERS_WATCH,
-                JOBS_GET, JOBS_LIST, JOBS_WATCH,
-                CRONJOBS_GET, CRONJOBS_LIST, CRONJOBS_WATCH
-        );
-    }
+                PODS_GET, PODS_LIST,
 
-    public static List<ResourcePermissionEnum> getConfigPermissions() {
-        return Arrays.asList(
-                CONFIGMAPS_GET, CONFIGMAPS_LIST, CONFIGMAPS_WATCH,
-                SECRETS_GET, SECRETS_LIST, SECRETS_WATCH
+                DEPLOYMENTS_GET, DEPLOYMENTS_LIST,
+                STATEFULSETS_GET, STATEFULSETS_LIST,
+                DAEMONSETS_GET, DEPLOYMENTS_LIST,
+                REPLICASETS_GET, REPLICASETS_GET,
+                REPLICATION_CONTROLLERS_GET, REPLICATION_CONTROLLERS_LIST,
+                JOBS_GET, JOBS_LIST,
+                CRONJOBS_GET, CRONJOBS_LIST,
+
+                SERVICES_GET, SERVICES_LIST,
+                ENDPOINTS_GET, ENDPOINTS_LIST,
+
+                CONFIGMAPS_GET, CONFIGMAPS_LIST,
+                SECRETS_GET, SECRETS_LIST
         );
     }
 

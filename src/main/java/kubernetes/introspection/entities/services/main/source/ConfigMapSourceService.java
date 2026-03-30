@@ -10,7 +10,7 @@ import kubernetes.introspection.entities.models.permision.ResourcePermissionEnum
 import kubernetes.introspection.entities.models.source.ConfigSourceInfo;
 import kubernetes.introspection.entities.models.source.ConfigSourceTypeEnum;
 import kubernetes.introspection.entities.models.source.ConfigUsageTypeEnum;
-import kubernetes.introspection.entities.services.main.permision.PermissionService;
+import kubernetes.introspection.entities.services.utils.PermissionServiceUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -76,14 +76,14 @@ public class ConfigMapSourceService {
 
     public ConfigMapDto getConfigMapSourcesWithPermission(Pod currentPod, PermissionInfo permissionInfo) {
         try {
-            PermissionService.checkPermission(permissionInfo, () -> List.of(
+            PermissionServiceUtil.checkPermission(permissionInfo, () -> List.of(
                     ResourcePermissionEnum.CONFIGMAPS_GET,
                     ResourcePermissionEnum.CONFIGMAPS_LIST
             ));
             return getConfigMapSources(currentPod);
         } catch (Exception e) {
             log.error("Error getting ConfigMap sources", e);
-            throw new KubernetesException(ErrorCodeEnum.CONFIG_SOURCE_NOT_FOUND);
+            throw new KubernetesException(ErrorCodeEnum.CONFIG_MAP_NOT_FOUND);
         }
     }
 
@@ -97,7 +97,7 @@ public class ConfigMapSourceService {
             extractFromVolumes(currentPod, configMapNames, usageTypeMap);
 
             if (configMapNames.isEmpty()) {
-                throw new KubernetesException(ErrorCodeEnum.CONFIG_SOURCE_NOT_FOUND);
+                throw new KubernetesException(ErrorCodeEnum.CONFIG_MAP_NOT_FOUND);
             }
 
             List<ConfigMap> configMaps = configMapNames.stream()
@@ -109,7 +109,7 @@ public class ConfigMapSourceService {
 
         } catch (Exception e) {
             log.error("Error getting ConfigMap sources", e);
-            throw new KubernetesException(ErrorCodeEnum.CONFIG_SOURCE_NOT_FOUND);
+            throw new KubernetesException(ErrorCodeEnum.CONFIG_MAP_NOT_FOUND);
         }
     }
 
@@ -161,6 +161,11 @@ public class ConfigMapSourceService {
         public ConfigMapDto(List<ConfigMap> k8sConfigMapList, Map<String, Set<ConfigUsageTypeEnum>> usageTypeMap) {
             this.k8sConfigMapList = k8sConfigMapList;
             this.configSourceInfoList = mapToConfigSourceInfoList(k8sConfigMapList, usageTypeMap);
+        }
+
+        public ConfigMapDto(List<ConfigMap> k8sConfigMapList, List<ConfigSourceInfo> configSourceInfoList) {
+            this.k8sConfigMapList = k8sConfigMapList;
+            this.configSourceInfoList = configSourceInfoList;
         }
     }
 }

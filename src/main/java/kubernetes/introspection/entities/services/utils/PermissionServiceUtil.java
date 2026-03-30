@@ -1,4 +1,4 @@
-package kubernetes.introspection.entities.services.main.permision;
+package kubernetes.introspection.entities.services.utils;
 
 import kubernetes.introspection.entities.models.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.permision.ResourcePermissionEnum;
@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Slf4j
-public final class PermissionService {
+public final class PermissionServiceUtil {
 
     public static void checkPermission(
             PermissionInfo permissionInfo,

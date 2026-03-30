@@ -2,11 +2,7 @@ package entities.services.main.owner.reference;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
-import kubernetes.introspection.entities.models.permision.PermissionInfo;
-import kubernetes.introspection.entities.models.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.main.owner.reference.OwnerReferenceService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -14,7 +10,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.IOException;
-import java.util.List;
 
 import static entities.services.utils.KubernetesYamlUtils.loadRbacYaml;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,14 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OwnerReferenceServiceTest {
-    private final String NAMESPACE = "test-namespace";
 
     private OwnerReferenceService ownerReferenceService;
     private Pod pod;
 
     @BeforeEach
     void setUp() throws Exception {
-        this.ownerReferenceService = new OwnerReferenceService(NAMESPACE);
+        this.ownerReferenceService = new OwnerReferenceService();
     }
 
     private void setPod(String fileName) throws IOException {
@@ -44,12 +38,7 @@ public class OwnerReferenceServiceTest {
     void getPodOwnerWithPermissionValidTest() throws IOException {
         setPod("owner/reference/test-short-pod-owner.yaml");
 
-        PermissionInfo permissionInfo = new PermissionInfo(true, List.of(
-                new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
-                new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true)
-        ));
-
-        OwnerReference result = ownerReferenceService.getPodOwnerWithPermission(pod, permissionInfo);
+        OwnerReference result = ownerReferenceService.getPodOwner(pod);
 
         assertNotNull(result, "OwnerReference не должен быть null");
 
@@ -62,28 +51,12 @@ public class OwnerReferenceServiceTest {
     }
 
     @Test
-    void getPodOwnerWithPermissionNoListPermissionTest() throws IOException {
-        setPod("owner/reference/test-short-pod-owner.yaml");
-
-        PermissionInfo permissionInfo = new PermissionInfo(true, List.of(
-                new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)
-        ));
-
-        Assertions.assertThrows(KubernetesException.class, () -> ownerReferenceService.getPodOwnerWithPermission(pod, permissionInfo));
-    }
-
-    @Test
     void getPodOwnerWithPermissionNoPodOwnerTest() throws IOException {
         setPod("owner/reference/test-short-pod-owner.yaml");
 
-        PermissionInfo permissionInfo = new PermissionInfo(true, List.of(
-                new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
-                new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true)
-        ));
-
         pod.getMetadata().setOwnerReferences(null);
 
-        OwnerReference result = ownerReferenceService.getPodOwnerWithPermission(pod, permissionInfo);
+        OwnerReference result = ownerReferenceService.getPodOwner(pod);
 
         assertNotNull(result, "OwnerReference не должен быть null");
         assertNull(result.getKind(), "Должен быть пустым");
@@ -93,12 +66,7 @@ public class OwnerReferenceServiceTest {
     void getPodOwnerWithPermissionNoControllerValidTest() throws IOException {
         setPod("owner/reference/test-short-pod-owner-no-controller.yaml");
 
-        PermissionInfo permissionInfo = new PermissionInfo(true, List.of(
-                new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true),
-                new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true)
-        ));
-
-        OwnerReference result = ownerReferenceService.getPodOwnerWithPermission(pod, permissionInfo);
+        OwnerReference result = ownerReferenceService.getPodOwner(pod);
 
         assertNotNull(result, "OwnerReference не должен быть null");
 

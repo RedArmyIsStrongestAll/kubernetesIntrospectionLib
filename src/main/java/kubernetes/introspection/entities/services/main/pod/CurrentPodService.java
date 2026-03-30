@@ -7,13 +7,13 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.models.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.pod.ContainerInfo;
 import kubernetes.introspection.entities.models.pod.ContainerStateEnum;
 import kubernetes.introspection.entities.models.pod.PodInfo;
-import kubernetes.introspection.entities.models.exceptions.KubernetesException;
-import kubernetes.introspection.entities.services.main.permision.PermissionService;
+import kubernetes.introspection.entities.services.utils.PermissionServiceUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -132,7 +132,7 @@ public abstract class CurrentPodService {
     public CurrentPodDto getCurrentPodWithCheckPermissions(PermissionInfo permissionInfo) {
         log.info("Start getCurrentPodInfoWithCheckPermissions in {}", getNameClassExt());
         try {
-            PermissionService.checkPermission(permissionInfo, this::getPermissionResource);
+            PermissionServiceUtil.checkPermission(permissionInfo, this::getPermissionResource);
 
             return getCurrentPod();
         } catch (Exception e) {

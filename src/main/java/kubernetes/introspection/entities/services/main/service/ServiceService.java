@@ -11,7 +11,7 @@ import kubernetes.introspection.entities.models.service.ServiceInfo;
 import kubernetes.introspection.entities.models.service.ServiceServicePort;
 import kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
-import kubernetes.introspection.entities.services.main.permision.PermissionService;
+import kubernetes.introspection.entities.services.utils.PermissionServiceUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -89,7 +89,7 @@ public class ServiceService {
     public ServiceDto findServicesForPodWithPermission(PodInfo podInfo, String namespace, PermissionInfo permissionInfo) {
         log.info("Stop findServicesForPodWithPermission");
         try {
-            PermissionService.checkPermission(permissionInfo, () -> List.of(ResourcePermissionEnum.SERVICES_LIST,
+            PermissionServiceUtil.checkPermission(permissionInfo, () -> List.of(ResourcePermissionEnum.SERVICES_LIST,
                     ResourcePermissionEnum.SERVICES_GET));
 
             return findServicesForPod(podInfo, namespace);
@@ -154,6 +154,11 @@ public class ServiceService {
         public ServiceDto(Service k8sService) {
             this.k8sService = k8sService;
             this.serviceInfo = mapToServiceInfo(k8sService);
+        }
+
+        public ServiceDto(Service k8sService, ServiceInfo serviceInfo) {
+            this.k8sService = k8sService;
+            this.serviceInfo = serviceInfo;
         }
     }
 }

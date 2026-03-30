@@ -6,7 +6,7 @@ import kubernetes.introspection.entities.models.owner.OwnerTypeEnum;
 import kubernetes.introspection.entities.models.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
-import kubernetes.introspection.entities.services.main.permision.PermissionService;
+import kubernetes.introspection.entities.services.utils.PermissionServiceUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +30,7 @@ public abstract class OwnerLabelService {
     public LabelSelector extractLabelSelectorWithPermission(HasMetadata hasMetadata, PermissionInfo permissionInfo) {
         log.info("Start extractLabelSelectorWithPermission");
         try {
-            PermissionService.checkPermission(permissionInfo, this::getPermissionResource);
+            PermissionServiceUtil.checkPermission(permissionInfo, this::getPermissionResource);
 
             return extractLabelSelector(hasMetadata);
         } catch (Exception e) {

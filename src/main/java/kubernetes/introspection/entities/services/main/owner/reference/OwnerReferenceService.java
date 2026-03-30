@@ -3,35 +3,15 @@ package kubernetes.introspection.entities.services.main.owner.reference;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
-import kubernetes.introspection.entities.models.permision.PermissionInfo;
-import kubernetes.introspection.entities.models.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
-import kubernetes.introspection.entities.services.main.permision.PermissionService;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
 
 import static kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum.OWNER_REFERENCE_NOT_FOUND;
 
 @Slf4j
 public class OwnerReferenceService {
 
-    protected final String namespace;
-
-    public OwnerReferenceService(String namespace) {
-        this.namespace = namespace;
-    }
-
-    public OwnerReference getPodOwnerWithPermission(Pod pod, PermissionInfo permissionInfo) {
-        log.info("Start getPodOwnerWithPermission");
-        try {
-            PermissionService.checkPermission(permissionInfo, this::getPermissionResource);
-
-            return getPodOwner(pod);
-        } catch (Exception e) {
-            log.error("Error getPodOwnerWithPermission: ", e);
-            throw new KubernetesException(OWNER_REFERENCE_NOT_FOUND);
-        }
+    public OwnerReferenceService() {
     }
 
     public OwnerReference getPodOwner(Pod pod) {
@@ -56,10 +36,5 @@ public class OwnerReferenceService {
             throw new KubernetesException(OWNER_REFERENCE_NOT_FOUND);
         }
     }
-
-    public List<ResourcePermissionEnum> getPermissionResource() {
-        return List.of(ResourcePermissionEnum.PODS_GET, ResourcePermissionEnum.PODS_LIST);
-    }
-
 }
 
