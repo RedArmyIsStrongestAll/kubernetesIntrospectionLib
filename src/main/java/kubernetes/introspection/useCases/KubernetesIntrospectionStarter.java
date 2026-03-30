@@ -7,6 +7,7 @@ import kubernetes.introspection.entities.models.enviroment.CollectionError;
 import kubernetes.introspection.entities.models.enviroment.KubernetesEnvironmentInfo;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.models.permision.PermissionInfo;
+import kubernetes.introspection.entities.models.source.ConfigSourceInfo;
 import kubernetes.introspection.entities.services.env.GetVarsServicesDtoService;
 import kubernetes.introspection.entities.services.init.InitDetectorService;
 import kubernetes.introspection.entities.services.init.InitPermissionsService;
@@ -48,6 +49,7 @@ import kubernetes.introspection.entities.services.utils.ConvertorToCollectionErr
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -83,49 +85,25 @@ public class KubernetesIntrospectionStarter {
                 ReplicaPodsService.ReplicaPodsDto replicaPodsDto = getReplicaPods(permissionInfo, client, k8sOwnerReference, ownerDto, currentPodDto, collectionErrorList);
 
                 ServiceService.ServiceDto serviceDto = getServices(permissionInfo, namespace, client, currentPodDto, collectionErrorList);
+                EndpointService.EndpointDto endpointDto = getEndpoints(serviceDto.getServiceInfo().getName(), namespace, client, permissionInfo, collectionErrorList);
+
+                ConfigMapSourceService.ConfigMapDto configMapDto = getConfigMaps(client, namespace, currentPodDto, permissionInfo, collectionErrorList);
+                SecretSourceService.SecretDto secretDto = getSecrets(client, namespace, currentPodDto, permissionInfo, collectionErrorList);
+                List<ConfigSourceInfo> configSourceInfoList = mergerConfigSourceInfo(configMapDto.getConfigSourceInfoList(), secretDto.getConfigSourceInfoList());
+
+                KubernetesEnvironmentInfo kubernetesEnvironmentInfo = KubernetesEnvironmentInfo.builder()
+                        .currentPod(currentPodDto.getPodInfo())
+                        .owner(ownerDto.getOwnerInfo())
+                        .replicaPods(replicaPodsDto.getPodInfoList())
+                        .services(serviceDto.getServiceInfo())
+                        .configSources(configMapDto.getConfigSourceInfoList())
+                        .collectionTimestamp(Instant.now().toString())
+                        .errors(collectionErrorList).build();
+                return kubernetesEnvironmentInfo;
 
             } finally {
                 disableServices();
             }
-
-
-            ////////////////////////////////////////МОГУТ БЫТЬ NULL//////////////////////////////////////////
-
-
-            //нахожу эндпоинты
-            EndpointService endpointService = new EndpointService(client);
-            EndpointService.EndpointDto endpointDto = endpointService.getEndpointsForServiceWithPermission(serviceDto.getServiceInfo().getName(), namespace, permissionInfo);
-            //throw new KubernetesException(ErrorCodeEnum.ENDPOINTS_NOT_FOUND);
-            //collectionErrorList
-
-            //нахожу конфигмапы
-            ConfigMapSourceService configMapSourceService = new ConfigMapSourceService(client, namespace);
-            ConfigMapSourceService.ConfigMapDto configMapDto = configMapSourceService.getConfigMapSourcesWithPermission(currentPodDto.getK8sPod(), permissionInfo);
-            //throw new KubernetesException(ErrorCodeEnum.CONFIG_MAP_NOT_FOUND);
-            //collectionErrorList
-
-            //нахожу секреты
-            SecretSourceService secretSourceService = new SecretSourceService(client, namespace);
-            SecretSourceService.SecretDto secretDto = secretSourceService.getSecretSourcesWithPermission(currentPodDto.getK8sPod(), permissionInfo);
-            //throw new KubernetesException(ErrorCodeEnum.SECRET_NOT_FOUND);
-            //collectionErrorList
-
-            //объединяем
-            configMapDto.getConfigSourceInfoList().addAll(secretDto.getConfigSourceInfoList());
-            //можетбыть null point!
-
-            //////////////////////////////////
-
-            KubernetesEnvironmentInfo kubernetesEnvironmentInfo = KubernetesEnvironmentInfo.builder()
-                    .currentPod(currentPodDto.getPodInfo())
-                    .owner(ownerDto.getOwnerInfo())
-                    .replicaPods(replicaPodsDto.getPodInfoList())
-                    .services(serviceDto.getServiceInfo())
-                    .configSources(configMapDto.getConfigSourceInfoList())
-                    .collectionTimestamp(Instant.now().toString())
-                    .errors(collectionErrorList).build();
-
-            return kubernetesEnvironmentInfo;
 
         } catch (KubernetesException e) {
             log.error("Critical known error: {}", e.getErrorCodeEnum());
@@ -274,33 +252,41 @@ public class KubernetesIntrospectionStarter {
             configMapDto = configMapSourceService.getConfigMapSourcesWithPermission(currentPodDto.getK8sPod(), permissionInfo);
         } catch (KubernetesException e) {
             collectionErrorList.add(ConvertorToCollectionErrorUtil.convertToCollectionErrors(e.getErrorCodeEnum()));
-            configMapDto = new ConfigMapSourceService.ConfigMapDto(null, null);
+            configMapDto = new ConfigMapSourceService.ConfigMapDto();
         }
-        return configMapDto
+        return configMapDto;
     }
 
     private SecretSourceService.SecretDto getSecrets(KubernetesClient client, String namespace,
                                                      CurrentPodService.CurrentPodDto currentPodDto,
                                                      PermissionInfo permissionInfo,
                                                      List<CollectionError> collectionErrorList) {
+
+        SecretSourceService.SecretDto secretDto;
         try {
             SecretSourceService secretSourceService = new SecretSourceService(client, namespace);
-            return secretSourceService.getSecretSourcesWithPermission(currentPodDto.getK8sPod(), permissionInfo);
+            secretDto = secretSourceService.getSecretSourcesWithPermission(currentPodDto.getK8sPod(), permissionInfo);
         } catch (KubernetesException e) {
             collectionErrorList.add(ConvertorToCollectionErrorUtil.convertToCollectionErrors(e.getErrorCodeEnum()));
-            return new SecretSourceService.SecretDto(null, null);
+            secretDto = new SecretSourceService.SecretDto();
         }
+        return secretDto;
     }
 
-//    private List<ConfigMapSourceService.ConfigSourceInfo> mergeConfigSources(
-//            ConfigMapSourceService.ConfigMapDto configMapDto,
-//            SecretSourceService.SecretDto secretDto) {
-//        List<ConfigMapSourceService.ConfigSourceInfo> result = configMapDto.getConfigSourceInfoList();
-//        if (secretDto != null && secretDto.getConfigSourceInfoList() != null) {
-//            result.addAll(secretDto.getConfigSourceInfoList());
-//        }
-//        return result;
-//    }
+    private List<ConfigSourceInfo> mergerConfigSourceInfo(List<ConfigSourceInfo> configMapList,
+                                                          List<ConfigSourceInfo> secretsList) {
+
+        if (configMapList != null && secretsList == null) return configMapList;
+        if (secretsList != null && configMapList == null) return secretsList;
+
+        if (secretsList == null && configMapList == null) return null;
+
+        List<ConfigSourceInfo> configSourceInfoList = new ArrayList<>();
+        configSourceInfoList.addAll(configMapList);
+        configSourceInfoList.addAll(secretsList);
+        return configSourceInfoList;
+    }
+
 
     private void disableServices() {
         podCallServiceList = null;

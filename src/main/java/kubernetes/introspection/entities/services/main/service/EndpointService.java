@@ -136,5 +136,10 @@ public class EndpointService {
             this.k8sEndpoints = endpoints;
             this.endpointsInfo = mapToEndpointsInfo(endpoints);
         }
+
+        public EndpointDto(Endpoints k8sEndpoints, List<ServiceEndpointAddress> endpointsInfo) {
+            this.k8sEndpoints = k8sEndpoints;
+            this.endpointsInfo = endpointsInfo;
+        }
     }
 }

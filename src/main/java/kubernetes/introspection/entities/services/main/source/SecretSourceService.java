@@ -155,9 +155,9 @@ public class SecretSourceService {
             this.configSourceInfoList = mapToConfigSourceInfoList(k8sSecretList, usageTypeMap);
         }
 
-        public SecretDto(List<Secret> k8sSecretList, List<ConfigSourceInfo> configSourceInfoList) {
-            this.k8sSecretList = k8sSecretList;
-            this.configSourceInfoList = configSourceInfoList;
+        public SecretDto() {
+            this.k8sSecretList = null;
+            this.configSourceInfoList = null;
         }
     }
 }

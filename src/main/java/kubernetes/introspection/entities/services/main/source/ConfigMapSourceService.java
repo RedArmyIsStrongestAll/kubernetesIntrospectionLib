@@ -163,9 +163,9 @@ public class ConfigMapSourceService {
             this.configSourceInfoList = mapToConfigSourceInfoList(k8sConfigMapList, usageTypeMap);
         }
 
-        public ConfigMapDto(List<ConfigMap> k8sConfigMapList, List<ConfigSourceInfo> configSourceInfoList) {
-            this.k8sConfigMapList = k8sConfigMapList;
-            this.configSourceInfoList = configSourceInfoList;
+        public ConfigMapDto() {
+            this.k8sConfigMapList = null;
+            this.configSourceInfoList = null;
         }
     }
 }
