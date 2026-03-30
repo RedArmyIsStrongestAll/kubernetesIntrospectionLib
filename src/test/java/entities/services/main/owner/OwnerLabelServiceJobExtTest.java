@@ -1,6 +1,6 @@
 package entities.services.main.owner;
 
-import engine.owner.OwnerAnalyzerJob;
+import engine.owners.OwnerAnalyzerJob;
 import entities.services.main.owner.parent.OwnerServiceTestAbstract;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;

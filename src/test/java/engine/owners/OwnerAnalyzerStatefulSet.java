@@ -1,5 +1,6 @@
-package engine.owner;
+package engine.owners;
 
+import engine.OwnerAnalyzer;
 import engine.RbacAnalyzer;
 import entities.services.utils.KubernetesYamlUtils;
 import io.fabric8.kubernetes.api.model.ObjectMeta;

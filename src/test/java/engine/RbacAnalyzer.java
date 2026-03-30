@@ -12,53 +12,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
-/**
- * Анализатор прав доступа RBAC для Kubernetes, предназначенный для использования в тестах.
- *
- * <p>Этот класс имитирует поведение Kubernetes RBAC engine, анализируя YAML-файлы с
- * правилами доступа и принимая решения о разрешении операций на ресурсы Kubernetes.
- * Предназначен для замены реального Kubernetes API server в тестовой среде.</p>
- *
- * <p><strong>Назначение:</strong></p>
- * <ul>
- *   <li>Парсинг YAML файлов с RBAC правилами (Role, ClusterRole)</li>
- *   <li>Анализ SelfSubjectAccessReview запросов на основе правил</li>
- *   <li>Имитация поведения Kubernetes RBAC engine без реального кластера</li>
- *   <li>Поддержка тестирования различных сценариев доступа</li>
- * </ul>
- *
- * <p><strong>Поддерживаемые возможности:</strong></p>
- * <ul>
- *   <li>Анализ правил Role и ClusterRole</li>
- *   <li>Проверка apiGroups, resources, verbs</li>
- *   <li>Учет namespace ограничений для Role (ClusterRole - глобальные)</li>
- *   <li>Поддержка wildcard (*) в правилах</li>
- * </ul>
- *
- * <p><strong>Пример использования:</strong></p>
- * <pre>
- * {@code
- * String yaml = """
- * apiVersion: rbac.authorization.k8s.io/v1
- * kind: Role
- * metadata:
- *   namespace: test-namespace
- *   name: test-role
- * rules:
- * - apiGroups: [""]
- *   resources: ["pods"]
- *   verbs: ["get", "list"]
- * """;
- *
- * RbacAnalyzer analyzer = new RbacAnalyzer(yaml);
- * boolean allowed = analyzer.isAllowed("pods", "get", "test-namespace"); // true
- * boolean denied = analyzer.isAllowed("pods", "watch", "test-namespace"); // false
- * }
- * </pre>
- *
- * @author Your Name
- * @since 1.0
- */
 public class RbacAnalyzer {
     private final Set<RbacRule> rules;
     private final String serviceAccountNamespace;

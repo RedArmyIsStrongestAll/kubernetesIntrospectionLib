@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-service
+  namespace: test-namespace
+  labels:
+    service-label: test
+spec:
+  type: ClusterIP
+  clusterIP: 10.100.200.1
+  selector:
+    app: test-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080
+      nodePort: 30080
+  externalIPs:
+    - 192.168.1.100
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: another-service
+  namespace: test-namespace
+  labels:
+    service-label: another
+spec:
+  type: LoadBalancer
+  clusterIP: 10.100.200.2
+  selector:
+    app: another-app
+  ports:
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 8443
+      nodePort: 30443
+  externalIPs:
+    - 192.168.1.101
+    - 192.168.1.102

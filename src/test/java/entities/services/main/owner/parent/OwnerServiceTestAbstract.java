@@ -1,14 +1,14 @@
 package entities.services.main.owner.parent;
 
 import engine.RbacAnalyzer;
-import engine.owner.OwnerAnalyzer;
-import engine.owner.OwnerAnalyzerCronJob;
-import engine.owner.OwnerAnalyzerDaemonSet;
-import engine.owner.OwnerAnalyzerDeployment;
-import engine.owner.OwnerAnalyzerJob;
-import engine.owner.OwnerAnalyzerReplicaSet;
-import engine.owner.OwnerAnalyzerReplicationController;
-import engine.owner.OwnerAnalyzerStatefulSet;
+import engine.OwnerAnalyzer;
+import engine.owners.OwnerAnalyzerCronJob;
+import engine.owners.OwnerAnalyzerDaemonSet;
+import engine.owners.OwnerAnalyzerDeployment;
+import engine.owners.OwnerAnalyzerJob;
+import engine.owners.OwnerAnalyzerReplicaSet;
+import engine.owners.OwnerAnalyzerReplicationController;
+import engine.owners.OwnerAnalyzerStatefulSet;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;

@@ -85,7 +85,7 @@ public class ServiceService {
     }
 
 
-    public Service findServicesForPodWithPermission(PodInfo podInfo, String namespace, PermissionInfo permissionInfo) {
+    public ServiceDto findServicesForPodWithPermission(PodInfo podInfo, String namespace, PermissionInfo permissionInfo) {
         log.info("Stop findServicesForPodWithPermission");
         try {
             PermissionService.checkPermission(permissionInfo, () -> List.of(ResourcePermissionEnum.SERVICES_LIST,
@@ -98,7 +98,7 @@ public class ServiceService {
         }
     }
 
-    public Service findServicesForPod(PodInfo podInfo, String namespace) {
+    public ServiceDto findServicesForPod(PodInfo podInfo, String namespace) {
         log.info("Start findServicesForPod");
         try {
             Map<String, String> podLabels = podInfo.getLabels();
@@ -126,7 +126,10 @@ public class ServiceService {
                 log.warn(ErrorCodeEnum.SERVICE_MANY_FOUND.getMessage());
                 throw new KubernetesException(ErrorCodeEnum.SERVICE_MANY_FOUND);
             }
-            return serviceListForLabel.get(0);
+            Service service = serviceListForLabel.get(0);
+            log.info("Find services: {}", service);
+
+            return new ServiceDto(service);
 
         } catch (Exception e) {
             log.info("Stop findServicesForPod: ", e);
