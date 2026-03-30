@@ -2,9 +2,9 @@ package kubernetes.introspection.entities.services.main.replics.owner;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.LabelSelector;
-import kubernetes.introspection.entities.models.dto.owner.OwnerTypeEnum;
-import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
-import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
+import kubernetes.introspection.entities.models.owner.OwnerTypeEnum;
+import kubernetes.introspection.entities.models.permision.PermissionInfo;
+import kubernetes.introspection.entities.models.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.main.permision.PermissionService;
 import lombok.Getter;

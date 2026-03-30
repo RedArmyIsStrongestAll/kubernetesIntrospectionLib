@@ -1,4 +1,4 @@
-package kubernetes.introspection.entities.models.dto.pod;
+package kubernetes.introspection.entities.models.pod;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;

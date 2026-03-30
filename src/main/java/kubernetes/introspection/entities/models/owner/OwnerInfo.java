@@ -1,4 +1,4 @@
-package kubernetes.introspection.entities.models.dto.owner;
+package kubernetes.introspection.entities.models.owner;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.fabric8.kubernetes.api.model.batch.v1.JobStatus;

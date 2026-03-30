@@ -1,4 +1,4 @@
-package kubernetes.introspection.entities.models.dto.service;
+package kubernetes.introspection.entities.models.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;

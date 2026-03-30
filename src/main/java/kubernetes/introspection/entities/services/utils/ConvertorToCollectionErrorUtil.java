@@ -1,7 +1,7 @@
 package kubernetes.introspection.entities.services.utils;
 
-import kubernetes.introspection.entities.models.dto.enviroment.CollectionError;
-import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
+import kubernetes.introspection.entities.models.enviroment.CollectionError;
+import kubernetes.introspection.entities.models.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum;
 
 import java.time.Instant;

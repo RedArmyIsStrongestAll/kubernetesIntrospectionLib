@@ -2,9 +2,9 @@ package kubernetes.introspection.entities.services.main.owner.delegate;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import kubernetes.introspection.entities.models.dto.owner.OwnerInfo;
-import kubernetes.introspection.entities.models.dto.owner.OwnerTypeEnum;
-import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
+import kubernetes.introspection.entities.models.owner.OwnerInfo;
+import kubernetes.introspection.entities.models.owner.OwnerTypeEnum;
+import kubernetes.introspection.entities.models.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.services.main.owner.OwnerService;
 import lombok.extern.slf4j.Slf4j;
 

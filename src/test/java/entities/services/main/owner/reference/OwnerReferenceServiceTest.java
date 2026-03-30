@@ -2,8 +2,8 @@ package entities.services.main.owner.reference;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
-import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
-import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
+import kubernetes.introspection.entities.models.permision.PermissionInfo;
+import kubernetes.introspection.entities.models.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.main.owner.reference.OwnerReferenceService;
 import org.junit.jupiter.api.Assertions;

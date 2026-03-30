@@ -1,4 +1,4 @@
-package kubernetes.introspection.entities.models.dto.enviroment;
+package kubernetes.introspection.entities.models.enviroment;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum;

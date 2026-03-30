@@ -3,8 +3,8 @@ package kubernetes.introspection.entities.services.main.replics.owner.delegate;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
-import kubernetes.introspection.entities.models.dto.owner.OwnerTypeEnum;
-import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
+import kubernetes.introspection.entities.models.owner.OwnerTypeEnum;
+import kubernetes.introspection.entities.models.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.services.main.replics.owner.OwnerLabelService;
 import lombok.extern.slf4j.Slf4j;
 

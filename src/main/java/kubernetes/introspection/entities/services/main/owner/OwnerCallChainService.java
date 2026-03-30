@@ -1,7 +1,7 @@
 package kubernetes.introspection.entities.services.main.owner;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
-import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
+import kubernetes.introspection.entities.models.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

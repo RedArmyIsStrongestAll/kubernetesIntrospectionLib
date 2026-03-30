@@ -2,8 +2,8 @@ package entities.services.init.permision;
 
 import entities.services.init.permision.parent.InitPermissionsServiceTestAbstract;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
-import kubernetes.introspection.entities.models.dto.enviroment.CollectionError;
-import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
+import kubernetes.introspection.entities.models.enviroment.CollectionError;
+import kubernetes.introspection.entities.models.permision.PermissionInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
 
-import static kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum.PODS_WATCH;
+import static kubernetes.introspection.entities.models.permision.ResourcePermissionEnum.PODS_WATCH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

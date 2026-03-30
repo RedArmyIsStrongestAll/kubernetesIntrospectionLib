@@ -1,4 +1,4 @@
-package kubernetes.introspection.entities.models.dto.permision;
+package kubernetes.introspection.entities.models.permision;
 
 import lombok.Getter;
 

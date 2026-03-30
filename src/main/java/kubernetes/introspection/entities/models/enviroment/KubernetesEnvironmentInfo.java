@@ -1,10 +1,10 @@
-package kubernetes.introspection.entities.models.dto.enviroment;
+package kubernetes.introspection.entities.models.enviroment;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import kubernetes.introspection.entities.models.dto.owner.OwnerInfo;
-import kubernetes.introspection.entities.models.dto.pod.PodInfo;
-import kubernetes.introspection.entities.models.dto.service.ServiceInfo;
-import kubernetes.introspection.entities.models.dto.source.ConfigSourceInfo;
+import kubernetes.introspection.entities.models.owner.OwnerInfo;
+import kubernetes.introspection.entities.models.pod.PodInfo;
+import kubernetes.introspection.entities.models.service.ServiceInfo;
+import kubernetes.introspection.entities.models.source.ConfigSourceInfo;
 import lombok.Builder;
 import lombok.Data;
 

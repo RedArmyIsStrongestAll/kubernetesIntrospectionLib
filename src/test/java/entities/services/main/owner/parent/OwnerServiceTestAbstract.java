@@ -12,7 +12,7 @@ import engine.owners.OwnerAnalyzerStatefulSet;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
-import kubernetes.introspection.entities.models.dto.owner.OwnerTypeEnum;
+import kubernetes.introspection.entities.models.owner.OwnerTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Constructor;

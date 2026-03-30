@@ -1,4 +1,4 @@
-package kubernetes.introspection.entities.models.dto.owner;
+package kubernetes.introspection.entities.models.owner;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;

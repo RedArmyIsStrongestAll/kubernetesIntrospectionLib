@@ -1,8 +1,8 @@
 package entities.services.main.pod.chain;
 
 import io.fabric8.kubernetes.api.model.Pod;
-import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
-import kubernetes.introspection.entities.models.dto.pod.PodInfo;
+import kubernetes.introspection.entities.models.permision.PermissionInfo;
+import kubernetes.introspection.entities.models.pod.PodInfo;
 import kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.main.pod.CurrentPodService;
