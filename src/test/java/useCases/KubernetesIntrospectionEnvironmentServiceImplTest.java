@@ -14,6 +14,8 @@ import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import kubernetes.introspection.entities.models.enviroment.KubernetesEnvironmentInfo;
 import kubernetes.introspection.entities.services.env.EnvironmentProviderSystemImpl;
 import kubernetes.introspection.entities.services.env.GetVarsServicesDtoService;
+import kubernetes.introspection.entities.services.env.KubernetesFileReadService;
+import kubernetes.introspection.entities.services.env.KubernetesFileReadServiceFileImpl;
 import kubernetes.introspection.entities.services.init.InitDetectorService;
 import kubernetes.introspection.useCases.KubernetesIntrospectionEnvironmentServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +26,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -48,14 +49,16 @@ public class KubernetesIntrospectionEnvironmentServiceImplTest {
     protected KubernetesMockServer mockServer;
     protected KubernetesClient client;
 
-    protected EnvironmentProviderSystemImpl mockProvider;
+    protected EnvironmentProviderSystemImpl mockEnvProvider;
+    protected KubernetesFileReadService mockFileReadService;
 
     @BeforeEach
     void setUp() {
         mockServer = new KubernetesMockServer();
         mockServer.init();
         client = mockServer.createClient();
-        mockProvider = mock(EnvironmentProviderSystemImpl.class);
+        mockEnvProvider = mock(EnvironmentProviderSystemImpl.class);
+        mockFileReadService = mock(KubernetesFileReadServiceFileImpl.class);
     }
 
     @AfterEach
@@ -69,14 +72,18 @@ public class KubernetesIntrospectionEnvironmentServiceImplTest {
         String yamlRbacPath = "commonsIntegration/deployment-all-rbac.yaml";
 
         //InitDetectorService
-        InitDetectorService mockInitService = getInitDetectorService();
+        InitDetectorService mockInitService = new InitDetectorService(mockFileReadService);
+        when(mockFileReadService.getKubernetesHostEnv()).thenReturn("1.1.1.1");
+        when(mockFileReadService.tokenExists()).thenReturn(true);
+        when(mockFileReadService.namespaceExists()).thenReturn(true);
+        when(mockFileReadService.getNamespace()).thenReturn(NAMESPACE);
 
         //InitPermissionService
         RbacAnalyzer rbacAnalyzer = getRbacAnalyzer(yamlRbacPath);
         setupMockServerWithRbacAnalyzer(rbacAnalyzer);
 
         //CurrentPodServiceConstDownward
-        when(mockProvider.getPodName()).thenReturn(POD_NAME);
+        when(mockEnvProvider.getPodName()).thenReturn(POD_NAME);
         PodAnalyzer podAnalyzer = getPodAnalyzer(rbacAnalyzer, yamlPath);
         setupMockServerWithPodByName(podAnalyzer, POD_NAME);
 
@@ -119,32 +126,10 @@ public class KubernetesIntrospectionEnvironmentServiceImplTest {
         setupMockServerWithSecretByName(SECRET_NAME, secretAnalyzer);
 
         KubernetesIntrospectionEnvironmentServiceImpl service = new KubernetesIntrospectionEnvironmentServiceImpl(mockInitService);
-        GetVarsServicesDtoService vars = new GetVarsServicesDtoService(mockProvider, null, null, null);
+        GetVarsServicesDtoService vars = new GetVarsServicesDtoService(mockEnvProvider, null, null, null);
         KubernetesEnvironmentInfo result = service.getKubernetesEnvironmentInfo(vars);
 
         Assertions.assertNotNull(result);
-    }
-
-    protected InitDetectorService getInitDetectorService() {
-        InitDetectorService testService = new InitDetectorService() {
-            @Override
-            public String getKubernetesHostEnv() {
-                return "1.2.3.4";
-            }
-
-            @Override
-            public boolean isFileExists(Path path) {
-                return true;
-            }
-
-            @Override
-            public String readFileContent(Path path) throws IOException {
-                return "test-namespace";
-            }
-
-        };
-
-        return testService;
     }
 
 

@@ -2,140 +2,93 @@ package entities.services.init.detector;
 
 import kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
+import kubernetes.introspection.entities.services.env.KubernetesFileReadService;
 import kubernetes.introspection.entities.services.init.InitDetectorService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import java.nio.file.Files;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 class InitDetectorServiceTest {
 
+    @Mock
+    private KubernetesFileReadService kubernetesFileReadService;
+
+    @InjectMocks
+    private InitDetectorService initDetectorService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
     @Test
     void runningInKubernetesNoKubernetesHostEnvTest() {
-        InitDetectorService testService = new InitDetectorService() {
-            @Override
-            public String getKubernetesHostEnv() {
-                return null;
-            }
-        };
+        when(kubernetesFileReadService.getKubernetesHostEnv()).thenReturn(null);
+        when(kubernetesFileReadService.namespaceExists()).thenReturn(true);
+        when(kubernetesFileReadService.tokenExists()).thenReturn(true);
 
-        try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
-            mockedFiles.when(() -> Files.exists(InitDetectorService.getNamespacePath()))
-                    .thenReturn(true);
-            mockedFiles.when(() -> Files.exists(InitDetectorService.getTokenPath()))
-                    .thenReturn(true);
-
-            boolean result = testService.runningInKubernetes();
-            assertFalse(result);
-        }
+        boolean result = initDetectorService.runningInKubernetes();
+        assertFalse(result);
     }
 
     @Test
     void runningInKubernetesNoTokenFileTest() {
-        InitDetectorService testService = new InitDetectorService() {
-            @Override
-            public String getKubernetesHostEnv() {
-                return "1.2.3.4";
-            }
-        };
+        when(kubernetesFileReadService.getKubernetesHostEnv()).thenReturn("1.2.3.4");
+        when(kubernetesFileReadService.namespaceExists()).thenReturn(true);
+        when(kubernetesFileReadService.tokenExists()).thenReturn(false);
 
-        try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
-            mockedFiles.when(() -> Files.exists(InitDetectorService.getNamespacePath()))
-                    .thenReturn(true);
-            mockedFiles.when(() -> Files.exists(InitDetectorService.getTokenPath()))
-                    .thenReturn(false);
-
-            boolean result = testService.runningInKubernetes();
-            assertFalse(result);
-        }
+        boolean result = initDetectorService.runningInKubernetes();
+        assertFalse(result);
     }
-
 
     @Test
     void runningInKubernetesSuccessTest() {
-        InitDetectorService testService = new InitDetectorService() {
-            @Override
-            public String getKubernetesHostEnv() {
-                return "1.2.3.4";
-            }
-        };
+        when(kubernetesFileReadService.getKubernetesHostEnv()).thenReturn("1.2.3.4");
+        when(kubernetesFileReadService.namespaceExists()).thenReturn(true);
+        when(kubernetesFileReadService.tokenExists()).thenReturn(true);
 
-        try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
-            mockedFiles.when(() -> Files.exists(InitDetectorService.getNamespacePath()))
-                    .thenReturn(true);
-            mockedFiles.when(() -> Files.exists(InitDetectorService.getTokenPath()))
-                    .thenReturn(true);
-
-            boolean result = testService.runningInKubernetes();
-            assertTrue(result);
-        }
+        boolean result = initDetectorService.runningInKubernetes();
+        assertTrue(result);
     }
 
     @Test
     void getNamespaceNoNamespaceFileTest() {
-        InitDetectorService testService = new InitDetectorService() {
-            @Override
-            public String getKubernetesHostEnv() {
-                return "1.2.3.4";
-            }
-        };
+        when(kubernetesFileReadService.getKubernetesHostEnv()).thenReturn("1.2.3.4");
+        when(kubernetesFileReadService.namespaceExists()).thenReturn(false);
 
-        try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
-            mockedFiles.when(() -> Files.exists(InitDetectorService.getNamespacePath()))
-                    .thenReturn(false);
-
-            KubernetesException ex = assertThrows(KubernetesException.class, testService::getNamespace);
-            assertEquals(ErrorCodeEnum.NOT_IN_CLUSTER, ex.getErrorCodeEnum());
-        }
+        KubernetesException ex = assertThrows(KubernetesException.class, () -> initDetectorService.getNamespace());
+        assertEquals(ErrorCodeEnum.NOT_IN_CLUSTER, ex.getErrorCodeEnum());
     }
 
     @Test
-    void getNamespaceReturnsValidNamespaceTest() {
-        InitDetectorService testService = new InitDetectorService() {
-            @Override
-            public String getKubernetesHostEnv() {
-                return "1.2.3.4";
-            }
-        };
+    void getNamespaceReturnsValidNamespaceTest() throws IOException {
+        when(kubernetesFileReadService.getKubernetesHostEnv()).thenReturn("1.2.3.4");
+        when(kubernetesFileReadService.namespaceExists()).thenReturn(true);
+        when(kubernetesFileReadService.tokenExists()).thenReturn(true);
+        when(kubernetesFileReadService.getNamespace()).thenReturn("test-namespace");
 
-        try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
-            mockedFiles.when(() -> Files.exists(InitDetectorService.getTokenPath()))
-                    .thenReturn(true);
-            mockedFiles.when(() -> Files.exists(InitDetectorService.getNamespacePath()))
-                    .thenReturn(true);
-            mockedFiles.when(() -> Files.readString(InitDetectorService.getNamespacePath()))
-                    .thenReturn("test-namespace");
-
-            String result = testService.getNamespace();
-            assertEquals("test-namespace", result);
-        }
+        String result = initDetectorService.getNamespace();
+        assertEquals("test-namespace", result);
     }
 
     @Test
-    void getNamespaceReturnsEmptyNamespaceTest() {
-        InitDetectorService testService = new InitDetectorService() {
-            @Override
-            public String getKubernetesHostEnv() {
-                return "1.2.3.4";
-            }
-        };
+    void getNamespaceReturnsEmptyNamespaceTest() throws IOException {
+        when(kubernetesFileReadService.getKubernetesHostEnv()).thenReturn("1.2.3.4");
+        when(kubernetesFileReadService.namespaceExists()).thenReturn(true);
+        when(kubernetesFileReadService.tokenExists()).thenReturn(true);
+        when(kubernetesFileReadService.getNamespace()).thenReturn("");
 
-        try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
-            mockedFiles.when(() -> Files.exists(InitDetectorService.getTokenPath()))
-                    .thenReturn(true);
-            mockedFiles.when(() -> Files.exists(InitDetectorService.getNamespacePath()))
-                    .thenReturn(true);
-            mockedFiles.when(() -> Files.readString(InitDetectorService.getNamespacePath()))
-                    .thenReturn("");
-
-            KubernetesException ex = assertThrows(KubernetesException.class, testService::getNamespace);
-            assertEquals(ErrorCodeEnum.NOT_NAMESPACE, ex.getErrorCodeEnum());
-        }
+        KubernetesException ex = assertThrows(KubernetesException.class, () -> initDetectorService.getNamespace());
+        assertEquals(ErrorCodeEnum.NOT_NAMESPACE, ex.getErrorCodeEnum());
     }
 }

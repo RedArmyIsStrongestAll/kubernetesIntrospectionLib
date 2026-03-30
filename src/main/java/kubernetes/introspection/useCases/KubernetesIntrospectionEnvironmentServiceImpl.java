@@ -10,6 +10,8 @@ import kubernetes.introspection.entities.models.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.service.ServiceEndpointAddress;
 import kubernetes.introspection.entities.models.source.ConfigSourceInfo;
 import kubernetes.introspection.entities.services.env.GetVarsServicesDtoService;
+import kubernetes.introspection.entities.services.env.KubernetesFileReadService;
+import kubernetes.introspection.entities.services.env.KubernetesFileReadServiceFileImpl;
 import kubernetes.introspection.entities.services.init.InitDetectorService;
 import kubernetes.introspection.entities.services.init.InitPermissionsService;
 import kubernetes.introspection.entities.services.main.owner.OwnerCallChainService;
@@ -62,7 +64,8 @@ public class KubernetesIntrospectionEnvironmentServiceImpl implements Kubernetes
     List<OwnerLabelService> replicCallServiceList;
 
     public KubernetesIntrospectionEnvironmentServiceImpl() {
-        this.initDetectorService = new InitDetectorService();
+        KubernetesFileReadService k8sFileReadService = new KubernetesFileReadServiceFileImpl();
+        this.initDetectorService = new InitDetectorService(k8sFileReadService);
     }
 
     @Deprecated(since = "Using only for test")
