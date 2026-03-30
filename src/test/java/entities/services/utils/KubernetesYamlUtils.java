@@ -74,4 +74,10 @@ public class KubernetesYamlUtils {
                 })
                 .collect(Collectors.joining("%2C")); // , → %2C
     }
+
+    public static String buildFieldSelectorQuery(String key, String value) {
+        String encodedKey = java.net.URLEncoder.encode(key, StandardCharsets.UTF_8);
+        String encodedValue = java.net.URLEncoder.encode(value, StandardCharsets.UTF_8);
+        return encodedKey + "%3D" + encodedValue;
+    }
 }

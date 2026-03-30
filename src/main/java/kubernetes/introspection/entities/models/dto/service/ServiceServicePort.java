@@ -10,7 +10,7 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
 @Data
-public class ServicePort {
+public class ServiceServicePort {
     /**
      * Имя порта (если есть)
      */

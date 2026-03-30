@@ -3,6 +3,7 @@ package kubernetes.introspection.entities.services.main.service;
 import io.fabric8.kubernetes.api.model.EndpointAddress;
 import io.fabric8.kubernetes.api.model.EndpointPort;
 import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.api.model.EndpointsList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
@@ -78,8 +79,8 @@ public class EndpointService {
     }
 
 
-    public Endpoints getEndpointsForServiceWithPermission(String serviceName, String namespace,
-                                                          PermissionInfo permissionInfo) {
+    public EndpointDto getEndpointsForServiceWithPermission(String serviceName, String namespace,
+                                                            PermissionInfo permissionInfo) {
         log.info("Start getEndpointsForServiceWithPermission");
         try {
             PermissionService.checkPermission(permissionInfo, () -> List.of(
@@ -93,7 +94,7 @@ public class EndpointService {
         }
     }
 
-    public Endpoints getEndpointsForService(String serviceName, String namespace) {
+    public EndpointDto getEndpointsForService(String serviceName, String namespace) {
         log.info("Start getEndpointsForService");
         try {
             if (serviceName == null || serviceName.isEmpty()) {
@@ -101,17 +102,24 @@ public class EndpointService {
                 throw new KubernetesException(ErrorCodeEnum.ENDPOINTS_NOT_FOUND);
             }
 
-            Endpoints endpoints = kubernetesClient.endpoints()
+            EndpointsList endpointsList = kubernetesClient.endpoints()
                     .inNamespace(namespace)
-                    .withName(serviceName)
-                    .get();
+                    .withField("metadata.name", serviceName)
+                    .list();
 
-            if (endpoints == null) {
+            if (endpointsList == null || endpointsList.getItems() == null || endpointsList.getItems().isEmpty()) {
                 log.warn("Endpoints not found for service: {}", serviceName);
                 throw new KubernetesException(ErrorCodeEnum.ENDPOINTS_NOT_FOUND);
             }
+            if (endpointsList.getItems().size() > 1) {
+                log.warn("Multiple endpoints found for service: {}", serviceName);
+                throw new KubernetesException(ErrorCodeEnum.ENDPOINTS_MANY_FOUND);
+            }
 
-            return endpoints;
+            Endpoints endpoint = endpointsList.getItems().get(0);
+            log.warn("Endpoints found: {}", endpoint);
+
+            return new EndpointDto(endpoint);
         } catch (Exception e) {
             log.error("Stop getEndpointsForService", e);
             throw new KubernetesException(ErrorCodeEnum.ENDPOINTS_NOT_FOUND);

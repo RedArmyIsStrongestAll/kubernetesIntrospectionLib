@@ -55,7 +55,7 @@ public class ServiceInfo {
     /**
      * Порты, на которых слушает сервис
      */
-    private List<ServicePort> ports;
+    private List<ServiceServicePort> ports;
 
     /**
      * Селекторы, связывающие сервис с подами

@@ -58,6 +58,10 @@ public enum ErrorCodeEnum {
 
     ENDPOINTS_NOT_FOUND(400, "Resource not found",
             "Endpoint not found",
+            false),
+
+    ENDPOINTS_MANY_FOUND(400, "Resource not found",
+            "Endpoint more than one found",
             false);
 
 

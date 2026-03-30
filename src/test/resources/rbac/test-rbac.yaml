@@ -45,19 +45,24 @@ rules:
     resources: [ "cronjobs" ]
     verbs: [ "get", "list", "watch" ]
 
-  # checkServiceResources
-  - apiGroups: [""]
-    resources: ["services"]
-    verbs: ["get", "list", "watch"]
 
   # checkServiceResources
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["get", "list", "watch"]
+  - apiGroups: [ "" ]
+    resources: [ "services" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "" ]
+    resources: [ "endpoints" ]
+    verbs: [ "get", "list", "watch" ]
 
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list", "watch"]
+
+  # checkServiceResources
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "get", "list", "watch" ]
+
+  - apiGroups: [ "" ]
+    resources: [ "secrets" ]
+    verbs: [ "get", "list", "watch" ]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1

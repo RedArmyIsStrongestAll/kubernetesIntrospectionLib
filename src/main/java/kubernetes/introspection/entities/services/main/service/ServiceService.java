@@ -2,12 +2,13 @@ package kubernetes.introspection.entities.services.main.service;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.models.dto.permision.PermissionInfo;
 import kubernetes.introspection.entities.models.dto.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.models.dto.pod.PodInfo;
 import kubernetes.introspection.entities.models.dto.service.ServiceInfo;
-import kubernetes.introspection.entities.models.dto.service.ServicePort;
+import kubernetes.introspection.entities.models.dto.service.ServiceServicePort;
 import kubernetes.introspection.entities.models.exceptions.ErrorCodeEnum;
 import kubernetes.introspection.entities.models.exceptions.KubernetesException;
 import kubernetes.introspection.entities.services.main.permision.PermissionService;
@@ -62,7 +63,7 @@ public class ServiceService {
         }
     }
 
-    private static List<ServicePort> mapPorts(List<io.fabric8.kubernetes.api.model.ServicePort> portList) {
+    private static List<ServiceServicePort> mapPorts(List<ServicePort> portList) {
         log.info("Start mapPorts");
         try {
             if (portList == null || portList.isEmpty()) {
@@ -70,7 +71,7 @@ public class ServiceService {
             }
 
             return portList.stream()
-                    .map(port -> ServicePort.builder()
+                    .map(port -> ServiceServicePort.builder()
                             .name(port.getName())
                             .protocol(port.getProtocol())
                             .port(port.getPort())
