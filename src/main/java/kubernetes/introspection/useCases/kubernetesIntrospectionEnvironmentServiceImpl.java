@@ -56,7 +56,6 @@ import java.util.List;
 public class kubernetesIntrospectionEnvironmentServiceImpl implements kubernetesIntrospectionEnvironmentService {
 
     private final InitDetectorService initDetectorService;
-
     List<CurrentPodService> podCallServiceList;
     List<OwnerService> ownerCallServiceList;
     List<OwnerLabelService> replicCallServiceList;
@@ -65,29 +64,22 @@ public class kubernetesIntrospectionEnvironmentServiceImpl implements kubernetes
         initDetectorService = new InitDetectorService();
     }
 
-
     @Override
     public KubernetesEnvironmentInfo getKubernetesEnvironmentInfo(GetVarsServicesDtoService vars) {
         try {
-            String namespace = getNamespace();
+            log.info("Starting getKubernetesEnvironmentInfo");
 
+            String namespace = getNamespace();
             try (KubernetesClient client = new KubernetesClientBuilder().build()) {
                 PermissionInfo permissionInfo = getPermission(client, namespace);
                 List<CollectionError> collectionErrorList = ConvertorToCollectionErrorUtil.convertToCollectionErrors(permissionInfo, namespace);
-
                 initServices(client, namespace, vars);
-
                 CurrentPodService.CurrentPodDto currentPodDto = getCurrentPod(permissionInfo);
-
                 OwnerReference k8sOwnerReference = getOwnerReference(currentPodDto, collectionErrorList);
-
                 OwnerService.OwnerDto ownerDto = getOwner(permissionInfo, k8sOwnerReference, collectionErrorList);
-
                 ReplicaPodsService.ReplicaPodsDto replicaPodsDto = getReplicaPods(permissionInfo, client, k8sOwnerReference, ownerDto, currentPodDto, collectionErrorList);
-
                 ServiceService.ServiceDto serviceDto = getServices(permissionInfo, namespace, client, currentPodDto, collectionErrorList);
                 EndpointService.EndpointDto endpointDto = getEndpoints(serviceDto.getServiceInfo().getName(), namespace, client, permissionInfo, collectionErrorList);
-
                 ConfigMapSourceService.ConfigMapDto configMapDto = getConfigMaps(client, namespace, currentPodDto, permissionInfo, collectionErrorList);
                 SecretSourceService.SecretDto secretDto = getSecrets(client, namespace, currentPodDto, permissionInfo, collectionErrorList);
                 List<ConfigSourceInfo> configSourceInfoList = mergerConfigSourceInfo(configMapDto.getConfigSourceInfoList(), secretDto.getConfigSourceInfoList());
@@ -100,36 +92,51 @@ public class kubernetesIntrospectionEnvironmentServiceImpl implements kubernetes
                         .configSources(configMapDto.getConfigSourceInfoList())
                         .collectionTimestamp(Instant.now().toString())
                         .errors(collectionErrorList).build();
+
+                log.info("getKubernetesEnvironmentInfo result: {}", kubernetesEnvironmentInfo);
                 return kubernetesEnvironmentInfo;
 
             } finally {
                 disableServices();
             }
-
         } catch (KubernetesException e) {
-            log.error("Critical known error: {}", e.getErrorCodeEnum());
+            log.error("Critical known error in getKubernetesEnvironmentInfo: {}", e.getErrorCodeEnum(), e);
             CollectionError error = ConvertorToCollectionErrorUtil.convertToCollectionErrors(e.getErrorCodeEnum());
             return KubernetesEnvironmentInfo.builder().errors(List.of(error)).build();
-
         } catch (Exception e) {
-            log.error("Critical unknown error: {}", e.getMessage());
+            log.error("Critical unknown error in getKubernetesEnvironmentInfo: {}", e.getMessage(), e);
             CollectionError error = ConvertorToCollectionErrorUtil.convertToCollectionErrors(e);
             return KubernetesEnvironmentInfo.builder().errors(List.of(error)).build();
         }
     }
 
-
     private String getNamespace() throws KubernetesException {
-        return initDetectorService.getNamespace();
+        log.info("Starting getNamespace");
+        try {
+            String namespace = initDetectorService.getNamespace();
+            log.info("getNamespace result: {}", namespace);
+            return namespace;
+        } catch (KubernetesException e) {
+            log.error("Error in getNamespace: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     private PermissionInfo getPermission(KubernetesClient client, String namespace) throws KubernetesException {
-        InitPermissionsService initPermissionsService = new InitPermissionsService(client);
-        return initPermissionsService.checkPermissions(namespace);
+        log.info("Starting getPermission");
+        try {
+            InitPermissionsService initPermissionsService = new InitPermissionsService(client);
+            PermissionInfo permissionInfo = initPermissionsService.checkPermissions(namespace);
+            log.info("getPermission result: {}", permissionInfo);
+            return permissionInfo;
+        } catch (KubernetesException e) {
+            log.error("Error in getPermission: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
-
     private void initServices(KubernetesClient client, String namespace, GetVarsServicesDtoService vars) {
+        log.info("Starting initServices");
         podCallServiceList = List.of(
                 new CurrentPodServiceConstDownwardApiExt(client, namespace, vars.getEnvironmentProviderSystemImpl()),
                 new CurrentPodServiceHostnameInetAddressExt(client, namespace, vars.getEnvironmentProviderSystemImpl()),
@@ -138,7 +145,6 @@ public class kubernetesIntrospectionEnvironmentServiceImpl implements kubernetes
                 new CurrentPodServiceLabelsExt(client, namespace, vars.getPodConstLabels()),
                 new CurrentPodServiceConstIpPodExt(client, namespace, vars.getPodConstIp())
         );
-
         ownerCallServiceList = List.of(
                 new OwnerServiceCronJobExt(client, namespace),
                 new OwnerServiceDaemonSetExt(client, namespace),
@@ -149,7 +155,6 @@ public class kubernetesIntrospectionEnvironmentServiceImpl implements kubernetes
                 new OwnerServiceStatefulSetExt(client, namespace),
                 new OwnerServiceUnknownExt(client, namespace)
         );
-
         replicCallServiceList = List.of(
                 new OwnerLabelServiceCronJobExt(),
                 new OwnerLabelServiceDaemonSetExt(),
@@ -160,139 +165,147 @@ public class kubernetesIntrospectionEnvironmentServiceImpl implements kubernetes
                 new OwnerLabelServiceStatefulSetExt(),
                 new OwnerLabelServiceUnknownExt()
         );
+        log.info("initServices finished");
     }
 
     private CurrentPodService.CurrentPodDto getCurrentPod(PermissionInfo permissionInfo) throws KubernetesException {
-        CurrentPorCallChainService currentPorCallChainService = new CurrentPorCallChainService(podCallServiceList);
-        return currentPorCallChainService.getPodWithPermission(permissionInfo);
+        log.info("Starting getCurrentPod");
+        try {
+            CurrentPorCallChainService currentPorCallChainService = new CurrentPorCallChainService(podCallServiceList);
+            CurrentPodService.CurrentPodDto currentPodDto = currentPorCallChainService.getPodWithPermission(permissionInfo);
+            log.info("getCurrentPod result: {}", currentPodDto);
+            return currentPodDto;
+        } catch (KubernetesException e) {
+            log.error("Error in getCurrentPod: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
-
-    private OwnerReference getOwnerReference(CurrentPodService.CurrentPodDto currentPodDto,
-                                             List<CollectionError> collectionErrorList) {
-
-        OwnerReference k8sOwnerReference;
+    private OwnerReference getOwnerReference(CurrentPodService.CurrentPodDto currentPodDto, List<CollectionError> collectionErrorList) {
+        log.info("Starting getOwnerReference");
         try {
             OwnerReferenceService ownerReferenceService = new OwnerReferenceService();
-            k8sOwnerReference = ownerReferenceService.getPodOwner(currentPodDto.getK8sPod());
+            OwnerReference k8sOwnerReference = ownerReferenceService.getPodOwner(currentPodDto.getK8sPod());
+            log.info("getOwnerReference result: {}", k8sOwnerReference);
+            return k8sOwnerReference;
         } catch (KubernetesException e) {
+            log.error("Error in getOwnerReference: {}", e.getMessage(), e);
             collectionErrorList.add(ConvertorToCollectionErrorUtil.convertToCollectionErrors(e.getErrorCodeEnum()));
             return null;
         }
-        return k8sOwnerReference;
     }
 
-    private OwnerService.OwnerDto getOwner(PermissionInfo permissionInfo, OwnerReference k8sOwnerReference,
-                                           List<CollectionError> collectionErrorList) {
-
-        OwnerService.OwnerDto ownerDto;
+    private OwnerService.OwnerDto getOwner(PermissionInfo permissionInfo, OwnerReference k8sOwnerReference, List<CollectionError> collectionErrorList) {
+        log.info("Starting getOwner");
         try {
             OwnerCallChainService ownerCallChainService = new OwnerCallChainService(ownerCallServiceList);
-            ownerDto = ownerCallChainService.getOwnerWithPermission(k8sOwnerReference, permissionInfo);
+            OwnerService.OwnerDto ownerDto = ownerCallChainService.getOwnerWithPermission(k8sOwnerReference, permissionInfo);
+            log.info("getOwner result: {}", ownerDto);
+            return ownerDto;
         } catch (KubernetesException e) {
+            log.error("Error in getOwner: {}", e.getMessage(), e);
             collectionErrorList.add(ConvertorToCollectionErrorUtil.convertToCollectionErrors(e.getErrorCodeEnum()));
-            ownerDto = new OwnerService.OwnerDto(null, null, null);
+            return new OwnerService.OwnerDto(null, null, null);
         }
-        return ownerDto;
     }
 
-    private ReplicaPodsService.ReplicaPodsDto getReplicaPods(PermissionInfo permissionInfo, KubernetesClient client,
-                                                             OwnerReference k8sOwnerReference, OwnerService.OwnerDto ownerDto,
-                                                             CurrentPodService.CurrentPodDto currentPodDto,
-                                                             List<CollectionError> collectionErrorList) {
-
-        ReplicaPodsService.ReplicaPodsDto replicaPodsDto;
+    private ReplicaPodsService.ReplicaPodsDto getReplicaPods(PermissionInfo permissionInfo, KubernetesClient client, OwnerReference k8sOwnerReference, OwnerService.OwnerDto ownerDto, CurrentPodService.CurrentPodDto currentPodDto, List<CollectionError> collectionErrorList) {
+        log.info("Starting getReplicaPods");
         try {
             OwnerLabelCallChainService ownerLabelCallChainService = new OwnerLabelCallChainService(replicCallServiceList);
             ReplicaPodsService replicaPodsService = new ReplicaPodsService(client, ownerLabelCallChainService);
-            replicaPodsDto = replicaPodsService.getReplicaPodsWithPermission(k8sOwnerReference, ownerDto, currentPodDto.getK8sPod(), permissionInfo);
-
+            ReplicaPodsService.ReplicaPodsDto replicaPodsDto = replicaPodsService.getReplicaPodsWithPermission(k8sOwnerReference, ownerDto, currentPodDto.getK8sPod(), permissionInfo);
+            log.info("getReplicaPods result: {}", replicaPodsDto);
+            return replicaPodsDto;
         } catch (KubernetesException e) {
+            log.error("Error in getReplicaPods: {}", e.getMessage(), e);
             collectionErrorList.add(ConvertorToCollectionErrorUtil.convertToCollectionErrors(e.getErrorCodeEnum()));
-            replicaPodsDto = new ReplicaPodsService.ReplicaPodsDto(null, null);
+            return new ReplicaPodsService.ReplicaPodsDto(null, null);
         }
-        return replicaPodsDto;
     }
 
-    private ServiceService.ServiceDto getServices(PermissionInfo permissionInfo, String namespace,
-                                                  KubernetesClient client, CurrentPodService.CurrentPodDto currentPodDto,
-                                                  List<CollectionError> collectionErrorList) {
-
-        ServiceService.ServiceDto serviceDto;
+    private ServiceService.ServiceDto getServices(PermissionInfo permissionInfo, String namespace, KubernetesClient client, CurrentPodService.CurrentPodDto currentPodDto, List<CollectionError> collectionErrorList) {
+        log.info("Starting getServices");
         try {
             ServiceService serviceService = new ServiceService(client);
-            serviceDto = serviceService.findServicesForPodWithPermission(currentPodDto.getPodInfo(), namespace, permissionInfo);
+            ServiceService.ServiceDto serviceDto = serviceService.findServicesForPodWithPermission(currentPodDto.getPodInfo(), namespace, permissionInfo);
+            log.info("getServices result: {}", serviceDto);
+            return serviceDto;
         } catch (KubernetesException e) {
+            log.error("Error in getServices: {}", e.getMessage(), e);
             collectionErrorList.add(ConvertorToCollectionErrorUtil.convertToCollectionErrors(e.getErrorCodeEnum()));
-            serviceDto = new ServiceService.ServiceDto(null, null);
+            return new ServiceService.ServiceDto(null, null);
         }
-        return serviceDto;
     }
 
-    private EndpointService.EndpointDto getEndpoints(String serviceName, String namespace, KubernetesClient client,
-                                                     PermissionInfo permissionInfo, List<CollectionError> collectionErrorList) {
-
-        EndpointService.EndpointDto endpointDto;
+    private EndpointService.EndpointDto getEndpoints(String serviceName, String namespace, KubernetesClient client, PermissionInfo permissionInfo, List<CollectionError> collectionErrorList) {
+        log.info("Starting getEndpoints");
         try {
             EndpointService endpointService = new EndpointService(client);
-            endpointDto = endpointService.getEndpointsForServiceWithPermission(serviceName, namespace, permissionInfo);
+            EndpointService.EndpointDto endpointDto = endpointService.getEndpointsForServiceWithPermission(serviceName, namespace, permissionInfo);
+            log.info("getEndpoints result: {}", endpointDto);
+            return endpointDto;
         } catch (KubernetesException e) {
+            log.error("Error in getEndpoints: {}", e.getMessage(), e);
             collectionErrorList.add(ConvertorToCollectionErrorUtil.convertToCollectionErrors(e.getErrorCodeEnum()));
-            endpointDto = new EndpointService.EndpointDto(null, null);
+            return new EndpointService.EndpointDto(null, null);
         }
-        return endpointDto;
     }
 
-    private ConfigMapSourceService.ConfigMapDto getConfigMaps(KubernetesClient client, String namespace,
-                                                              CurrentPodService.CurrentPodDto currentPodDto,
-                                                              PermissionInfo permissionInfo,
-                                                              List<CollectionError> collectionErrorList) {
-
-        ConfigMapSourceService.ConfigMapDto configMapDto;
+    private ConfigMapSourceService.ConfigMapDto getConfigMaps(KubernetesClient client, String namespace, CurrentPodService.CurrentPodDto currentPodDto, PermissionInfo permissionInfo, List<CollectionError> collectionErrorList) {
+        log.info("Starting getConfigMaps");
         try {
             ConfigMapSourceService configMapSourceService = new ConfigMapSourceService(client, namespace);
-            configMapDto = configMapSourceService.getConfigMapSourcesWithPermission(currentPodDto.getK8sPod(), permissionInfo);
+            ConfigMapSourceService.ConfigMapDto configMapDto = configMapSourceService.getConfigMapSourcesWithPermission(currentPodDto.getK8sPod(), permissionInfo);
+            log.info("getConfigMaps result: {}", configMapDto);
+            return configMapDto;
         } catch (KubernetesException e) {
+            log.error("Error in getConfigMaps: {}", e.getMessage(), e);
             collectionErrorList.add(ConvertorToCollectionErrorUtil.convertToCollectionErrors(e.getErrorCodeEnum()));
-            configMapDto = new ConfigMapSourceService.ConfigMapDto();
+            return new ConfigMapSourceService.ConfigMapDto();
         }
-        return configMapDto;
     }
 
-    private SecretSourceService.SecretDto getSecrets(KubernetesClient client, String namespace,
-                                                     CurrentPodService.CurrentPodDto currentPodDto,
-                                                     PermissionInfo permissionInfo,
-                                                     List<CollectionError> collectionErrorList) {
-
-        SecretSourceService.SecretDto secretDto;
+    private SecretSourceService.SecretDto getSecrets(KubernetesClient client, String namespace, CurrentPodService.CurrentPodDto currentPodDto, PermissionInfo permissionInfo, List<CollectionError> collectionErrorList) {
+        log.info("Starting getSecrets");
         try {
             SecretSourceService secretSourceService = new SecretSourceService(client, namespace);
-            secretDto = secretSourceService.getSecretSourcesWithPermission(currentPodDto.getK8sPod(), permissionInfo);
+            SecretSourceService.SecretDto secretDto = secretSourceService.getSecretSourcesWithPermission(currentPodDto.getK8sPod(), permissionInfo);
+            log.info("getSecrets result: {}", secretDto);
+            return secretDto;
         } catch (KubernetesException e) {
+            log.error("Error in getSecrets: {}", e.getMessage(), e);
             collectionErrorList.add(ConvertorToCollectionErrorUtil.convertToCollectionErrors(e.getErrorCodeEnum()));
-            secretDto = new SecretSourceService.SecretDto();
+            return new SecretSourceService.SecretDto();
         }
-        return secretDto;
     }
 
-    private List<ConfigSourceInfo> mergerConfigSourceInfo(List<ConfigSourceInfo> configMapList,
-                                                          List<ConfigSourceInfo> secretsList) {
-
-        if (configMapList != null && secretsList == null) return configMapList;
-        if (secretsList != null && configMapList == null) return secretsList;
-
-        if (secretsList == null && configMapList == null) return null;
-
+    private List<ConfigSourceInfo> mergerConfigSourceInfo(List<ConfigSourceInfo> configMapList, List<ConfigSourceInfo> secretsList) {
+        log.info("Starting mergerConfigSourceInfo");
+        if (configMapList != null && secretsList == null) {
+            log.info("mergerConfigSourceInfo result: {}", configMapList);
+            return configMapList;
+        }
+        if (secretsList != null && configMapList == null) {
+            log.info("mergerConfigSourceInfo result: {}", secretsList);
+            return secretsList;
+        }
+        if (secretsList == null && configMapList == null) {
+            log.info("mergerConfigSourceInfo result: null");
+            return null;
+        }
         List<ConfigSourceInfo> configSourceInfoList = new ArrayList<>();
         configSourceInfoList.addAll(configMapList);
         configSourceInfoList.addAll(secretsList);
+        log.info("mergerConfigSourceInfo result: {}", configSourceInfoList);
         return configSourceInfoList;
     }
 
-
     private void disableServices() {
+        log.info("Starting disableServices");
         podCallServiceList = null;
         ownerCallServiceList = null;
         replicCallServiceList = null;
+        log.info("disableServices finished");
     }
 }
