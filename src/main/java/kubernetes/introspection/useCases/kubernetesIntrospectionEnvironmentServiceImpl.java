@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class KubernetesIntrospectionStarter {
+public class kubernetesIntrospectionEnvironmentServiceImpl implements kubernetesIntrospectionEnvironmentService {
 
     private final InitDetectorService initDetectorService;
 
@@ -61,12 +61,13 @@ public class KubernetesIntrospectionStarter {
     List<OwnerService> ownerCallServiceList;
     List<OwnerLabelService> replicCallServiceList;
 
-    public KubernetesIntrospectionStarter() {
+    public kubernetesIntrospectionEnvironmentServiceImpl() {
         initDetectorService = new InitDetectorService();
     }
 
-    public KubernetesEnvironmentInfo getKubernetesEnvironmentInfo(GetVarsServicesDtoService vars) {
 
+    @Override
+    public KubernetesEnvironmentInfo getKubernetesEnvironmentInfo(GetVarsServicesDtoService vars) {
         try {
             String namespace = getNamespace();
 
@@ -116,6 +117,7 @@ public class KubernetesIntrospectionStarter {
             return KubernetesEnvironmentInfo.builder().errors(List.of(error)).build();
         }
     }
+
 
     private String getNamespace() throws KubernetesException {
         return initDetectorService.getNamespace();
