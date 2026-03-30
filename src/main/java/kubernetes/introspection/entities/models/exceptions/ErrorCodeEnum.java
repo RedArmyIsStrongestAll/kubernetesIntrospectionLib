@@ -62,6 +62,18 @@ public enum ErrorCodeEnum {
 
     ENDPOINTS_MANY_FOUND(400, "Resource not found",
             "Endpoint more than one found",
+            false),
+
+    CONFIG_SOURCE_NOT_FOUND(400, "Resource not found",
+            "Source (ConfigMap or Secrets) not found",
+            false),
+
+    CONFIG_MAP_NOT_FOUND(400, "Resource not found",
+            "ConfigMap not found",
+            false),
+
+    SECRET_NOT_FOUND(400, "Resource not found",
+            "Secrets not found",
             false);
 
 

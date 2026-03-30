@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+  namespace: test-namespace
+spec:
+  containers:
+    - name: main
+      image: nginx
+      env:
+        - name: ENV1
+          valueFrom:
+            configMapKeyRef:
+              name: env-config
+              key: key1
+      envFrom:
+        - configMapRef:
+            name: envfrom-config1
+      volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+    - name: sidecar
+      image: busybox
+      envFrom:
+        - configMapRef:
+            name: envfrom-config2
+      args:
+        - sleep
+        - "3600"
+  volumes:
+    - name: config-volume
+      configMap:
+        name: volume-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-config
+  namespace: test-namespace
+data:
+  key1: value1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: envfrom-config1
+  namespace: test-namespace
+data:
+  key2: value2
+  key3: value3
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: envfrom-config2
+  namespace: test-namespace
+data:
+  key4: value4
+  key5: value5
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: volume-config
+  namespace: test-namespace
+data:
+  key6: value6
