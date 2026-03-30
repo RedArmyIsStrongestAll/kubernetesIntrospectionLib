@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+  namespace: test-namespace
+  labels:
+    app: test-app
+  ownerReferences:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: test-deployment
+      uid: "12345678-1234-1234-1234-123456789012"
+      controller: true
+spec:
+  containers:
+    - name: app
+      image: nginx
+  volumes:
+    - name: config
+      configMap:
+        name: test-configmap
+    - name: secret
+      secret:
+        secretName: test-secret
+status:
+  phase: Running
+  podIP: 10.1.0.10
+  hostname: test-pod-hostname
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-deployment
+  namespace: test-namespace
+  labels:
+    app: test-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: test-app
+  template:
+    metadata:
+      labels:
+        app: test-app
+    spec:
+      containers:
+        - name: app
+          image: nginx
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-service
+  namespace: test-namespace
+spec:
+  selector:
+    app: test-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: test-service
+  namespace: test-namespace
+subsets:
+  - addresses:
+      - ip: 10.1.0.10
+        hostname: test-pod
+        targetRef:
+          kind: Pod
+          name: test-pod
+          namespace: test-namespace
+    ports:
+      - port: 80
+        protocol: TCP
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-configmap
+  namespace: test-namespace
+data:
+  key1: value1
+  key2: value2
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-secret
+  namespace: test-namespace
+type: Opaque
+data:
+  secretKey: c2VjcmV0VmFsdWU=

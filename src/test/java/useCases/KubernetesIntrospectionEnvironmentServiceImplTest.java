@@ -17,7 +17,9 @@ import kubernetes.introspection.entities.services.env.GetVarsServicesDtoService;
 import kubernetes.introspection.entities.services.init.InitDetectorService;
 import kubernetes.introspection.useCases.KubernetesIntrospectionEnvironmentServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.MockedStatic;
 
@@ -63,17 +65,21 @@ public class KubernetesIntrospectionEnvironmentServiceImplTest {
         mockServer.destroy();
     }
 
-    public void InCluster_Pod_ConstDownwardApi_Owner_Deployment_Service_Endpoints_ConfigMap_Secrets_Test() throws Exception {
+    @Test
+    public void inCluster_Pod_ConstDownwardApi_Owner_Deployment_Service_Endpoints_ConfigMap_Secrets_Test() throws Exception {
+        String yamlPath = "commonsIntegration/deployment-all.yaml";
+        String yamlRbacPath = "commonsIntegration/deployment-all-rbac.yaml";
+
         //InitDetectorService
         InitDetectorService mockInitService = getInitDetectorService();
 
         //InitPermissionService
-        RbacAnalyzer rbacAnalyzer = getRbacAnalyzer("rbac.yaml");
+        RbacAnalyzer rbacAnalyzer = getRbacAnalyzer(yamlRbacPath);
         setupMockServerWithRbacAnalyzer(rbacAnalyzer);
 
         //CurrentPodServiceConstDownward
         when(mockProvider.getPodName()).thenReturn(POD_NAME);
-        PodAnalyzer podAnalyzer = getPodAnalyzer(rbacAnalyzer, "common.yaml");
+        PodAnalyzer podAnalyzer = getPodAnalyzer(rbacAnalyzer, yamlPath);
         setupMockServerWithPodByName(podAnalyzer, POD_NAME);
 
         //OwnerReferenceService - yaml настройка
@@ -85,8 +91,7 @@ public class KubernetesIntrospectionEnvironmentServiceImplTest {
         //и он должен быть Deployment
 
         //OwnerService
-        OwnerAnalyzerDeployment ownerEngine = (OwnerAnalyzerDeployment) getOwnerAnalyzer(rbacAnalyzer,
-                "common.yaml", OwnerAnalyzerDeployment.class);
+        OwnerAnalyzerDeployment ownerEngine = (OwnerAnalyzerDeployment) getOwnerAnalyzer(rbacAnalyzer, yamlPath, OwnerAnalyzerDeployment.class);
         setupMockServerWithOwnerDeploymentByName(ownerEngine, DEPLOYMENT_NAME);
 
         //OwnerLabelService - yaml настройка
@@ -98,28 +103,28 @@ public class KubernetesIntrospectionEnvironmentServiceImplTest {
         setupMockServerWithPodsByLabels(podAnalyzer, podLabels);
 
         //ServiceService
-        ServiceAnalyzer serviceAnalyzer = getServiceAnalyzer(rbacAnalyzer, "common.yaml");
+        ServiceAnalyzer serviceAnalyzer = getServiceAnalyzer(rbacAnalyzer, yamlPath);
         setupMockServerWithServiceList(serviceAnalyzer);
         //у сервиса должен быть селектор который закрывает лейблы пода labels {app=test-app}
 
         //ServiceEndpoint
-        EndpointAnalyzer endpointAnalyzer = getEndpointAnalyzer(rbacAnalyzer, "common.yaml");
+        EndpointAnalyzer endpointAnalyzer = getEndpointAnalyzer(rbacAnalyzer, yamlPath);
         setupMockServerWithEndpoints(endpointAnalyzer, SERVICE_NAME);
         //должно совпать с именем Service
 
         //ConfigMapService
-        ConfigMapAnalyzer configMapAnalyzer = getConfigMapAnalyzer(rbacAnalyzer, "common.yaml");
+        ConfigMapAnalyzer configMapAnalyzer = getConfigMapAnalyzer(rbacAnalyzer, yamlPath);
         setupMockServerWithConfigMapByName(CONFIGMAP_NAME, configMapAnalyzer);
 
         //SecretService
-        SecretAnalyzer secretAnalyzer = getSecretAnalyzer(rbacAnalyzer, "common.yaml");
+        SecretAnalyzer secretAnalyzer = getSecretAnalyzer(rbacAnalyzer, yamlPath);
         setupMockServerWithSecretByName(SECRET_NAME, secretAnalyzer);
 
         KubernetesIntrospectionEnvironmentServiceImpl service = new KubernetesIntrospectionEnvironmentServiceImpl(mockInitService);
         GetVarsServicesDtoService vars = new GetVarsServicesDtoService(mockProvider, null, null, null);
         KubernetesEnvironmentInfo result = service.getKubernetesEnvironmentInfo(vars);
 
-        log.info("result: {}", result);
+        Assertions.assertNotNull(result);
     }
 
     protected InitDetectorService getInitDetectorService() {
