@@ -1,12 +1,13 @@
 package kubernetes.introspection.useCases.utils;
 
-import kubernetes.introspection.entities.permision.PermissionInfo;
-import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.exceptions.ErrorCodeEnum;
 import kubernetes.introspection.entities.exceptions.KubernetesException;
+import kubernetes.introspection.entities.permision.PermissionInfo;
+import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -15,8 +16,7 @@ public final class PermissionServiceUtil {
 
     public static void checkPermission(
             PermissionInfo permissionInfo,
-            Supplier<List<ResourcePermissionEnum>> getPermissionResource)
-            throws KubernetesException {
+            Supplier<List<ResourcePermissionEnum>> getPermissionResource) throws KubernetesException {
 
         log.info("Start checkPermission");
 
@@ -38,10 +38,18 @@ public final class PermissionServiceUtil {
                 .collect(Collectors.joining(", ")));
 
         boolean hasPermission = resourcePermissionList.stream().allMatch(requiredPerm ->
-                permissionInfo.getPermissions().stream()
-                        .anyMatch(appPerm -> appPerm.isAllowed() &&
-                                appPerm.getResource().getResource().equals(requiredPerm.getResource()) &&
-                                appPerm.getResource().getVerb().equals(requiredPerm.getVerb()))
+                permissionInfo.getPermissions().stream().anyMatch(appPerm -> {
+                    boolean allowed = appPerm.isAllowed();
+                    boolean resourceMatch = Objects.equals(
+                            appPerm.getResource().getResource().toString().trim().toLowerCase(),
+                            requiredPerm.getResource().trim().toLowerCase()
+                    );
+                    boolean verbMatch = Objects.equals(
+                            appPerm.getResource().getVerb().toString().trim().toLowerCase(),
+                            requiredPerm.getVerb().trim().toLowerCase()
+                    );
+                    return allowed && resourceMatch && verbMatch;
+                })
         );
         if (!hasPermission) {
             log.error("No permission: forbidden");

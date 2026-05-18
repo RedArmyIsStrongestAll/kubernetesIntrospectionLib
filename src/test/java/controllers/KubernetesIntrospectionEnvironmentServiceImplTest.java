@@ -45,8 +45,8 @@ public class KubernetesIntrospectionEnvironmentServiceImplTest extends Kubernete
 
     @Test
     public void inCluster_Pod_ConstDownwardApi_Owner_Deployment_Service_Endpoints_ConfigMap_Secrets_Test() throws Exception {
-        String yamlPath = "commonsIntegration/deployment-all.yaml";
-        String yamlRbacPath = "commonsIntegration/deployment-all-rbac.yaml";
+        String yamlPath = "commons.Integration/deployment-all.yaml";
+        String yamlRbacPath = "commons.Integration/deployment-all-rbac.yaml";
 
         //InitDetectorService
         InitDetectorService mockInitService = new InitDetectorService(mockFileReadService);
@@ -104,7 +104,9 @@ public class KubernetesIntrospectionEnvironmentServiceImplTest extends Kubernete
 
         KubernetesIntrospectionEnvironmentServiceImpl service = new KubernetesIntrospectionEnvironmentServiceImpl(mockInitService);
         GetVarsServicesDtoService vars = new GetVarsServicesDtoService(mockEnvProvider, null, null, null);
-        KubernetesEnvironmentInfo result = service.getKubernetesEnvironmentInfo(vars);
+        KubernetesEnvironmentInfo result = service.getKubernetesEnvironmentInfoWithClient(vars, client);
+
+        System.out.println("\n\n\n\n\n" + "RESPONSE:\n" + result + "\n\n\n\n\n");
 
         Assertions.assertNotNull(result);
     }

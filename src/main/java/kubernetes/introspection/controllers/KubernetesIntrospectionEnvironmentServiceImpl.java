@@ -80,40 +80,28 @@ public class KubernetesIntrospectionEnvironmentServiceImpl implements Kubernetes
 
             String namespace = getNamespace();
             try (KubernetesClient client = new KubernetesClientBuilder().build()) {
-                PermissionInfo permissionInfo = getPermission(client, namespace);
-                List<CollectionError> collectionErrorList = ConvertorToCollectionErrorUtil.convertToCollectionErrors(permissionInfo, namespace);
-
-                initServices(client, namespace, vars);
-
-                CurrentPodService.CurrentPodDto currentPodDto = getCurrentPod(permissionInfo);
-                OwnerReference k8sOwnerReference = getOwnerReference(currentPodDto, collectionErrorList);
-
-                OwnerService.OwnerDto ownerDto = getOwner(permissionInfo, k8sOwnerReference, collectionErrorList);
-                ReplicaPodsService.ReplicaPodsDto replicaPodsDto = getReplicaPods(permissionInfo, client, k8sOwnerReference, ownerDto, currentPodDto, collectionErrorList);
-
-                ServiceService.ServiceDto serviceDto = getServices(permissionInfo, namespace, client, currentPodDto, collectionErrorList);
-                EndpointService.EndpointDto endpointDto = getEndpoints(serviceDto.getServiceInfo().getName(), namespace, client, permissionInfo, collectionErrorList);
-                fillEndpointToService(endpointDto, serviceDto);
-
-                ConfigMapSourceService.ConfigMapDto configMapDto = getConfigMaps(client, namespace, currentPodDto, permissionInfo, collectionErrorList);
-                SecretSourceService.SecretDto secretDto = getSecrets(client, namespace, currentPodDto, permissionInfo, collectionErrorList);
-                List<ConfigSourceInfo> configSourceInfoList = mergerConfigSourceInfo(configMapDto.getConfigSourceInfoList(), secretDto.getConfigSourceInfoList());
-
-                KubernetesEnvironmentInfo kubernetesEnvironmentInfo = KubernetesEnvironmentInfo.builder()
-                        .currentPod(currentPodDto.getPodInfo())
-                        .owner(ownerDto.getOwnerInfo())
-                        .replicaPods(replicaPodsDto.getPodInfoList())
-                        .services(serviceDto.getServiceInfo())
-                        .configSources(configSourceInfoList)
-                        .collectionTimestamp(Instant.now().toString())
-                        .errors(collectionErrorList).build();
-
-                log.info("getKubernetesEnvironmentInfo result: {}", kubernetesEnvironmentInfo);
-                return kubernetesEnvironmentInfo;
-
+                return getKubernetesEnvironmentInfo(vars, client, namespace);
             } finally {
                 disableServices();
             }
+        } catch (KubernetesException e) {
+            log.error("Critical known error in getKubernetesEnvironmentInfo: {}", e.getErrorCodeEnum(), e);
+            CollectionError error = ConvertorToCollectionErrorUtil.convertToCollectionErrors(e.getErrorCodeEnum());
+            return KubernetesEnvironmentInfo.builder().errors(List.of(error)).build();
+        } catch (Exception e) {
+            log.error("Critical unknown error in getKubernetesEnvironmentInfo: {}", e.getMessage(), e);
+            CollectionError error = ConvertorToCollectionErrorUtil.convertToCollectionErrors(e);
+            return KubernetesEnvironmentInfo.builder().errors(List.of(error)).build();
+        }
+    }
+
+    @Override
+    public KubernetesEnvironmentInfo getKubernetesEnvironmentInfoWithClient(GetVarsServicesDtoService vars, KubernetesClient client) {
+        try {
+            log.info("Starting getKubernetesEnvironmentInfoWithClient");
+
+            String namespace = getNamespace();
+            return getKubernetesEnvironmentInfo(vars, client, namespace);
         } catch (KubernetesException e) {
             log.error("Critical known error in getKubernetesEnvironmentInfo: {}", e.getErrorCodeEnum(), e);
             CollectionError error = ConvertorToCollectionErrorUtil.convertToCollectionErrors(e.getErrorCodeEnum());
@@ -135,6 +123,39 @@ public class KubernetesIntrospectionEnvironmentServiceImpl implements Kubernetes
             log.error("Error in getNamespace: {}", e.getMessage(), e);
             throw e;
         }
+    }
+
+    private KubernetesEnvironmentInfo getKubernetesEnvironmentInfo(GetVarsServicesDtoService vars, KubernetesClient client, String namespace) {
+        PermissionInfo permissionInfo = getPermission(client, namespace);
+        List<CollectionError> collectionErrorList = ConvertorToCollectionErrorUtil.convertToCollectionErrors(permissionInfo, namespace);
+
+        initServices(client, namespace, vars);
+
+        CurrentPodService.CurrentPodDto currentPodDto = getCurrentPod(permissionInfo);
+        OwnerReference k8sOwnerReference = getOwnerReference(currentPodDto, collectionErrorList);
+
+        OwnerService.OwnerDto ownerDto = getOwner(permissionInfo, k8sOwnerReference, collectionErrorList);
+        ReplicaPodsService.ReplicaPodsDto replicaPodsDto = getReplicaPods(permissionInfo, client, k8sOwnerReference, ownerDto, currentPodDto, collectionErrorList);
+
+        ServiceService.ServiceDto serviceDto = getServices(permissionInfo, namespace, client, currentPodDto, collectionErrorList);
+        EndpointService.EndpointDto endpointDto = getEndpoints(serviceDto.getServiceInfo().getName(), namespace, client, permissionInfo, collectionErrorList);
+        fillEndpointToService(endpointDto, serviceDto);
+
+        ConfigMapSourceService.ConfigMapDto configMapDto = getConfigMaps(client, namespace, currentPodDto, permissionInfo, collectionErrorList);
+        SecretSourceService.SecretDto secretDto = getSecrets(client, namespace, currentPodDto, permissionInfo, collectionErrorList);
+        List<ConfigSourceInfo> configSourceInfoList = mergerConfigSourceInfo(configMapDto.getConfigSourceInfoList(), secretDto.getConfigSourceInfoList());
+
+        KubernetesEnvironmentInfo kubernetesEnvironmentInfo = KubernetesEnvironmentInfo.builder()
+                .currentPod(currentPodDto.getPodInfo())
+                .owner(ownerDto.getOwnerInfo())
+                .replicaPods(replicaPodsDto.getPodInfoList())
+                .services(serviceDto.getServiceInfo())
+                .configSources(configSourceInfoList)
+                .collectionTimestamp(Instant.now().toString())
+                .errors(collectionErrorList).build();
+
+        log.info("getKubernetesEnvironmentInfo result: {}", kubernetesEnvironmentInfo);
+        return kubernetesEnvironmentInfo;
     }
 
     private PermissionInfo getPermission(KubernetesClient client, String namespace) throws KubernetesException {
