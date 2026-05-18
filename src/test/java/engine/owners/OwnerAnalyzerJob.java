@@ -2,7 +2,7 @@ package engine.owners;
 
 import engine.OwnerAnalyzer;
 import engine.RbacAnalyzer;
-import entities.services.utils.KubernetesYamlUtils;
+import usesCases.utils.KubernetesYamlUtils;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 

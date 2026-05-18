@@ -1,6 +1,6 @@
 package engine;
 
-import entities.services.utils.KubernetesYamlUtils;
+import usesCases.utils.KubernetesYamlUtils;
 import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.api.model.EndpointsList;
 import io.fabric8.kubernetes.api.model.ListMeta;

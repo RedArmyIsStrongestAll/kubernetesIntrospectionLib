@@ -1,0 +1,67 @@
+package kubernetes.introspection.entities.enviroment;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import kubernetes.introspection.entities.owner.OwnerInfo;
+import kubernetes.introspection.entities.pod.PodInfo;
+import kubernetes.introspection.entities.service.ServiceInfo;
+import kubernetes.introspection.entities.source.ConfigSourceInfo;
+import lombok.Builder;
+import lombok.Data;
+
+import java.util.List;
+
+/**
+ * Полная информация о Kubernetes окружении приложения.
+ * <p>
+ * Содержит все данные, необходимые для интроспекции:
+ * текущий под, его владельца, родственные поды,
+ * сервисы и источники конфигурации.
+ * </p>
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Builder
+@Data
+public class KubernetesEnvironmentInfo {
+    /**
+     * Информация о текущем поде, в котором запущено приложение.
+     * Содержит статус, контейнеры, метки и основную идентификацию.
+     */
+    private PodInfo currentPod;
+
+    /**
+     * Список родственных подов (другие реплики того же владельца).
+     * Содержит базовую информацию о состоянии других экземпляров приложения.
+     */
+    private List<PodInfo> replicaPods;
+
+    /**
+     * Информация о ресурсе, управляющем подом (Deployment/StatefulSet/Job/etc).
+     * Позволяет понять, кто создал под и следит за его жизненным циклом.
+     */
+    private OwnerInfo owner;
+
+
+    /**
+     * Сервис, через которые можно достучаться до приложения.
+     * Включает информацию о типе сервиса, портах и реальных эндпоинтах.
+     */
+    private ServiceInfo services;
+
+    /**
+     * Список источников конфигурации, используемых подом.
+     * ConfigMap и Secret с их ключами (только имена, без значений).
+     */
+    private List<ConfigSourceInfo> configSources;
+
+    /**
+     * Время сбора информации (timestamp).
+     */
+    private String collectionTimestamp;
+
+
+    /**
+     * Ошибки, которые помещали собрать информацию
+     */
+    private List<CollectionError> errors;
+}
+
