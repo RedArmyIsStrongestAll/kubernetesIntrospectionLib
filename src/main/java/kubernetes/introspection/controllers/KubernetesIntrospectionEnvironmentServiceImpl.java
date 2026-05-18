@@ -248,6 +248,10 @@ public class KubernetesIntrospectionEnvironmentServiceImpl implements Kubernetes
     private ReplicaPodsService.ReplicaPodsDto getReplicaPods(PermissionInfo permissionInfo, KubernetesClient client, OwnerReference k8sOwnerReference, OwnerService.OwnerDto ownerDto, CurrentPodService.CurrentPodDto currentPodDto, List<CollectionError> collectionErrorList) {
         log.info("Starting getReplicaPods");
         try {
+            if (ownerDto.getK8sType() == null) {
+                return new ReplicaPodsService.ReplicaPodsDto(null, null);
+            }
+
             OwnerLabelCallChainService ownerLabelCallChainService = new OwnerLabelCallChainService(replicCallServiceList);
             ReplicaPodsService replicaPodsService = new ReplicaPodsService(client, ownerLabelCallChainService);
             ReplicaPodsService.ReplicaPodsDto replicaPodsDto = replicaPodsService.getReplicaPodsWithPermission(k8sOwnerReference, ownerDto, currentPodDto.getK8sPod(), permissionInfo);

@@ -38,18 +38,10 @@ public final class PermissionServiceUtil {
                 .collect(Collectors.joining(", ")));
 
         boolean hasPermission = resourcePermissionList.stream().allMatch(requiredPerm ->
-                permissionInfo.getPermissions().stream().anyMatch(appPerm -> {
-                    boolean allowed = appPerm.isAllowed();
-                    boolean resourceMatch = Objects.equals(
-                            appPerm.getResource().getResource().toString().trim().toLowerCase(),
-                            requiredPerm.getResource().trim().toLowerCase()
-                    );
-                    boolean verbMatch = Objects.equals(
-                            appPerm.getResource().getVerb().toString().trim().toLowerCase(),
-                            requiredPerm.getVerb().trim().toLowerCase()
-                    );
-                    return allowed && resourceMatch && verbMatch;
-                })
+                permissionInfo.getPermissions().stream()
+                        .anyMatch(appPerm -> appPerm.isAllowed() &&
+                                appPerm.getResource().getResource().equals(requiredPerm.getResource()) &&
+                                appPerm.getResource().getVerb().equals(requiredPerm.getVerb()))
         );
         if (!hasPermission) {
             log.error("No permission: forbidden");

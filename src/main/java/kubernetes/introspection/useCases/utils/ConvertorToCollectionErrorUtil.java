@@ -6,12 +6,13 @@ import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ConvertorToCollectionErrorUtil {
 
     public static List<CollectionError> convertToCollectionErrors(PermissionInfo permissionInfo, String namespace) {
-        return permissionInfo.getPermissions().stream()
+        return new ArrayList<>(permissionInfo.getPermissions().stream()
                 .filter(p -> !p.isAllowed())
                 .map(p -> {
                     String resourceType = (p.getResource() == null) ? "unknown" : p.getResource().getStringValue();
@@ -25,7 +26,7 @@ public class ConvertorToCollectionErrorUtil {
                             .timestamp(Instant.now().toString())
                             .build();
                 })
-                .toList();
+                .toList());
     }
 
     public static CollectionError convertToCollectionErrors(ErrorCodeEnum errorCodeEnum) {
