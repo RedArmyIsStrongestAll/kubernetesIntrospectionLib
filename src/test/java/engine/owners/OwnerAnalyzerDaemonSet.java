@@ -13,7 +13,7 @@ public class OwnerAnalyzerDaemonSet implements OwnerAnalyzer<DaemonSet> {
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerDaemonSet(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.daemonSet = KubernetesYamlUtils.trySetYamlObject(yamlContent, DaemonSet.class);
+        this.daemonSet = KubernetesYamlUtils.trySetYamlObject(yamlContent, DaemonSet.class, "DaemonSet");
 
         this.rbacAnalyzer = rbacAnalyzer;
     }

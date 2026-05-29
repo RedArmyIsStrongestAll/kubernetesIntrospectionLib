@@ -13,7 +13,7 @@ public class OwnerAnalyzerJob implements OwnerAnalyzer<Job> {
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerJob(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.job = KubernetesYamlUtils.trySetYamlObject(yamlContent, Job.class);
+        this.job = KubernetesYamlUtils.trySetYamlObject(yamlContent, Job.class, "Job");
 
         this.rbacAnalyzer = rbacAnalyzer;
     }

@@ -13,7 +13,7 @@ public class OwnerAnalyzerStatefulSet implements OwnerAnalyzer<StatefulSet> {
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerStatefulSet(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.statefulSet = KubernetesYamlUtils.trySetYamlObject(yamlContent, StatefulSet.class);
+        this.statefulSet = KubernetesYamlUtils.trySetYamlObject(yamlContent, StatefulSet.class, "StatefulSet");
 
         this.rbacAnalyzer = rbacAnalyzer;
     }

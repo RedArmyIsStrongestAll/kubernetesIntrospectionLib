@@ -13,7 +13,7 @@ public class OwnerAnalyzerReplicationController implements OwnerAnalyzer<Replica
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerReplicationController(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.replicationController = KubernetesYamlUtils.trySetYamlObject(yamlContent, ReplicationController.class);
+        this.replicationController = KubernetesYamlUtils.trySetYamlObject(yamlContent, ReplicationController.class, "ReplicationController");
 
         this.rbacAnalyzer = rbacAnalyzer;
     }

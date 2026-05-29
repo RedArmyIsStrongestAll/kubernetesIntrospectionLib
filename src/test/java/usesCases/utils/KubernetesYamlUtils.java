@@ -27,19 +27,27 @@ public class KubernetesYamlUtils {
     }
 
     public static <T> T trySetYamlObject(String yamlObjects, Class<T> classObject) throws IOException {
-        T object = null;
-        Yaml yaml = new Yaml(new Constructor(new LoaderOptions()));
+        return trySetYamlObject(yamlObjects, classObject, null);
+    }
 
+    /**
+     * Извлекает первый документ заданного kind из multi-document YAML.
+     * Без kind-фильтрации Jackson без ошибок конвертирует любой документ в целевой класс
+     * (заполняя metadata чужим именем), поэтому фильтрация по kind обязательна.
+     */
+    public static <T> T trySetYamlObject(String yamlObjects, Class<T> classObject, String kind) throws IOException {
+        Yaml yaml = new Yaml(new Constructor(new LoaderOptions()));
         for (Object doc : yaml.loadAll(yamlObjects)) {
             try {
-                object = objectMapper.convertValue(doc, classObject);
+                if (!(doc instanceof Map)) continue;
+                Map<?, ?> map = (Map<?, ?>) doc;
+                if (kind != null && !kind.equals(map.get("kind"))) continue;
+                T object = objectMapper.convertValue(doc, classObject);
+                if (object != null) return object;
             } catch (Exception ignored) {
             }
         }
-        if (object == null) {
-            throw new IllegalArgumentException(String.format("Invalid YAML: {} to {}", yamlObjects, classObject));
-        }
-        return object;
+        throw new IllegalArgumentException(String.format("No YAML document of kind '%s' found for type %s", kind, classObject));
     }
 
     public static <T> List<T> trySetYamlObjectList(String yamlContent, Class<T> classObject, String k8sKindNameOrig) throws IOException {

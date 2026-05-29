@@ -13,7 +13,7 @@ public class OwnerAnalyzerCronJob implements OwnerAnalyzer<CronJob> {
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerCronJob(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.cronJob = KubernetesYamlUtils.trySetYamlObject(yamlContent, CronJob.class);
+        this.cronJob = KubernetesYamlUtils.trySetYamlObject(yamlContent, CronJob.class, "CronJob");
 
         this.rbacAnalyzer = rbacAnalyzer;
     }

@@ -14,7 +14,7 @@ public class OwnerAnalyzerDeployment implements OwnerAnalyzer<Deployment> {
     private final RbacAnalyzer rbacAnalyzer;
 
     public OwnerAnalyzerDeployment(String yamlContent, RbacAnalyzer rbacAnalyzer) throws IOException {
-        this.deployment = KubernetesYamlUtils.trySetYamlObject(yamlContent, Deployment.class);
+        this.deployment = KubernetesYamlUtils.trySetYamlObject(yamlContent, Deployment.class, "Deployment");
 
         this.rbacAnalyzer = rbacAnalyzer;
     }
