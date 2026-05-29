@@ -109,5 +109,25 @@ public class KubernetesIntrospectionEnvironmentServiceImplTest extends Kubernete
         System.out.println("\n\n\n\n\n" + "RESPONSE:\n" + result + "\n\n\n\n\n");
 
         Assertions.assertNotNull(result);
+        Assertions.assertNotNull(result.getCurrentPod(), "currentPod должен быть найден");
+        Assertions.assertEquals(POD_NAME, result.getCurrentPod().getName());
+
+        Assertions.assertNotNull(result.getOwner(), "owner должен быть найден");
+        Assertions.assertEquals(DEPLOYMENT_NAME, result.getOwner().getName());
+
+        Assertions.assertNotNull(result.getReplicaPods(), "replicaPods не должны быть null");
+        Assertions.assertFalse(result.getReplicaPods().isEmpty(), "replicaPods должны содержать хотя бы одну реплику");
+
+        Assertions.assertNotNull(result.getServices(), "service должен быть найден");
+        Assertions.assertEquals(SERVICE_NAME, result.getServices().getName());
+
+        Assertions.assertNotNull(result.getConfigSources(), "configSources не должны быть null");
+        Assertions.assertFalse(result.getConfigSources().isEmpty(), "configSources должны содержать хотя бы один источник");
+
+        long errors = result.getErrors() == null ? 0 :
+                result.getErrors().stream()
+                        .filter(e -> e.getErrorCodeEnum().isCritical())
+                        .count();
+        Assertions.assertEquals(0, errors, "Не должно быть критических ошибок: " + result.getErrors());
     }
 }

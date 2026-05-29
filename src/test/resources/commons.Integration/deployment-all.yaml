@@ -28,6 +28,28 @@ status:
   hostname: test-pod-hostname
 
 ---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod-replica-1
+  namespace: test-namespace
+  labels:
+    app: test-app
+  ownerReferences:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: test-deployment
+      uid: "12345678-1234-1234-1234-123456789012"
+      controller: true
+spec:
+  containers:
+    - name: app
+      image: nginx
+status:
+  phase: Running
+  podIP: 10.1.0.11
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
