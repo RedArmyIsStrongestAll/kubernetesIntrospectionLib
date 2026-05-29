@@ -50,6 +50,10 @@ rules:
     resources: [ "services" ]
     verbs: [ "get", "list", "watch" ]
 
+  - apiGroups: [ "" ]
+    resources: [ "endpoints" ]
+    verbs: [ "get", "list", "watch" ]
+
   # checkServiceResources
   - apiGroups: [ "" ]
     resources: [ "configmaps" ]
