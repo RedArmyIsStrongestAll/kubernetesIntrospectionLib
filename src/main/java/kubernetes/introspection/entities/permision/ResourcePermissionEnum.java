@@ -46,9 +46,9 @@ public enum ResourcePermissionEnum {
     SERVICES_LIST("services", "list"),
     SERVICES_WATCH("services", "watch"),
 
-    ENDPOINTS_GET("secrets", "get"),
-    ENDPOINTS_LIST("secrets", "list"),
-    ENDPOINTS_WATCH("secrets", "watch"),
+    ENDPOINTS_GET("endpoints", "get"),
+    ENDPOINTS_LIST("endpoints", "list"),
+    ENDPOINTS_WATCH("endpoints", "watch"),
 
     // Config ресурсы
     CONFIGMAPS_GET("configmaps", "get"),
