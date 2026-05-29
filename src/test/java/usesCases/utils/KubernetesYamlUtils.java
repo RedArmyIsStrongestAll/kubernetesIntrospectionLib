@@ -5,11 +5,9 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +19,8 @@ public class KubernetesYamlUtils {
     public static String loadRbacYaml(String filename) throws IOException {
         URL resource = KubernetesYamlUtils.class.getClassLoader().getResource(filename);
         if (resource != null) {
-            File file = new File(resource.getFile());
-            if (file.exists()) {
-                return new String(Files.readAllBytes(file.toPath()));
+            try (java.io.InputStream in = resource.openStream()) {
+                return new String(in.readAllBytes(), StandardCharsets.UTF_8);
             }
         }
         throw new IOException("No " + filename + " file found");
