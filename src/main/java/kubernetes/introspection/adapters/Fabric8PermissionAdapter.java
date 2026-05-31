@@ -1,4 +1,4 @@
-package kubernetes.introspection.adapters.kubernetes;
+package kubernetes.introspection.adapters;
 
 import io.fabric8.kubernetes.api.model.authorization.v1.SelfSubjectAccessReview;
 import io.fabric8.kubernetes.api.model.authorization.v1.SelfSubjectAccessReviewBuilder;

@@ -2,7 +2,7 @@ package usesCases.main.owner;
 
 import engine.owners.OwnerAnalyzerDeployment;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
-import kubernetes.introspection.adapters.kubernetes.Fabric8OwnerAdapter;
+import kubernetes.introspection.adapters.Fabric8OwnerAdapter;
 import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
 import kubernetes.introspection.entities.owner.OwnerTypeEnum;

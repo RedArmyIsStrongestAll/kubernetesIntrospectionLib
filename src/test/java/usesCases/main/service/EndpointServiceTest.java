@@ -3,7 +3,7 @@ package usesCases.main.service;
 import engine.EndpointAnalyzer;
 import usesCases.main.service.parent.EndpointServiceTestAbstract;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
-import kubernetes.introspection.adapters.kubernetes.Fabric8EndpointAdapter;
+import kubernetes.introspection.adapters.Fabric8EndpointAdapter;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.service.ServiceEndpointAddress;

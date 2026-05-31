@@ -3,7 +3,7 @@ package usesCases.init.permision.parent;
 import engine.RbacAnalyzer;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
-import kubernetes.introspection.adapters.kubernetes.Fabric8PermissionAdapter;
+import kubernetes.introspection.adapters.Fabric8PermissionAdapter;
 import kubernetes.introspection.entities.enviroment.CollectionError;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.useCases.init.InitPermissionsService;

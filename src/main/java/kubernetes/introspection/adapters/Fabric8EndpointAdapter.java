@@ -1,4 +1,4 @@
-package kubernetes.introspection.adapters.kubernetes;
+package kubernetes.introspection.adapters;
 
 import io.fabric8.kubernetes.api.model.EndpointAddress;
 import io.fabric8.kubernetes.api.model.EndpointPort;

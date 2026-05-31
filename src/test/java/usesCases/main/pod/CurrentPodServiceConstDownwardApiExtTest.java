@@ -2,7 +2,7 @@ package usesCases.main.pod;
 
 import engine.PodAnalyzer;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
-import kubernetes.introspection.adapters.kubernetes.Fabric8PodAdapter;
+import kubernetes.introspection.adapters.Fabric8PodAdapter;
 import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;

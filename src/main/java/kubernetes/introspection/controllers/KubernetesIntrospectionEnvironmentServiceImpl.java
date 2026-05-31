@@ -2,7 +2,12 @@ package kubernetes.introspection.controllers;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
-import kubernetes.introspection.adapters.kubernetes.*;
+import kubernetes.introspection.adapters.Fabric8ConfigAdapter;
+import kubernetes.introspection.adapters.Fabric8EndpointAdapter;
+import kubernetes.introspection.adapters.Fabric8OwnerAdapter;
+import kubernetes.introspection.adapters.Fabric8PermissionAdapter;
+import kubernetes.introspection.adapters.Fabric8PodAdapter;
+import kubernetes.introspection.adapters.Fabric8ServiceAdapter;
 import kubernetes.introspection.entities.enviroment.CollectionError;
 import kubernetes.introspection.entities.enviroment.KubernetesEnvironmentInfo;
 import kubernetes.introspection.entities.exceptions.KubernetesException;
