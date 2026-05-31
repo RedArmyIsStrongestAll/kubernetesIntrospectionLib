@@ -1,21 +1,15 @@
 package kubernetes.introspection.useCases.main.owner.delegate;
 
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.api.model.ReplicationController;
-import io.fabric8.kubernetes.api.model.ReplicationControllerSpec;
-import io.fabric8.kubernetes.api.model.ReplicationControllerStatus;
-import io.fabric8.kubernetes.client.KubernetesClient;
+import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.entities.owner.OwnerInfo;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
 import kubernetes.introspection.entities.owner.OwnerTypeEnum;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.useCases.main.owner.OwnerService;
+import kubernetes.introspection.useCases.ports.KubernetesOwnerPort;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static kubernetes.introspection.entities.exceptions.ErrorCodeEnum.OWNER_REALIZED_NOT_FOUND;
 
@@ -25,8 +19,8 @@ public class OwnerServiceReplicationControllerExt extends OwnerService {
     private static final String SERVICE_NAME = "OwnerServiceReplicationControllerExt";
     private static final OwnerTypeEnum OWNER_TYPE = OwnerTypeEnum.REPLICATION_CONTROLLER;
 
-    public OwnerServiceReplicationControllerExt(KubernetesClient kubernetesClient, String namespace) {
-        super(kubernetesClient, namespace);
+    public OwnerServiceReplicationControllerExt(KubernetesOwnerPort ownerPort, String namespace) {
+        super(ownerPort, namespace);
     }
 
     @Override
@@ -45,62 +39,10 @@ public class OwnerServiceReplicationControllerExt extends OwnerService {
     }
 
     @Override
-    public OwnerDto getOwnerDto(OwnerReference ownerRef) {
-        log.info("{}: fetching ReplicationController owner: {}", SERVICE_NAME, ownerRef.getName());
-
-        ReplicationController rc = kubernetesClient
-                .replicationControllers()
-                .inNamespace(namespace)
-                .withName(ownerRef.getName())
-                .get();
-
-        if (rc == null) {
-            log.error("{}: ReplicationController not found: {}", SERVICE_NAME, ownerRef.getName());
-            throw new KubernetesException(OWNER_REALIZED_NOT_FOUND);
-        }
-
-        OwnerInfo ownerInfo = createOwnerInfo(rc);
-
-        log.info("{}: created info: {}", SERVICE_NAME, ownerInfo);
-
-        return new OwnerDto(ownerInfo, OwnerTypeEnum.REPLICATION_CONTROLLER, rc);
-    }
-
-    private OwnerInfo createOwnerInfo(ReplicationController rc) {
-        OwnerInfo ownerInfo = OwnerInfo.builder()
-                .type(OwnerTypeEnum.REPLICATION_CONTROLLER)
-                .name(rc.getMetadata().getName())
-                .exists(true)
-                .selector(rc.getSpec().getSelector())
-                .desiredReplicas(rc.getSpec().getReplicas())
-                .availableReplicas(rc.getStatus().getReadyReplicas())
-                .build();
-
-        return OwnerInfo.builder()
-                .type(OwnerTypeEnum.REPLICATION_CONTROLLER)
-                .name(
-                        Optional.ofNullable(rc.getMetadata())
-                                .map(ObjectMeta::getName)
-                                .orElse(null)
-                )
-                .exists(true)
-                .selector(
-                        Optional.ofNullable(rc.getSpec())
-                                .map(ReplicationControllerSpec::getSelector)
-                                .orElse(Collections.emptyMap())
-                )
-                .desiredReplicas(
-                        Optional.ofNullable(rc.getSpec())
-                                .map(ReplicationControllerSpec::getReplicas)
-                                .orElse(null)
-                )
-                .availableReplicas(
-                        Optional.ofNullable(rc.getStatus())
-                                .map(ReplicationControllerStatus::getReadyReplicas)
-                                .orElse(null)
-                )
-                .jobStatus(null)
-                .lastSuccessfulTime(null)
-                .build();
+    public OwnerDto getOwnerDto(OwnerReferenceInfo ownerRef) {
+        log.info("{}: fetching ReplicationController: {}", SERVICE_NAME, ownerRef.getName());
+        OwnerInfo ownerInfo = ownerPort.getReplicationController(ownerRef.getName(), namespace);
+        if (ownerInfo == null) throw new KubernetesException(OWNER_REALIZED_NOT_FOUND);
+        return new OwnerDto(ownerInfo, OWNER_TYPE);
     }
 }

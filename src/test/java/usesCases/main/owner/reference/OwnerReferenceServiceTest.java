@@ -1,49 +1,44 @@
 package usesCases.main.owner.reference;
 
-import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.api.model.Pod;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
+import kubernetes.introspection.entities.pod.PodInfo;
 import kubernetes.introspection.useCases.main.owner.reference.OwnerReferenceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
-import java.io.IOException;
+import java.util.List;
 
-import static usesCases.utils.KubernetesYamlUtils.loadRbacYaml;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OwnerReferenceServiceTest {
 
     private OwnerReferenceService ownerReferenceService;
-    private Pod pod;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         this.ownerReferenceService = new OwnerReferenceService();
     }
 
-    private void setPod(String fileName) throws IOException {
-        String podString = loadRbacYaml(fileName);
-        Yaml yaml = new Yaml(new Constructor(new LoaderOptions()));
-        this.pod = yaml.loadAs(podString, Pod.class);
-    }
-
     @Test
-    void getPodOwnerWithPermissionValidTest() throws IOException {
-        setPod("owner/reference/test-short-pod-owner.yaml");
+    void getPodOwnerWithPermissionValidTest() {
+        PodInfo podInfo = PodInfo.builder()
+                .name("test-pod")
+                .namespace("default")
+                .ownerReferences(List.of(
+                        OwnerReferenceInfo.builder()
+                                .apiVersion("apps/v1")
+                                .kind("ReplicaSet")
+                                .name("my-replicaset")
+                                .uid("rs-12345")
+                                .controller(true)
+                                .build()
+                ))
+                .build();
 
-        OwnerReference result = ownerReferenceService.getPodOwner(pod);
+        OwnerReferenceInfo result = ownerReferenceService.getPodOwner(podInfo);
 
-        assertNotNull(result, "OwnerReference не должен быть null");
-
+        assertNotNull(result, "OwnerReferenceInfo не должен быть null");
         assertTrue(result.getController(), "Должен быть установлен controller = true");
-
         assertEquals("apps/v1", result.getApiVersion());
         assertEquals("ReplicaSet", result.getKind());
         assertEquals("my-replicaset", result.getName());
@@ -51,32 +46,42 @@ public class OwnerReferenceServiceTest {
     }
 
     @Test
-    void getPodOwnerWithPermissionNoPodOwnerTest() throws IOException {
-        setPod("owner/reference/test-short-pod-owner.yaml");
+    void getPodOwnerWithPermissionNoPodOwnerTest() {
+        PodInfo podInfo = PodInfo.builder()
+                .name("test-pod")
+                .namespace("default")
+                .ownerReferences(null)
+                .build();
 
-        pod.getMetadata().setOwnerReferences(null);
+        OwnerReferenceInfo result = ownerReferenceService.getPodOwner(podInfo);
 
-        OwnerReference result = ownerReferenceService.getPodOwner(pod);
-
-        assertNotNull(result, "OwnerReference не должен быть null");
+        assertNotNull(result, "OwnerReferenceInfo не должен быть null");
         assertNull(result.getKind(), "Должен быть пустым");
     }
 
     @Test
-    void getPodOwnerWithPermissionNoControllerValidTest() throws IOException {
-        setPod("owner/reference/test-short-pod-owner-no-controller.yaml");
+    void getPodOwnerWithPermissionNoControllerValidTest() {
+        PodInfo podInfo = PodInfo.builder()
+                .name("test-pod")
+                .namespace("default")
+                .ownerReferences(List.of(
+                        OwnerReferenceInfo.builder()
+                                .apiVersion("apps/v1")
+                                .kind("ReplicaSet")
+                                .name("my-replicaset")
+                                .uid("rs-12345")
+                                .controller(false)
+                                .build()
+                ))
+                .build();
 
-        OwnerReference result = ownerReferenceService.getPodOwner(pod);
+        OwnerReferenceInfo result = ownerReferenceService.getPodOwner(podInfo);
 
-        assertNotNull(result, "OwnerReference не должен быть null");
-
-        assertFalse(result.getController(), "Должен быть установлен controller = true");
-
+        assertNotNull(result);
+        assertFalse(result.getController());
         assertEquals("apps/v1", result.getApiVersion());
         assertEquals("ReplicaSet", result.getKind());
         assertEquals("my-replicaset", result.getName());
         assertEquals("rs-12345", result.getUid());
     }
-
-
 }

@@ -2,40 +2,39 @@ package usesCases.main.source;
 
 import engine.ConfigMapAnalyzer;
 import engine.PodAnalyzer;
-import usesCases.main.source.parent.ConfigMapSourceServiceTestAbstract;
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.adapters.kubernetes.Fabric8ConfigAdapter;
+import kubernetes.introspection.adapters.kubernetes.Fabric8PodAdapter;
 import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
+import kubernetes.introspection.entities.pod.PodInfo;
 import kubernetes.introspection.entities.source.ConfigSourceInfo;
 import kubernetes.introspection.entities.source.ConfigSourceTypeEnum;
 import kubernetes.introspection.entities.source.ConfigUsageTypeEnum;
 import kubernetes.introspection.useCases.main.source.ConfigMapSourceService;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import usesCases.main.source.parent.ConfigMapSourceServiceTestAbstract;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConfigMapSourceServiceTest extends ConfigMapSourceServiceTestAbstract {
+
+    private Fabric8PodAdapter podAdapter;
 
     @BeforeEach
     void setUp() throws IOException {
         mockServer = new KubernetesMockServer();
         mockServer.init();
 
-        configMapSourceService = new ConfigMapSourceService(mockServer.createClient(), NAMESPACE);
+        configMapSourceService = new ConfigMapSourceService(new Fabric8ConfigAdapter(mockServer.createClient()), NAMESPACE);
+        podAdapter = new Fabric8PodAdapter(mockServer.createClient());
     }
 
     @AfterEach
@@ -54,23 +53,20 @@ public class ConfigMapSourceServiceTest extends ConfigMapSourceServiceTestAbstra
         setupMockServerWithConfigMapByName(CONFIGMAP_ENVFROM_NAME_2, configMapAnalyzer);
         setupMockServerWithConfigMapByName(CONFIGMAP_VOLUME_NAME_3, configMapAnalyzer);
 
-        Pod pod = podAnalyzer.getPodByName(POD_NAME, NAMESPACE);
-        assertNotNull(pod);
+        PodInfo podInfo = podAdapter.getPodByName(POD_NAME, NAMESPACE);
+        assertNotNull(podInfo);
 
         PermissionInfo permissionInfo = new PermissionInfo(true, List.of(
                 new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.CONFIGMAPS_GET, true),
                 new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.CONFIGMAPS_LIST, true)
         ));
 
-        ConfigMapSourceService.ConfigMapDto dto = configMapSourceService.getConfigMapSourcesWithPermission(pod, permissionInfo);
+        ConfigMapSourceService.ConfigMapDto dto = configMapSourceService.getConfigMapSourcesWithPermission(podInfo, permissionInfo);
 
         assertNotNull(dto);
-        assertNotNull(dto.getK8sConfigMapList());
         assertNotNull(dto.getConfigSourceInfoList());
 
-        List<ConfigMap> configMaps = dto.getK8sConfigMapList();
         List<ConfigSourceInfo> sourceInfos = dto.getConfigSourceInfoList();
-        assertEquals(4, configMaps.size());
         assertEquals(4, sourceInfos.size());
         assertSourceInfoExists(sourceInfos, "env-config", ConfigUsageTypeEnum.ENV, List.of("key1"));
         assertSourceInfoExists(sourceInfos, "envfrom-config1", ConfigUsageTypeEnum.ENV_FROM, List.of("key2", "key3"));
@@ -80,60 +76,43 @@ public class ConfigMapSourceServiceTest extends ConfigMapSourceServiceTestAbstra
 
     @Test
     void testMapToConfigSourceInfoCorrectlyMapsSingleConfigMap() {
-        ObjectMeta metadata = new ObjectMeta();
-        metadata.setName("test-configmap");
-        metadata.setNamespace(NAMESPACE);
-        ConfigMap configMap = new ConfigMap();
-        configMap.setMetadata(metadata);
-        configMap.setData(Map.of("key1", "value1", "key2", "value2"));
-        configMap.setBinaryData(Map.of("binKey", Arrays.toString(new byte[]{0x01})));
-
-        ConfigSourceInfo info = ConfigMapSourceService.mapToConfigSourceInfo(configMap, ConfigUsageTypeEnum.ENV);
+        ConfigSourceInfo info = ConfigMapSourceService.mapToConfigSourceInfo(
+                "test-configmap", List.of("key1", "key2", "binKey"), ConfigUsageTypeEnum.ENV);
 
         assertNotNull(info);
         assertEquals("test-configmap", info.getName());
         assertEquals(ConfigSourceTypeEnum.CONFIG_MAP, info.getType());
         assertEquals(ConfigUsageTypeEnum.ENV, info.getUsageType());
         assertEquals(3, info.getKeys().size());
-        Assertions.assertTrue(info.getKeys().containsAll(List.of("key1", "key2", "binKey")));
+        assertTrue(info.getKeys().containsAll(List.of("key1", "key2", "binKey")));
     }
 
     @Test
     void testGetConfigMapSources_throwsExceptionIfNoConfigMapsUsed() {
-        ObjectMeta metadata = new ObjectMeta();
-        metadata.setName("test-configmap");
-        metadata.setNamespace(NAMESPACE);
+        PodInfo podInfo = PodInfo.builder()
+                .name("test-pod")
+                .namespace(NAMESPACE)
+                .configMapRefs(Map.of())
+                .build();
 
-        Pod pod = new Pod();
-        pod.setMetadata(metadata);
-
-        KubernetesException exception = assertThrows(KubernetesException.class, () ->
-                configMapSourceService.getConfigMapSources(pod)
-        );
+        assertThrows(KubernetesException.class, () ->
+                configMapSourceService.getConfigMapSources(podInfo));
     }
 
     @Test
     void testGetConfigMapSourcesWithPermission_deniesAccessIfMissingPermission() throws IOException {
         PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "source/configmap-pod-test.yaml");
-        ConfigMapAnalyzer configMapAnalyzer = getConfigMapAnalyzer("rbac/test-rbac.yaml", "source/configmap-pod-test.yaml");
-
         setupMockServerWithPodsByName(POD_NAME, podAnalyzer);
-        setupMockServerWithConfigMapByName(CONFIGMAP_ENV_NAME, configMapAnalyzer);
-        setupMockServerWithConfigMapByName(CONFIGMAP_ENVFROM_NAME_1, configMapAnalyzer);
-        setupMockServerWithConfigMapByName(CONFIGMAP_ENVFROM_NAME_2, configMapAnalyzer);
-        setupMockServerWithConfigMapByName(CONFIGMAP_VOLUME_NAME_3, configMapAnalyzer);
 
-        Pod pod = podAnalyzer.getPodByName(POD_NAME, NAMESPACE);
-        assertNotNull(pod);
+        PodInfo podInfo = podAdapter.getPodByName(POD_NAME, NAMESPACE);
+        assertNotNull(podInfo);
 
         PermissionInfo permissionInfo = new PermissionInfo(true, List.of(
                 new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.CONFIGMAPS_GET, true),
                 new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.CONFIGMAPS_LIST, false)
         ));
 
-        KubernetesException exception = assertThrows(KubernetesException.class, () ->
-                configMapSourceService.getConfigMapSourcesWithPermission(pod, permissionInfo)
-        );
+        assertThrows(KubernetesException.class, () ->
+                configMapSourceService.getConfigMapSourcesWithPermission(podInfo, permissionInfo));
     }
-
 }

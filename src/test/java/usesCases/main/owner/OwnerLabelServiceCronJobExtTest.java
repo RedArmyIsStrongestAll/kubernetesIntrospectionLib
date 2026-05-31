@@ -1,13 +1,13 @@
 package usesCases.main.owner;
 
 import engine.owners.OwnerAnalyzerCronJob;
-import usesCases.main.owner.parent.OwnerServiceTestAbstract;
-import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.adapters.kubernetes.Fabric8OwnerAdapter;
+import kubernetes.introspection.entities.exceptions.KubernetesException;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
 import kubernetes.introspection.entities.owner.OwnerTypeEnum;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.useCases.main.owner.OwnerService;
 import kubernetes.introspection.useCases.main.owner.OwnerService.OwnerDto;
 import kubernetes.introspection.useCases.main.owner.delegate.OwnerServiceCronJobExt;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import usesCases.main.owner.parent.OwnerServiceTestAbstract;
 
 import java.util.List;
 
@@ -50,8 +51,8 @@ public class OwnerLabelServiceCronJobExtTest extends OwnerServiceTestAbstract {
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.CRONJOBS_GET, true)
                 ));
 
-        OwnerReference ownerRef = getOwnerReference(CRONJOB_NAME, OwnerTypeEnum.CRON_JOB);
-        OwnerService ownerService = new OwnerServiceCronJobExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(CRONJOB_NAME, OwnerTypeEnum.CRON_JOB);
+        OwnerService ownerService = new OwnerServiceCronJobExt(new Fabric8OwnerAdapter(client), NAMESPACE);
         OwnerDto ownerDto = ownerService.getOwnerWithPermission(ownerRef, permission);
 
         assertNotNull(ownerDto);
@@ -59,7 +60,6 @@ public class OwnerLabelServiceCronJobExtTest extends OwnerServiceTestAbstract {
         assertEquals(OwnerTypeEnum.CRON_JOB, ownerDto.getOwnerInfo().getType());
         assertEquals(CRONJOB_NAME, ownerDto.getOwnerInfo().getName());
         assertEquals(1, ownerDto.getOwnerInfo().getDesiredReplicas());
-        assertNotNull(ownerDto.getK8sObject());
     }
 
     @Test
@@ -74,34 +74,27 @@ public class OwnerLabelServiceCronJobExtTest extends OwnerServiceTestAbstract {
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.CRONJOBS_GET, false)
                 ));
 
-        OwnerReference ownerRef = getOwnerReference(CRONJOB_NAME, OwnerTypeEnum.CRON_JOB);
-        OwnerService ownerService = new OwnerServiceCronJobExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(CRONJOB_NAME, OwnerTypeEnum.CRON_JOB);
+        OwnerService ownerService = new OwnerServiceCronJobExt(new Fabric8OwnerAdapter(client), NAMESPACE);
 
-        Assertions.assertThrows(KubernetesException.class, () -> {
-            ownerService.getOwnerWithPermission(ownerRef, permission);
-        });
+        Assertions.assertThrows(KubernetesException.class, () ->
+                ownerService.getOwnerWithPermission(ownerRef, permission));
     }
 
     @Test
     void getOwnerNoPermissionCronJobByRbac() throws Exception {
         OwnerAnalyzerCronJob ownerEngine = (OwnerAnalyzerCronJob) getOwnerAnalyzer("rbac/fail-test-rbac-default.yaml",
                 "owner/pod-with-cronjob-owner.yaml", OwnerAnalyzerCronJob.class);
-
         setupMockServerWithValidCronJob(ownerEngine, CRONJOB_NAME);
 
-        OwnerReference ownerRef = getOwnerReference(CRONJOB_NAME, OwnerTypeEnum.CRON_JOB);
-        OwnerService ownerService = new OwnerServiceCronJobExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(CRONJOB_NAME, OwnerTypeEnum.CRON_JOB);
+        OwnerService ownerService = new OwnerServiceCronJobExt(new Fabric8OwnerAdapter(client), NAMESPACE);
 
-        Assertions.assertThrows(KubernetesException.class, () -> {
-            ownerService.getOwner(ownerRef);
-        });
+        Assertions.assertThrows(KubernetesException.class, () -> ownerService.getOwner(ownerRef));
     }
 
     @Test
     void getOwnerWithPermissionNoKubernetesAnswerCronJob() throws Exception {
-        OwnerAnalyzerCronJob ownerEngine = (OwnerAnalyzerCronJob) getOwnerAnalyzer("rbac/test-rbac.yaml",
-                "owner/pod-with-cronjob-owner.yaml", OwnerAnalyzerCronJob.class);
-
         setupMockServerWithError();
 
         PermissionInfo permission = new PermissionInfo(true,
@@ -110,11 +103,10 @@ public class OwnerLabelServiceCronJobExtTest extends OwnerServiceTestAbstract {
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.CRONJOBS_GET, true)
                 ));
 
-        OwnerReference ownerRef = getOwnerReference(CRONJOB_NAME, OwnerTypeEnum.CRON_JOB);
-        OwnerService ownerService = new OwnerServiceCronJobExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(CRONJOB_NAME, OwnerTypeEnum.CRON_JOB);
+        OwnerService ownerService = new OwnerServiceCronJobExt(new Fabric8OwnerAdapter(client), NAMESPACE);
 
-        Assertions.assertThrows(KubernetesException.class, () -> {
-            ownerService.getOwnerWithPermission(ownerRef, permission);
-        });
+        Assertions.assertThrows(KubernetesException.class, () ->
+                ownerService.getOwnerWithPermission(ownerRef, permission));
     }
 }

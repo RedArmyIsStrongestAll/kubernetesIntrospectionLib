@@ -1,37 +1,29 @@
 package usesCases.main.replics;
 
 import engine.PodAnalyzer;
-import usesCases.main.replics.parent.ReplicaPodsServiceTestAbstract;
-import io.fabric8.kubernetes.api.model.LabelSelector;
-import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.adapters.kubernetes.Fabric8PodAdapter;
+import kubernetes.introspection.entities.exceptions.KubernetesException;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
 import kubernetes.introspection.entities.owner.OwnerTypeEnum;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.exceptions.KubernetesException;
+import kubernetes.introspection.entities.pod.PodInfo;
 import kubernetes.introspection.useCases.main.owner.OwnerService;
 import kubernetes.introspection.useCases.main.replics.ReplicaPodsService;
-import kubernetes.introspection.useCases.main.replics.owner.OwnerLabelCallChainService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import usesCases.main.replics.parent.ReplicaPodsServiceTestAbstract;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 public class ReplicaPodsServiceTest extends ReplicaPodsServiceTestAbstract {
@@ -41,10 +33,7 @@ public class ReplicaPodsServiceTest extends ReplicaPodsServiceTestAbstract {
         mockServer = new KubernetesMockServer();
         mockServer.init();
         kubernetesClient = mockServer.createClient();
-
-        ownerLabelCallChainService = Mockito.mock(OwnerLabelCallChainService.class);
-        replicaPodsService = new ReplicaPodsService(kubernetesClient, ownerLabelCallChainService);
-
+        replicaPodsService = new ReplicaPodsService(new Fabric8PodAdapter(kubernetesClient));
     }
 
     @AfterEach
@@ -55,36 +44,31 @@ public class ReplicaPodsServiceTest extends ReplicaPodsServiceTestAbstract {
     @Test
     void testGetReplicaPodsWithPermissionSuccess() throws Exception {
         PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "replics/labels-pods.yaml");
-        Pod currentPod = podAnalyzer.getPodByName(CURRENT_POD_NAME, NAMESPACE);
-
         Map<String, String> labels = Collections.singletonMap("app", "test-app");
-
-        LabelSelector labelSelector = new LabelSelector();
-        labelSelector.setMatchLabels(labels);
-        when(ownerLabelCallChainService.getSelector(eq(OwnerTypeEnum.DEPLOYMENT), any()))
-                .thenReturn(labelSelector);
-
         setupMockServerWithPodsByLabels(podAnalyzer, labels);
+
+        PodInfo currentPod = new Fabric8PodAdapter(kubernetesClient)
+                .listPodsByLabels(labels, NAMESPACE).stream()
+                .filter(p -> CURRENT_POD_NAME.equals(p.getName()))
+                .findFirst()
+                .orElseGet(() -> PodInfo.builder().name(CURRENT_POD_NAME).namespace(NAMESPACE).build());
 
         PermissionInfo permission = new PermissionInfo(true, List.of(
                 new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, true),
                 new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)
         ));
 
-        OwnerReference ownerRef = createOwnerReference(OwnerTypeEnum.DEPLOYMENT, DEPLOYMENT_NAME);
-        OwnerService.OwnerDto ownerDto = mockOwnerDto(OwnerTypeEnum.DEPLOYMENT);
+        OwnerReferenceInfo ownerRef = createOwnerReference(OwnerTypeEnum.DEPLOYMENT, DEPLOYMENT_NAME);
+        OwnerService.OwnerDto ownerDto = mockOwnerDto(OwnerTypeEnum.DEPLOYMENT, labels);
 
         ReplicaPodsService.ReplicaPodsDto result = replicaPodsService.getReplicaPodsWithPermission(ownerRef, ownerDto, currentPod, permission);
 
         assertNotNull(result);
         assertNotNull(result.getPodInfoList());
-        assertNotNull(result.getK8sPodList());
-
-        assertEquals(2, result.getK8sPodList().size());
         assertEquals(2, result.getPodInfoList().size());
 
-        List<String> podNames = result.getK8sPodList().stream()
-                .map(pod -> pod.getMetadata().getName())
+        List<String> podNames = result.getPodInfoList().stream()
+                .map(PodInfo::getName)
                 .sorted().toList();
 
         assertTrue(podNames.contains("test-pod-1"));
@@ -94,15 +78,14 @@ public class ReplicaPodsServiceTest extends ReplicaPodsServiceTestAbstract {
 
     @Test
     void testGetReplicaPodsWithPermissionMissingListPermission() throws IOException {
-        PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "replics/labels-pods.yaml");
-        Pod currentPod = podAnalyzer.getPodByName(CURRENT_POD_NAME, NAMESPACE);
+        PodInfo currentPod = PodInfo.builder().name(CURRENT_POD_NAME).namespace(NAMESPACE).build();
 
         PermissionInfo permission = new PermissionInfo(true, List.of(
                 new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_LIST, false),
                 new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)
         ));
 
-        OwnerReference ownerRef = createOwnerReference(OwnerTypeEnum.DEPLOYMENT, DEPLOYMENT_NAME);
+        OwnerReferenceInfo ownerRef = createOwnerReference(OwnerTypeEnum.DEPLOYMENT, DEPLOYMENT_NAME);
         OwnerService.OwnerDto ownerDto = mockOwnerDto(OwnerTypeEnum.DEPLOYMENT);
 
         Assertions.assertThrows(KubernetesException.class, () ->
@@ -113,22 +96,25 @@ public class ReplicaPodsServiceTest extends ReplicaPodsServiceTestAbstract {
     @Test
     void testGetReplicaPodsStatefulSetOwner() throws Exception {
         PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "replics/sts-pods.yaml");
-        Pod currentPod = podAnalyzer.getPodByName(STATEFUL_CURRENT_POD_NAME, NAMESPACE);
-
         String stsName = "test-sts";
-        OwnerReference ownerRef = createOwnerReference(OwnerTypeEnum.STATEFULSET, STATEFUL_NAME);
-        OwnerService.OwnerDto ownerDto = mockOwnerDto(OwnerTypeEnum.STATEFULSET);
-
         String podNamePrefix = stsName + "-";
         setupMockServerWithPodsByLabels(podAnalyzer, podNamePrefix);
+
+        PodInfo currentPod = PodInfo.builder()
+                .name(STATEFUL_CURRENT_POD_NAME)
+                .namespace(NAMESPACE)
+                .build();
+
+        OwnerReferenceInfo ownerRef = createOwnerReference(OwnerTypeEnum.STATEFULSET, STATEFUL_NAME);
+        OwnerService.OwnerDto ownerDto = mockOwnerDto(OwnerTypeEnum.STATEFULSET, Collections.emptyMap());
 
         ReplicaPodsService.ReplicaPodsDto result = replicaPodsService.getReplicaPods(ownerRef, ownerDto, currentPod);
 
         assertNotNull(result);
-        List<Pod> replicas = result.getK8sPodList();
+        List<PodInfo> replicas = result.getPodInfoList();
 
         replicas.forEach(pod -> {
-            assertTrue(pod.getMetadata().getName().startsWith(podNamePrefix));
+            assertTrue(pod.getName().startsWith(podNamePrefix));
             assertFalse(isCurrentPod(pod, currentPod));
         });
 
@@ -138,17 +124,15 @@ public class ReplicaPodsServiceTest extends ReplicaPodsServiceTestAbstract {
     @Test
     void testFindPodsByOwnerSelectorNoPodsFoundWithLabels() throws Exception {
         PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "replics/no-labels-pods-rbac.yaml");
-        Pod currentPod = podAnalyzer.getPodByName(NO_LABELS_CURRENT_POD_NAME, NAMESPACE);
-
         Map<String, String> labels = Collections.singletonMap("app", "test-app");
-        LabelSelector labelSelector = new LabelSelector();
-        labelSelector.setMatchLabels(labels);
-        when(ownerLabelCallChainService.getSelector(eq(OwnerTypeEnum.DEPLOYMENT), any()))
-                .thenReturn(labelSelector);
-
         setupMockServerWithPodsByLabels(podAnalyzer, labels);
 
-        OwnerService.OwnerDto ownerDto = mockOwnerDto(OwnerTypeEnum.DEPLOYMENT);
+        PodInfo currentPod = PodInfo.builder()
+                .name(NO_LABELS_CURRENT_POD_NAME)
+                .namespace(NAMESPACE)
+                .build();
+
+        OwnerService.OwnerDto ownerDto = mockOwnerDto(OwnerTypeEnum.DEPLOYMENT, labels);
 
         Assertions.assertThrows(KubernetesException.class, () ->
                 replicaPodsService.getReplicaPods(
@@ -161,13 +145,12 @@ public class ReplicaPodsServiceTest extends ReplicaPodsServiceTestAbstract {
 
     @Test
     void testFindPodsByOwnerSelector_SelectorIsNull() throws Exception {
-        PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "replics/labels-pods.yaml");
-        Pod currentPod = podAnalyzer.getPodByName(CURRENT_POD_NAME, NAMESPACE);
+        PodInfo currentPod = PodInfo.builder()
+                .name(CURRENT_POD_NAME)
+                .namespace(NAMESPACE)
+                .build();
 
-        when(ownerLabelCallChainService.getSelector(eq(OwnerTypeEnum.DEPLOYMENT), any()))
-                .thenReturn(null);
-
-        OwnerService.OwnerDto ownerDto = mockOwnerDto(OwnerTypeEnum.DEPLOYMENT);
+        OwnerService.OwnerDto ownerDto = mockOwnerDto(OwnerTypeEnum.DEPLOYMENT, Collections.emptyMap());
 
         Assertions.assertThrows(KubernetesException.class, () ->
                 replicaPodsService.getReplicaPods(

@@ -1,8 +1,8 @@
 package usesCases.main.owner;
 
-import usesCases.main.owner.parent.OwnerServiceTestAbstract;
-import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.adapters.kubernetes.Fabric8OwnerAdapter;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
 import kubernetes.introspection.entities.owner.OwnerTypeEnum;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
@@ -11,12 +11,12 @@ import kubernetes.introspection.useCases.main.owner.delegate.OwnerServiceUnknown
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import usesCases.main.owner.parent.OwnerServiceTestAbstract;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class OwnerLabelServiceUnknownImplTest extends OwnerServiceTestAbstract {
 
@@ -40,40 +40,36 @@ public class OwnerLabelServiceUnknownImplTest extends OwnerServiceTestAbstract {
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.STATEFULSETS_GET, true)
                 ));
 
-        OwnerReference ownerRef = getOwnerReference(null, OwnerTypeEnum.UNKNOWN);
-        OwnerServiceUnknownExt ownerService = new OwnerServiceUnknownExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(null, OwnerTypeEnum.UNKNOWN);
+        OwnerServiceUnknownExt ownerService = new OwnerServiceUnknownExt(new Fabric8OwnerAdapter(client), NAMESPACE);
         OwnerDto ownerDto = ownerService.getOwnerWithPermission(ownerRef, permission);
 
         assertNotNull(ownerDto);
         assertNotNull(ownerDto.getOwnerInfo());
         assertEquals(OwnerTypeEnum.UNKNOWN, ownerDto.getK8sType());
-        assertNull(ownerDto.getK8sObject());
     }
 
     @Test
-    void getOwnerWithPermissionNoPermissionUnknown() throws Exception {
-        PermissionInfo permission = new PermissionInfo(true,
-                List.of());
+    void getOwnerWithPermissionNoPermissionUnknown() {
+        PermissionInfo permission = new PermissionInfo(true, List.of());
 
-        OwnerReference ownerRef = getOwnerReference(null, OwnerTypeEnum.UNKNOWN);
-        OwnerServiceUnknownExt ownerService = new OwnerServiceUnknownExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(null, OwnerTypeEnum.UNKNOWN);
+        OwnerServiceUnknownExt ownerService = new OwnerServiceUnknownExt(new Fabric8OwnerAdapter(client), NAMESPACE);
         OwnerDto ownerDto = ownerService.getOwnerWithPermission(ownerRef, permission);
 
         assertNotNull(ownerDto);
         assertNotNull(ownerDto.getOwnerInfo());
         assertEquals(OwnerTypeEnum.UNKNOWN, ownerDto.getK8sType());
-        assertNull(ownerDto.getK8sObject());
     }
 
     @Test
-    void getOwnerNoPermissionUnknown() throws Exception {
-        OwnerReference ownerRef = getOwnerReference(null, OwnerTypeEnum.UNKNOWN);
-        OwnerServiceUnknownExt ownerService = new OwnerServiceUnknownExt(client, NAMESPACE);
+    void getOwnerNoPermissionUnknown() {
+        OwnerReferenceInfo ownerRef = getOwnerReference(null, OwnerTypeEnum.UNKNOWN);
+        OwnerServiceUnknownExt ownerService = new OwnerServiceUnknownExt(new Fabric8OwnerAdapter(client), NAMESPACE);
         OwnerDto ownerDto = ownerService.getOwnerDto(ownerRef);
 
         assertNotNull(ownerDto);
         assertNotNull(ownerDto.getOwnerInfo());
         assertEquals(OwnerTypeEnum.UNKNOWN, ownerDto.getK8sType());
-        assertNull(ownerDto.getK8sObject());
     }
 }

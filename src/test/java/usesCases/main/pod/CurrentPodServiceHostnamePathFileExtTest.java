@@ -1,11 +1,11 @@
 package usesCases.main.pod;
 
 import engine.PodAnalyzer;
-import usesCases.main.pod.parent.CurrentPodServiceTestAbstract;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.adapters.kubernetes.Fabric8PodAdapter;
+import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.useCases.env.EnvironmentProvider;
 import kubernetes.introspection.useCases.main.pod.CurrentPodService;
 import kubernetes.introspection.useCases.main.pod.delegate.CurrentPodServiceHostnamePathFileExt;
@@ -14,6 +14,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import usesCases.main.pod.parent.CurrentPodServiceTestAbstract;
 
 import java.util.List;
 
@@ -42,7 +43,7 @@ class CurrentPodServiceHostnamePathFileExtTest extends CurrentPodServiceTestAbst
     void getCurrentPodWithCheckPermissionsValidTest() throws Exception {
         when(mockProvider.readHostNameFile()).thenReturn(POD_NAME);
 
-        CurrentPodService service = new CurrentPodServiceHostnamePathFileExt(client, NAMESPACE, mockProvider);
+        CurrentPodService service = new CurrentPodServiceHostnamePathFileExt(new Fabric8PodAdapter(client), NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
         PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "pod/test-short-pod.yaml");
@@ -56,7 +57,7 @@ class CurrentPodServiceHostnamePathFileExtTest extends CurrentPodServiceTestAbst
     void getCurrentPodWithCheckPermissionsNoPermissionTest() throws Exception {
         when(mockProvider.readHostNameFile()).thenReturn(POD_NAME);
 
-        CurrentPodService service = new CurrentPodServiceHostnamePathFileExt(client, NAMESPACE, mockProvider);
+        CurrentPodService service = new CurrentPodServiceHostnamePathFileExt(new Fabric8PodAdapter(client), NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, false)));
         Assertions.assertThrows(KubernetesException.class, () -> {
@@ -68,7 +69,7 @@ class CurrentPodServiceHostnamePathFileExtTest extends CurrentPodServiceTestAbst
     void getCurrentPodInfoWithCheckPermissionsNoPodNameTest() throws Exception {
         when(mockProvider.readHostNameFile()).thenThrow(new RuntimeException("File not found"));
 
-        CurrentPodService service = new CurrentPodServiceHostnamePathFileExt(client, NAMESPACE, mockProvider);
+        CurrentPodService service = new CurrentPodServiceHostnamePathFileExt(new Fabric8PodAdapter(client), NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
         Assertions.assertThrows(KubernetesException.class, () -> {
@@ -80,7 +81,7 @@ class CurrentPodServiceHostnamePathFileExtTest extends CurrentPodServiceTestAbst
     void getCurrentPodInfoWithCheckPermissionsWrongPodNameTest() throws Exception {
         when(mockProvider.readHostNameFile()).thenReturn(MISTAKE_POD_NAME);
 
-        CurrentPodService service = new CurrentPodServiceHostnamePathFileExt(client, NAMESPACE, mockProvider);
+        CurrentPodService service = new CurrentPodServiceHostnamePathFileExt(new Fabric8PodAdapter(client), NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
         PodAnalyzer podAnalyzer = getPodAnalyzer("rbac/test-rbac.yaml", "pod/test-short-pod.yaml");
@@ -94,7 +95,7 @@ class CurrentPodServiceHostnamePathFileExtTest extends CurrentPodServiceTestAbst
     void getCurrentPodWithCheckPermissionsKubernetes500Test() throws Exception {
         when(mockProvider.readHostNameFile()).thenReturn(POD_NAME);
 
-        CurrentPodService service = new CurrentPodServiceHostnamePathFileExt(client, NAMESPACE, mockProvider);
+        CurrentPodService service = new CurrentPodServiceHostnamePathFileExt(new Fabric8PodAdapter(client), NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
         setupMockServerWithError();

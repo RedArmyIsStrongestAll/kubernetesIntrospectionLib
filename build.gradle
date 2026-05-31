@@ -56,6 +56,9 @@ tasks.withType(JavaCompile).configureEach {
 
 test {
     useJUnitPlatform()
+    jvmArgs '-Dfile.encoding=UTF-8'
+    environment 'JDK_JAVA_OPTIONS', '-Dfile.encoding=UTF-8'
+    environment 'JAVA_TOOL_OPTIONS', '-Dfile.encoding=UTF-8'
 }
 
 publishing {

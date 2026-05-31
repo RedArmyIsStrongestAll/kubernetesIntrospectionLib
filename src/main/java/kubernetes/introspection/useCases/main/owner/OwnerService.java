@@ -1,13 +1,12 @@
 package kubernetes.introspection.useCases.main.owner;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.client.KubernetesClient;
+import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.entities.owner.OwnerInfo;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
 import kubernetes.introspection.entities.owner.OwnerTypeEnum;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.exceptions.KubernetesException;
+import kubernetes.introspection.useCases.ports.KubernetesOwnerPort;
 import kubernetes.introspection.useCases.utils.PermissionServiceUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,21 +20,19 @@ import static kubernetes.introspection.entities.exceptions.ErrorCodeEnum.OWNER_R
 @Slf4j
 public abstract class OwnerService {
 
-    protected final KubernetesClient kubernetesClient;
+    protected final KubernetesOwnerPort ownerPort;
     protected final String namespace;
 
-    public OwnerService(KubernetesClient kubernetesClient, String namespace) {
-        this.kubernetesClient = kubernetesClient;
+    public OwnerService(KubernetesOwnerPort ownerPort, String namespace) {
+        this.ownerPort = ownerPort;
         this.namespace = namespace;
     }
 
 
-    public OwnerService.OwnerDto getOwnerWithPermission(OwnerReference ownerRef, PermissionInfo permissionInfo) {
+    public OwnerDto getOwnerWithPermission(OwnerReferenceInfo ownerRef, PermissionInfo permissionInfo) {
         log.info("Start getOwnerWithPermission");
-
         try {
             PermissionServiceUtil.checkPermission(permissionInfo, this::getPermissionResource);
-
             return getOwner(ownerRef);
         } catch (Exception e) {
             log.error("Error getOwnerWithPermission: ", e);
@@ -43,13 +40,12 @@ public abstract class OwnerService {
         }
     }
 
-    public OwnerService.OwnerDto getOwner(OwnerReference ownerRef) {
+    public OwnerDto getOwner(OwnerReferenceInfo ownerRef) {
         log.info("Starting getOwner in {}", getNameClassExt());
 
-        if (ownerRef.getKind() == null && getKindOwnerType().getOriginalName() == null ||
-                ownerRef.getKind().equals(getKindOwnerType().getOriginalName())) {
+        if ((ownerRef.getKind() == null && getKindOwnerType().getOriginalName() == null) ||
+                (ownerRef.getKind() != null && ownerRef.getKind().equals(getKindOwnerType().getOriginalName()))) {
             log.info("Switch getOwner in {}", getNameClassExt());
-
             try {
                 return getOwnerDto(ownerRef);
             } catch (Exception e) {
@@ -70,7 +66,7 @@ public abstract class OwnerService {
 
     protected abstract OwnerTypeEnum getKindOwnerType();
 
-    protected abstract OwnerDto getOwnerDto(OwnerReference ownerRef);
+    protected abstract OwnerDto getOwnerDto(OwnerReferenceInfo ownerRef);
 
 
     @AllArgsConstructor
@@ -78,8 +74,5 @@ public abstract class OwnerService {
     public static class OwnerDto {
         private OwnerInfo ownerInfo;
         private OwnerTypeEnum k8sType;
-        private HasMetadata k8sObject;
     }
-
 }
-

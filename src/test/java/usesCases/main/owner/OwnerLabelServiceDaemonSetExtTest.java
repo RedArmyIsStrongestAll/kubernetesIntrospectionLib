@@ -1,13 +1,13 @@
 package usesCases.main.owner;
 
 import engine.owners.OwnerAnalyzerDaemonSet;
-import usesCases.main.owner.parent.OwnerServiceTestAbstract;
-import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.adapters.kubernetes.Fabric8OwnerAdapter;
+import kubernetes.introspection.entities.exceptions.KubernetesException;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
 import kubernetes.introspection.entities.owner.OwnerTypeEnum;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.useCases.main.owner.OwnerService;
 import kubernetes.introspection.useCases.main.owner.OwnerService.OwnerDto;
 import kubernetes.introspection.useCases.main.owner.delegate.OwnerServiceDaemonSetExt;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import usesCases.main.owner.parent.OwnerServiceTestAbstract;
 
 import java.util.List;
 
@@ -41,10 +42,7 @@ public class OwnerLabelServiceDaemonSetExtTest extends OwnerServiceTestAbstract 
     @Test
     void getOwnerWithPermissionValidDaemonSetOwner() throws Exception {
         OwnerAnalyzerDaemonSet ownerEngine = (OwnerAnalyzerDaemonSet) getOwnerAnalyzer(
-                "rbac/test-rbac.yaml",
-                "owner/pod-with-daemonset-owner.yaml",
-                OwnerAnalyzerDaemonSet.class
-        );
+                "rbac/test-rbac.yaml", "owner/pod-with-daemonset-owner.yaml", OwnerAnalyzerDaemonSet.class);
         setupMockServerWithValidDaemonSet(ownerEngine, DAEMONSET_NAME);
 
         PermissionInfo permission = new PermissionInfo(true,
@@ -53,8 +51,8 @@ public class OwnerLabelServiceDaemonSetExtTest extends OwnerServiceTestAbstract 
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.DAEMONSETS_GET, true)
                 ));
 
-        OwnerReference ownerRef = getOwnerReference(DAEMONSET_NAME, OwnerTypeEnum.DAEMONSET);
-        OwnerService ownerService = new OwnerServiceDaemonSetExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(DAEMONSET_NAME, OwnerTypeEnum.DAEMONSET);
+        OwnerService ownerService = new OwnerServiceDaemonSetExt(new Fabric8OwnerAdapter(client), NAMESPACE);
         OwnerDto ownerDto = ownerService.getOwnerWithPermission(ownerRef, permission);
 
         assertNotNull(ownerDto);
@@ -63,16 +61,12 @@ public class OwnerLabelServiceDaemonSetExtTest extends OwnerServiceTestAbstract 
         assertEquals(DAEMONSET_NAME, ownerDto.getOwnerInfo().getName());
         assertEquals(3, ownerDto.getOwnerInfo().getDesiredReplicas());
         assertEquals(3, ownerDto.getOwnerInfo().getAvailableReplicas());
-        assertNotNull(ownerDto.getK8sObject());
     }
 
     @Test
     void getOwnerWithPermissionNoPermissionDaemonSet() throws Exception {
         OwnerAnalyzerDaemonSet ownerEngine = (OwnerAnalyzerDaemonSet) getOwnerAnalyzer(
-                "rbac/test-rbac.yaml",
-                "owner/pod-with-daemonset-owner.yaml",
-                OwnerAnalyzerDaemonSet.class
-        );
+                "rbac/test-rbac.yaml", "owner/pod-with-daemonset-owner.yaml", OwnerAnalyzerDaemonSet.class);
         setupMockServerWithValidDaemonSet(ownerEngine, DAEMONSET_NAME);
 
         PermissionInfo permission = new PermissionInfo(true,
@@ -81,40 +75,27 @@ public class OwnerLabelServiceDaemonSetExtTest extends OwnerServiceTestAbstract 
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.DAEMONSETS_GET, false)
                 ));
 
-        OwnerReference ownerRef = getOwnerReference(DAEMONSET_NAME, OwnerTypeEnum.DAEMONSET);
-        OwnerService ownerService = new OwnerServiceDaemonSetExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(DAEMONSET_NAME, OwnerTypeEnum.DAEMONSET);
+        OwnerService ownerService = new OwnerServiceDaemonSetExt(new Fabric8OwnerAdapter(client), NAMESPACE);
 
-        Assertions.assertThrows(KubernetesException.class, () -> {
-            ownerService.getOwnerWithPermission(ownerRef, permission);
-        });
+        Assertions.assertThrows(KubernetesException.class, () ->
+                ownerService.getOwnerWithPermission(ownerRef, permission));
     }
 
     @Test
     void getOwnerNoPermissionDaemonSetByRbac() throws Exception {
         OwnerAnalyzerDaemonSet ownerEngine = (OwnerAnalyzerDaemonSet) getOwnerAnalyzer(
-                "rbac/fail-test-rbac-default.yaml",
-                "owner/pod-with-daemonset-owner.yaml",
-                OwnerAnalyzerDaemonSet.class
-        );
-
+                "rbac/fail-test-rbac-default.yaml", "owner/pod-with-daemonset-owner.yaml", OwnerAnalyzerDaemonSet.class);
         setupMockServerWithValidDaemonSet(ownerEngine, DAEMONSET_NAME);
 
-        OwnerReference ownerRef = getOwnerReference(DAEMONSET_NAME, OwnerTypeEnum.DAEMONSET);
-        OwnerService ownerService = new OwnerServiceDaemonSetExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(DAEMONSET_NAME, OwnerTypeEnum.DAEMONSET);
+        OwnerService ownerService = new OwnerServiceDaemonSetExt(new Fabric8OwnerAdapter(client), NAMESPACE);
 
-        Assertions.assertThrows(KubernetesException.class, () -> {
-            ownerService.getOwner(ownerRef);
-        });
+        Assertions.assertThrows(KubernetesException.class, () -> ownerService.getOwner(ownerRef));
     }
 
     @Test
     void getOwnerWithPermissionNoKubernetesAnswerDaemonSet() throws Exception {
-        OwnerAnalyzerDaemonSet ownerEngine = (OwnerAnalyzerDaemonSet) getOwnerAnalyzer(
-                "rbac/test-rbac.yaml",
-                "owner/pod-with-daemonset-owner.yaml",
-                OwnerAnalyzerDaemonSet.class
-        );
-
         setupMockServerWithError();
 
         PermissionInfo permission = new PermissionInfo(true,
@@ -123,11 +104,10 @@ public class OwnerLabelServiceDaemonSetExtTest extends OwnerServiceTestAbstract 
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.DAEMONSETS_GET, true)
                 ));
 
-        OwnerReference ownerRef = getOwnerReference(DAEMONSET_NAME, OwnerTypeEnum.DAEMONSET);
-        OwnerService ownerService = new OwnerServiceDaemonSetExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(DAEMONSET_NAME, OwnerTypeEnum.DAEMONSET);
+        OwnerService ownerService = new OwnerServiceDaemonSetExt(new Fabric8OwnerAdapter(client), NAMESPACE);
 
-        Assertions.assertThrows(KubernetesException.class, () -> {
-            ownerService.getOwnerWithPermission(ownerRef, permission);
-        });
+        Assertions.assertThrows(KubernetesException.class, () ->
+                ownerService.getOwnerWithPermission(ownerRef, permission));
     }
 }

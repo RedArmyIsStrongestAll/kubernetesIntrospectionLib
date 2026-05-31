@@ -3,6 +3,7 @@ package usesCases.init.permision.parent;
 import engine.RbacAnalyzer;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.adapters.kubernetes.Fabric8PermissionAdapter;
 import kubernetes.introspection.entities.enviroment.CollectionError;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.useCases.init.InitPermissionsService;
@@ -26,7 +27,7 @@ public class InitPermissionsServiceTestAbstract {
 
 
     public PermissionInfo getPermissionInfoForRbacFile(String filename, String namespace) throws IOException {
-        InitPermissionsService service = new InitPermissionsService(client);
+        InitPermissionsService service = new InitPermissionsService(new Fabric8PermissionAdapter(client));
         String yamlContent = loadRbacYaml(filename);
         RbacAnalyzer analyzer = new RbacAnalyzer(yamlContent);
         setupMockServerWithRbacAnalyzer(analyzer);

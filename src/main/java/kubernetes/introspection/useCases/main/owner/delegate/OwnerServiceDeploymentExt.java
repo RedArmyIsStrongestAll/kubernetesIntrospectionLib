@@ -1,34 +1,27 @@
 package kubernetes.introspection.useCases.main.owner.delegate;
 
-import io.fabric8.kubernetes.api.model.LabelSelector;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.api.model.apps.DeploymentSpec;
-import io.fabric8.kubernetes.api.model.apps.DeploymentStatus;
-import io.fabric8.kubernetes.client.KubernetesClient;
+import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.entities.owner.OwnerInfo;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
 import kubernetes.introspection.entities.owner.OwnerTypeEnum;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.useCases.main.owner.OwnerService;
+import kubernetes.introspection.useCases.ports.KubernetesOwnerPort;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static kubernetes.introspection.entities.exceptions.ErrorCodeEnum.OWNER_REALIZED_NOT_FOUND;
 
 @Slf4j
 public class OwnerServiceDeploymentExt extends OwnerService {
 
-    public OwnerServiceDeploymentExt(KubernetesClient kubernetesClient, String namespace) {
-        super(kubernetesClient, namespace);
-    }
-
     private static final String OWNER_SERVICE_NAME = "OwnerServiceDeploymentExt";
     private static final OwnerTypeEnum OWNER_SERVICE_TYPE = OwnerTypeEnum.DEPLOYMENT;
+
+    public OwnerServiceDeploymentExt(KubernetesOwnerPort ownerPort, String namespace) {
+        super(ownerPort, namespace);
+    }
 
     @Override
     protected String getNameClassExt() {
@@ -46,55 +39,13 @@ public class OwnerServiceDeploymentExt extends OwnerService {
     }
 
     @Override
-    public OwnerDto getOwnerDto(OwnerReference ownerRef) {
+    public OwnerDto getOwnerDto(OwnerReferenceInfo ownerRef) {
         log.info("{}: fetching Deployment owner: {}", OWNER_SERVICE_NAME, ownerRef.getName());
-
-        log.info("Start k8s request");
-        Deployment deployment = kubernetesClient.apps()
-                .deployments()
-                .inNamespace(namespace)
-                .withName(ownerRef.getName())
-                .get();
-
-        if (deployment == null) {
-            log.error("{}: error fetching Deployment owner: return null", OWNER_SERVICE_NAME);
+        OwnerInfo ownerInfo = ownerPort.getDeployment(ownerRef.getName(), namespace);
+        if (ownerInfo == null) {
+            log.error("{}: Deployment not found", OWNER_SERVICE_NAME);
             throw new KubernetesException(OWNER_REALIZED_NOT_FOUND);
         }
-        log.info("{}: fetching Deployment owner: find", OWNER_SERVICE_NAME);
-
-        OwnerInfo ownerInfo = createOwnerInfo(deployment);
-        log.info("{}: created info: {}", OWNER_SERVICE_NAME, ownerInfo);
-
-        return new OwnerDto(ownerInfo, OwnerTypeEnum.DEPLOYMENT, deployment);
-    }
-
-    private OwnerInfo createOwnerInfo(Deployment deployment) {
-        return OwnerInfo.builder()
-                .type(OwnerTypeEnum.DEPLOYMENT)
-                .name(
-                        Optional.ofNullable(deployment.getMetadata())
-                                .map(ObjectMeta::getName)
-                                .orElse(null)
-                )
-                .exists(true)
-                .selector(
-                        Optional.ofNullable(deployment.getSpec())
-                                .map(DeploymentSpec::getSelector)
-                                .map(LabelSelector::getMatchLabels)
-                                .orElse(Collections.emptyMap())
-                )
-                .desiredReplicas(
-                        Optional.ofNullable(deployment.getSpec())
-                                .map(DeploymentSpec::getReplicas)
-                                .orElse(null)
-                )
-                .availableReplicas(
-                        Optional.ofNullable(deployment.getStatus())
-                                .map(DeploymentStatus::getAvailableReplicas)
-                                .orElse(null)
-                )
-                .jobStatus(null)
-                .lastSuccessfulTime(null)
-                .build();
+        return new OwnerDto(ownerInfo, OwnerTypeEnum.DEPLOYMENT);
     }
 }

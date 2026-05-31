@@ -1,22 +1,15 @@
 package kubernetes.introspection.useCases.main.owner.delegate;
 
-import io.fabric8.kubernetes.api.model.LabelSelector;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
-import io.fabric8.kubernetes.api.model.apps.ReplicaSetSpec;
-import io.fabric8.kubernetes.api.model.apps.ReplicaSetStatus;
-import io.fabric8.kubernetes.client.KubernetesClient;
+import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.entities.owner.OwnerInfo;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
 import kubernetes.introspection.entities.owner.OwnerTypeEnum;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.useCases.main.owner.OwnerService;
+import kubernetes.introspection.useCases.ports.KubernetesOwnerPort;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static kubernetes.introspection.entities.exceptions.ErrorCodeEnum.OWNER_REALIZED_NOT_FOUND;
 
@@ -26,8 +19,8 @@ public class OwnerServiceReplicaSetExt extends OwnerService {
     private static final String SERVICE_NAME = "OwnerServiceReplicaSetExt";
     private static final OwnerTypeEnum OWNER_TYPE = OwnerTypeEnum.REPLICASET;
 
-    public OwnerServiceReplicaSetExt(KubernetesClient kubernetesClient, String namespace) {
-        super(kubernetesClient, namespace);
+    public OwnerServiceReplicaSetExt(KubernetesOwnerPort ownerPort, String namespace) {
+        super(ownerPort, namespace);
     }
 
     @Override
@@ -46,55 +39,10 @@ public class OwnerServiceReplicaSetExt extends OwnerService {
     }
 
     @Override
-    public OwnerDto getOwnerDto(OwnerReference ownerRef) {
-        log.info("{}: fetching ReplicaSet owner: {}", SERVICE_NAME, ownerRef.getName());
-
-        log.info("Start k8s request");
-        ReplicaSet replicaSet = kubernetesClient.apps()
-                .replicaSets()
-                .inNamespace(namespace)
-                .withName(ownerRef.getName())
-                .get();
-
-        if (replicaSet == null) {
-            log.error("{}: ReplicaSet not found: {}", SERVICE_NAME, ownerRef.getName());
-            throw new KubernetesException(OWNER_REALIZED_NOT_FOUND);
-        }
-
-        OwnerInfo ownerInfo = createOwnerInfo(replicaSet);
-
-        log.info("{}: created info: {}", SERVICE_NAME, ownerInfo);
-
-        return new OwnerDto(ownerInfo, OwnerTypeEnum.REPLICASET, replicaSet);
-    }
-
-    private OwnerInfo createOwnerInfo(ReplicaSet replicaSet) {
-        return OwnerInfo.builder()
-                .type(OwnerTypeEnum.REPLICASET)
-                .name(
-                        Optional.ofNullable(replicaSet.getMetadata())
-                                .map(ObjectMeta::getName)
-                                .orElse(null)
-                )
-                .exists(true)
-                .selector(
-                        Optional.ofNullable(replicaSet.getSpec())
-                                .map(ReplicaSetSpec::getSelector)
-                                .map(LabelSelector::getMatchLabels)
-                                .orElse(Collections.emptyMap())
-                )
-                .desiredReplicas(
-                        Optional.ofNullable(replicaSet.getSpec())
-                                .map(ReplicaSetSpec::getReplicas)
-                                .orElse(null)
-                )
-                .availableReplicas(
-                        Optional.ofNullable(replicaSet.getStatus())
-                                .map(ReplicaSetStatus::getReadyReplicas)
-                                .orElse(null)
-                )
-                .jobStatus(null)
-                .lastSuccessfulTime(null)
-                .build();
+    public OwnerDto getOwnerDto(OwnerReferenceInfo ownerRef) {
+        log.info("{}: fetching ReplicaSet: {}", SERVICE_NAME, ownerRef.getName());
+        OwnerInfo ownerInfo = ownerPort.getReplicaSet(ownerRef.getName(), namespace);
+        if (ownerInfo == null) throw new KubernetesException(OWNER_REALIZED_NOT_FOUND);
+        return new OwnerDto(ownerInfo, OWNER_TYPE);
     }
 }

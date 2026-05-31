@@ -1,14 +1,12 @@
 package kubernetes.introspection.useCases.init;
 
 
-import io.fabric8.kubernetes.api.model.authorization.v1.SelfSubjectAccessReview;
-import io.fabric8.kubernetes.api.model.authorization.v1.SelfSubjectAccessReviewBuilder;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.exceptions.ErrorCodeEnum;
 import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.permision.SsarKubernetesRequestDto;
+import kubernetes.introspection.useCases.ports.KubernetesPermissionPort;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,7 +19,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class InitPermissionsService {
 
-    private final KubernetesClient kubernetesClient;
+    private final KubernetesPermissionPort permissionPort;
 
 
     public PermissionInfo checkPermissions(String currentNamespace) {
@@ -62,32 +60,6 @@ public class InitPermissionsService {
     }
 
     private PermissionInfo.PermissionInfoDto executeSingleAccessReview(SsarKubernetesRequestDto request) {
-        try {
-            SelfSubjectAccessReview review = new SelfSubjectAccessReviewBuilder()
-                    .withNewSpec()
-                    .withNewResourceAttributes()
-                    .withResource(request.getResourcePermissionEnum().getResource())
-                    .withVerb(request.getResourcePermissionEnum().getVerb())
-                    .withNamespace(request.getNamespace())
-                    .endResourceAttributes()
-                    .endSpec()
-                    .build();
-
-            SelfSubjectAccessReview response = kubernetesClient
-                    .resource(review)
-                    .create();
-
-            boolean allowed = response.getStatus() != null && Boolean.TRUE.equals(response.getStatus().getAllowed());
-
-            ResourcePermissionEnum resourcePermissionEnum = ResourcePermissionEnum.findByResourceAndVerb(
-                    request.getResourcePermissionEnum().getResource(),
-                    request.getResourcePermissionEnum().getVerb());
-
-            return new PermissionInfo.PermissionInfoDto(resourcePermissionEnum, allowed);
-
-        } catch (Exception e) {
-            log.error("Error executing kubernetes access review for resource: {}", request);
-            return new PermissionInfo.PermissionInfoDto(request.getResourcePermissionEnum(), false);
-        }
+        return permissionPort.checkSinglePermission(request.getResourcePermissionEnum(), request.getNamespace());
     }
 }

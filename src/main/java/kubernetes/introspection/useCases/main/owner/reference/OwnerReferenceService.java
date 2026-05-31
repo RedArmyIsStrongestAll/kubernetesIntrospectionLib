@@ -1,10 +1,11 @@
 package kubernetes.introspection.useCases.main.owner.reference;
 
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.api.model.Pod;
 import kubernetes.introspection.entities.exceptions.KubernetesException;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
+import kubernetes.introspection.entities.pod.PodInfo;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 import static kubernetes.introspection.entities.exceptions.ErrorCodeEnum.OWNER_REFERENCE_NOT_FOUND;
 
@@ -14,27 +15,22 @@ public class OwnerReferenceService {
     public OwnerReferenceService() {
     }
 
-    public OwnerReference getPodOwner(Pod pod) {
+    public OwnerReferenceInfo getPodOwner(PodInfo podInfo) {
         log.info("Start getPodOwner");
-
         try {
-            ObjectMeta metadata = pod.getMetadata();
-            if (metadata == null || metadata.getOwnerReferences() == null || metadata.getOwnerReferences().isEmpty()) {
-                log.info("Owner not found for pod: {}", pod.getMetadata().getName());
-                log.info("Owner is pod");
-                OwnerReference ownerReference = new OwnerReference();
-                ownerReference.setKind(null);
-                return ownerReference;
+            List<OwnerReferenceInfo> ownerRefs = podInfo.getOwnerReferences();
+            if (ownerRefs == null || ownerRefs.isEmpty()) {
+                log.info("Owner not found for pod: {}", podInfo.getName());
+                return OwnerReferenceInfo.builder().kind(null).build();
             }
 
-            return metadata.getOwnerReferences().stream()
+            return ownerRefs.stream()
                     .filter(ref -> Boolean.TRUE.equals(ref.getController()))
                     .findFirst()
-                    .orElse(metadata.getOwnerReferences().get(0));
+                    .orElse(ownerRefs.get(0));
         } catch (Exception e) {
             log.error("Error getPodOwner: ", e);
             throw new KubernetesException(OWNER_REFERENCE_NOT_FOUND);
         }
     }
 }
-

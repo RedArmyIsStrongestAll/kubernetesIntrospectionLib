@@ -1,11 +1,11 @@
 package usesCases.main.pod;
 
 import engine.PodAnalyzer;
-import usesCases.main.pod.parent.CurrentPodServiceTestAbstract;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.adapters.kubernetes.Fabric8PodAdapter;
+import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.useCases.env.EnvironmentProvider;
 import kubernetes.introspection.useCases.main.pod.CurrentPodService;
 import kubernetes.introspection.useCases.main.pod.delegate.CurrentPodServiceHostnameInetAddressExt;
@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import usesCases.main.pod.parent.CurrentPodServiceTestAbstract;
 
 import java.net.UnknownHostException;
 import java.util.List;
@@ -43,7 +44,7 @@ class CurrentPodServiceHostnameInetAddressExtTest extends CurrentPodServiceTestA
     void getCurrentPodWithCheckPermissionsValidTest() throws Exception {
         when(mockProvider.getInetAddressLocalHost()).thenReturn(POD_NAME);
 
-        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(client, NAMESPACE, mockProvider);
+        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(new Fabric8PodAdapter(client), NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
@@ -59,7 +60,7 @@ class CurrentPodServiceHostnameInetAddressExtTest extends CurrentPodServiceTestA
     void getCurrentPodWithCheckPermissionsNoPermissionTest() throws Exception {
         when(mockProvider.getInetAddressLocalHost()).thenReturn(POD_NAME);
 
-        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(client, NAMESPACE, mockProvider);
+        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(new Fabric8PodAdapter(client), NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, false)));
 
@@ -72,7 +73,7 @@ class CurrentPodServiceHostnameInetAddressExtTest extends CurrentPodServiceTestA
     void getCurrentPodInfoWithCheckPermissionsNoPodNameTest() throws Exception {
         when(mockProvider.getInetAddressLocalHost()).thenThrow(new UnknownHostException("Mocked exception"));
 
-        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(client, NAMESPACE, mockProvider);
+        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(new Fabric8PodAdapter(client), NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
@@ -85,7 +86,7 @@ class CurrentPodServiceHostnameInetAddressExtTest extends CurrentPodServiceTestA
     void getCurrentPodInfoWithCheckPermissionsWrongPodNameTest() throws Exception {
         when(mockProvider.getInetAddressLocalHost()).thenReturn(MISTAKE_POD_NAME);
 
-        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(client, NAMESPACE, mockProvider);
+        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(new Fabric8PodAdapter(client), NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
@@ -101,7 +102,7 @@ class CurrentPodServiceHostnameInetAddressExtTest extends CurrentPodServiceTestA
     void getCurrentPodWithCheckPermissionsKubernetes500Test() throws Exception {
         when(mockProvider.getInetAddressLocalHost()).thenReturn(POD_NAME);
 
-        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(client, NAMESPACE, mockProvider);
+        CurrentPodService service = new CurrentPodServiceHostnameInetAddressExt(new Fabric8PodAdapter(client), NAMESPACE, mockProvider);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 

@@ -3,6 +3,7 @@ package usesCases.main.service;
 import engine.EndpointAnalyzer;
 import usesCases.main.service.parent.EndpointServiceTestAbstract;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.adapters.kubernetes.Fabric8EndpointAdapter;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
 import kubernetes.introspection.entities.service.ServiceEndpointAddress;
@@ -30,7 +31,7 @@ public class EndpointServiceTest extends EndpointServiceTestAbstract {
         mockServer = new KubernetesMockServer();
         mockServer.init();
         kubernetesClient = mockServer.createClient();
-        endpointService = new EndpointService(kubernetesClient);
+        endpointService = new EndpointService(new Fabric8EndpointAdapter(kubernetesClient));
     }
 
     @AfterEach
@@ -51,7 +52,6 @@ public class EndpointServiceTest extends EndpointServiceTestAbstract {
         EndpointService.EndpointDto result = endpointService.getEndpointsForServiceWithPermission(SERVICE_NAME, NAMESPACE, permission);
 
         assertNotNull(result);
-        assertNotNull(result.getK8sEndpoints());
         assertNotNull(result.getEndpointsInfo());
         assertFalse(result.getEndpointsInfo().isEmpty());
 

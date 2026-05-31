@@ -1,10 +1,9 @@
 package kubernetes.introspection.useCases.main.pod.delegate;
 
-
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
+import kubernetes.introspection.entities.pod.PodInfo;
 import kubernetes.introspection.useCases.main.pod.CurrentPodService;
+import kubernetes.introspection.useCases.ports.KubernetesPodPort;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -18,8 +17,8 @@ public class CurrentPodServiceConstIpPodExt extends CurrentPodService {
 
     private static final String CURRENT_POD_SERVICE_NAME = "CurrentPodServiceConstIpPodExt";
 
-    public CurrentPodServiceConstIpPodExt(KubernetesClient kubernetesClient, String namespace, String podId) {
-        super(kubernetesClient, namespace);
+    public CurrentPodServiceConstIpPodExt(KubernetesPodPort podPort, String namespace, String podId) {
+        super(podPort, namespace);
         this.podName = podId;
     }
 
@@ -39,16 +38,12 @@ public class CurrentPodServiceConstIpPodExt extends CurrentPodService {
     }
 
     @Override
-    protected Pod getPod() throws Exception {
+    protected PodInfo getPodInfo() throws Exception {
         log.info("Start k8s request");
-        return kubernetesClient.pods()
-                .inNamespace(namespace)
-                .list()
-                .getItems()
+        return podPort.listAllPods(namespace)
                 .stream()
-                .filter(p -> podName.equals(p.getStatus().getPodIP()))
+                .filter(p -> podName.equals(p.getPodIP()))
                 .findFirst()
                 .orElse(null);
     }
-
 }

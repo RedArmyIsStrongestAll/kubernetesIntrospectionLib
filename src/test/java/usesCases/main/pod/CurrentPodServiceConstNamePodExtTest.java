@@ -1,11 +1,11 @@
 package usesCases.main.pod;
 
 import engine.PodAnalyzer;
-import usesCases.main.pod.parent.CurrentPodServiceTestAbstract;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.adapters.kubernetes.Fabric8PodAdapter;
+import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.useCases.main.pod.CurrentPodService;
 import kubernetes.introspection.useCases.main.pod.delegate.CurrentPodServiceConstNamePodExt;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import usesCases.main.pod.parent.CurrentPodServiceTestAbstract;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ class CurrentPodServiceConstNamePodExtTest extends CurrentPodServiceTestAbstract
 
     @Test
     void getCurrentPodWithCheckPermissionsValidTest() throws Exception {
-        CurrentPodService service = new CurrentPodServiceConstNamePodExt(client, NAMESPACE, POD_NAME);
+        CurrentPodService service = new CurrentPodServiceConstNamePodExt(new Fabric8PodAdapter(client), NAMESPACE, POD_NAME);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
@@ -47,7 +48,7 @@ class CurrentPodServiceConstNamePodExtTest extends CurrentPodServiceTestAbstract
 
     @Test
     void getCurrentPodWithCheckPermissionsNoPermissionTest() {
-        CurrentPodService service = new CurrentPodServiceConstNamePodExt(client, NAMESPACE, POD_NAME);
+        CurrentPodService service = new CurrentPodServiceConstNamePodExt(new Fabric8PodAdapter(client), NAMESPACE, POD_NAME);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, false)));
 
@@ -58,7 +59,7 @@ class CurrentPodServiceConstNamePodExtTest extends CurrentPodServiceTestAbstract
 
     @Test
     void getCurrentPodInfoWithCheckPermissionsNoPodNameTest() {
-        CurrentPodService service = new CurrentPodServiceConstNamePodExt(client, NAMESPACE, null);
+        CurrentPodService service = new CurrentPodServiceConstNamePodExt(new Fabric8PodAdapter(client), NAMESPACE, null);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
@@ -69,7 +70,7 @@ class CurrentPodServiceConstNamePodExtTest extends CurrentPodServiceTestAbstract
 
     @Test
     void getCurrentPodInfoWithCheckPermissionsWrongPodNameTest() throws Exception {
-        CurrentPodService service = new CurrentPodServiceConstNamePodExt(client, NAMESPACE, MISTAKE_POD_NAME);
+        CurrentPodService service = new CurrentPodServiceConstNamePodExt(new Fabric8PodAdapter(client), NAMESPACE, MISTAKE_POD_NAME);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 
@@ -83,7 +84,7 @@ class CurrentPodServiceConstNamePodExtTest extends CurrentPodServiceTestAbstract
 
     @Test
     void getCurrentPodWithCheckPermissionsKubernetes500Test() {
-        CurrentPodService service = new CurrentPodServiceConstNamePodExt(client, NAMESPACE, POD_NAME);
+        CurrentPodService service = new CurrentPodServiceConstNamePodExt(new Fabric8PodAdapter(client), NAMESPACE, POD_NAME);
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.PODS_GET, true)));
 

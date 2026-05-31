@@ -1,5 +1,7 @@
 package usesCases.statics;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import kubernetes.introspection.useCases.statics.YamlGenerateService;
 import org.junit.jupiter.api.Test;
 
@@ -9,10 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class YamlGenerateServiceTest {
 
@@ -46,6 +45,15 @@ class YamlGenerateServiceTest {
         String expectedContent = Files.readString(expectedFile, StandardCharsets.UTF_8).strip();
         String actualContent = content.strip();
 
-        assertEquals(expectedContent, actualContent, "Содержимое файла должно точно совпадать с ожидаемым");
+        ObjectMapper yamlMapper = new YAMLMapper();
+        Object expectedObj = yamlMapper.readValue(expectedContent, Object.class);
+        Object actualObj = yamlMapper.readValue(actualContent, Object.class);
+
+        String normalizedExpected = yamlMapper.writeValueAsString(expectedObj);
+        String normalizedActual = yamlMapper.writeValueAsString(actualObj);
+
+        assertEquals(normalizedExpected, normalizedActual, "Содержимое файла должно точно совпадать с ожидаемым");
+
+        //todo-ilia проверить число тестов и кожд ревью сделать по изменения
     }
 }

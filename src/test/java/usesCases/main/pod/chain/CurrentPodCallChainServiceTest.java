@@ -1,10 +1,9 @@
 package usesCases.main.pod.chain;
 
-import io.fabric8.kubernetes.api.model.Pod;
-import kubernetes.introspection.entities.permision.PermissionInfo;
-import kubernetes.introspection.entities.pod.PodInfo;
 import kubernetes.introspection.entities.exceptions.ErrorCodeEnum;
 import kubernetes.introspection.entities.exceptions.KubernetesException;
+import kubernetes.introspection.entities.permision.PermissionInfo;
+import kubernetes.introspection.entities.pod.PodInfo;
 import kubernetes.introspection.useCases.main.pod.CurrentPodService;
 import kubernetes.introspection.useCases.main.pod.CurrentPorCallChainService;
 import org.junit.jupiter.api.Assertions;
@@ -13,10 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class CurrentPodCallChainServiceTest {
 
@@ -36,10 +32,8 @@ public class CurrentPodCallChainServiceTest {
     @Test
     void getPodWithPermissionLastServiceValidTest() {
         PermissionInfo permissionInfo = new PermissionInfo();
-
-        Pod mockPod = mock(Pod.class);
         PodInfo mockPodInfo = mock(PodInfo.class);
-        CurrentPodService.CurrentPodDto mockDto = new CurrentPodService.CurrentPodDto(mockPod, mockPodInfo);
+        CurrentPodService.CurrentPodDto mockDto = new CurrentPodService.CurrentPodDto(mockPodInfo);
 
         CurrentPodService first = mockServices.get(0);
         CurrentPodService second = mockServices.get(1);
@@ -63,10 +57,6 @@ public class CurrentPodCallChainServiceTest {
     void getPodWithPermissionNoValidTest() {
         PermissionInfo permissionInfo = new PermissionInfo();
 
-        Pod mockPod = mock(Pod.class);
-        PodInfo mockPodInfo = mock(PodInfo.class);
-        CurrentPodService.CurrentPodDto mockDto = new CurrentPodService.CurrentPodDto(mockPod, mockPodInfo);
-
         CurrentPodService first = mockServices.get(0);
         CurrentPodService second = mockServices.get(1);
         CurrentPodService third = mockServices.get(2);
@@ -74,7 +64,6 @@ public class CurrentPodCallChainServiceTest {
         when(first.getCurrentPodWithCheckPermissions(permissionInfo)).thenThrow(new KubernetesException(ErrorCodeEnum.POD_NOT_FOUND));
         when(second.getCurrentPodWithCheckPermissions(permissionInfo)).thenThrow(new KubernetesException(ErrorCodeEnum.POD_NOT_FOUND));
         when(third.getCurrentPodWithCheckPermissions(permissionInfo)).thenThrow(new KubernetesException(ErrorCodeEnum.POD_NOT_FOUND));
-
 
         Assertions.assertThrows(KubernetesException.class, () -> callChainService.getPodWithPermission(permissionInfo));
 
@@ -85,9 +74,8 @@ public class CurrentPodCallChainServiceTest {
 
     @Test
     void getPodLastServiceValidTest() {
-        Pod mockPod = mock(Pod.class);
         PodInfo mockPodInfo = mock(PodInfo.class);
-        CurrentPodService.CurrentPodDto mockDto = new CurrentPodService.CurrentPodDto(mockPod, mockPodInfo);
+        CurrentPodService.CurrentPodDto mockDto = new CurrentPodService.CurrentPodDto(mockPodInfo);
 
         CurrentPodService first = mockServices.get(0);
         CurrentPodService second = mockServices.get(1);
@@ -109,10 +97,6 @@ public class CurrentPodCallChainServiceTest {
 
     @Test
     void getPodNoValidTest() {
-        Pod mockPod = mock(Pod.class);
-        PodInfo mockPodInfo = mock(PodInfo.class);
-        CurrentPodService.CurrentPodDto mockDto = new CurrentPodService.CurrentPodDto(mockPod, mockPodInfo);
-
         CurrentPodService first = mockServices.get(0);
         CurrentPodService second = mockServices.get(1);
         CurrentPodService third = mockServices.get(2);

@@ -1,10 +1,9 @@
 package kubernetes.introspection.useCases.main.pod.delegate;
 
-
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
+import kubernetes.introspection.entities.pod.PodInfo;
 import kubernetes.introspection.useCases.main.pod.CurrentPodService;
+import kubernetes.introspection.useCases.ports.KubernetesPodPort;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -15,19 +14,14 @@ import java.util.stream.Collectors;
 import static kubernetes.introspection.entities.permision.ResourcePermissionEnum.PODS_GET;
 import static kubernetes.introspection.entities.permision.ResourcePermissionEnum.PODS_LIST;
 
-
 @Slf4j
 public class CurrentPodServiceLabelsExt extends CurrentPodService {
 
     private static final String CURRENT_POD_SERVICE_NAME = "CurrentPodServiceLabelsExt";
     private final List<String> labelList;
 
-    /**
-     * Принимает List<String> формата "key=value"
-     * <p> Пример: List.of("app=my-app", "env=prod", "version=1.0")</p>
-     */
-    public CurrentPodServiceLabelsExt(KubernetesClient kubernetesClient, String namespace, List<String> labelList) {
-        super(kubernetesClient, namespace);
+    public CurrentPodServiceLabelsExt(KubernetesPodPort podPort, String namespace, List<String> labelList) {
+        super(podPort, namespace);
         this.labelList = labelList;
     }
 
@@ -50,28 +44,18 @@ public class CurrentPodServiceLabelsExt extends CurrentPodService {
     }
 
     @Override
-    protected Pod getPod() throws Exception {
+    protected PodInfo getPodInfo() throws Exception {
         Map<String, String> labels = labelList.stream()
                 .filter(s -> s.contains("="))
                 .map(s -> s.split("=", 2))
-                .collect(Collectors.toMap(
-                        parts -> parts[0].trim(),
-                        parts -> parts[1].trim()
-                ));
+                .collect(Collectors.toMap(parts -> parts[0].trim(), parts -> parts[1].trim()));
 
         log.info("Start k8s request");
-        List<Pod> pods = kubernetesClient.pods()
-                .inNamespace(namespace)
-                .withLabels(labels)
-                .list()
-                .getItems().stream()
-                .toList();
+        List<PodInfo> pods = podPort.listPodsByLabels(labels, namespace);
 
         if (pods.size() != 1) {
             return null;
         }
-
         return pods.get(0);
     }
-
 }

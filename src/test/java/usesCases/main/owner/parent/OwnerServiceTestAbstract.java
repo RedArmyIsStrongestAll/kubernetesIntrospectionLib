@@ -1,17 +1,11 @@
 package usesCases.main.owner.parent;
 
-import engine.RbacAnalyzer;
 import engine.OwnerAnalyzer;
-import engine.owners.OwnerAnalyzerCronJob;
-import engine.owners.OwnerAnalyzerDaemonSet;
-import engine.owners.OwnerAnalyzerDeployment;
-import engine.owners.OwnerAnalyzerJob;
-import engine.owners.OwnerAnalyzerReplicaSet;
-import engine.owners.OwnerAnalyzerReplicationController;
-import engine.owners.OwnerAnalyzerStatefulSet;
-import io.fabric8.kubernetes.api.model.OwnerReference;
+import engine.RbacAnalyzer;
+import engine.owners.*;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
 import kubernetes.introspection.entities.owner.OwnerTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,28 +23,25 @@ public class OwnerServiceTestAbstract {
     protected OwnerAnalyzer getOwnerAnalyzer(String rbacFilename, String ownerFilename, Class<? extends OwnerAnalyzer> analyzerClass) throws Exception {
         String rbacContent = loadRbacYaml(rbacFilename);
         RbacAnalyzer rbacAnalyzer = new RbacAnalyzer(rbacContent);
-
         String yamlContent = loadRbacYaml(ownerFilename);
-
         Constructor<? extends OwnerAnalyzer> constructor = analyzerClass.getConstructor(String.class, RbacAnalyzer.class);
         return constructor.newInstance(yamlContent, rbacAnalyzer);
     }
 
-    protected OwnerReference getOwnerReference(String ownerName, OwnerTypeEnum typeEnum) {
-        OwnerReference ownerRef = new OwnerReference();
-        ownerRef.setKind(typeEnum.getOriginalName());
-        ownerRef.setName(ownerName);
-        return ownerRef;
+    protected OwnerReferenceInfo getOwnerReference(String ownerName, OwnerTypeEnum typeEnum) {
+        return OwnerReferenceInfo.builder()
+                .kind(typeEnum.getOriginalName())
+                .name(ownerName)
+                .build();
     }
 
     protected void setupMockServerWithValidOwnerDeployment(OwnerAnalyzerDeployment analyzer, String ownerName) {
         mockServer.expect().get()
                 .withPath("/apis/apps/v1/namespaces/" + NAMESPACE + "/deployments/" + ownerName)
                 .andReply(200, request -> {
-                            log.info("Received GET request for owner: {}/{}", NAMESPACE, ownerName);
-                            return analyzer.getOwner(ownerName, NAMESPACE);
-                        }
-                )
+                    log.info("Received GET request for owner: {}/{}", NAMESPACE, ownerName);
+                    return analyzer.getOwner(ownerName, NAMESPACE);
+                })
                 .always();
     }
 
@@ -116,5 +107,4 @@ public class OwnerServiceTestAbstract {
 
     protected void setupMockServerWithError() {
     }
-
 }

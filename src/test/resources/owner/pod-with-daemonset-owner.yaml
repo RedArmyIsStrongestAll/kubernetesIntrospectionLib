@@ -42,4 +42,5 @@ spec:
 status:
   currentNumberScheduled: 3
   desiredNumberScheduled: 3
+  numberAvailable: 3
   numberReady: 3

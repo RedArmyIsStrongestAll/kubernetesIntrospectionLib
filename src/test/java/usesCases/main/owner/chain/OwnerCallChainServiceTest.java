@@ -1,12 +1,11 @@
 package usesCases.main.owner.chain;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.OwnerReference;
-import kubernetes.introspection.entities.owner.OwnerInfo;
-import kubernetes.introspection.entities.owner.OwnerTypeEnum;
-import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.exceptions.ErrorCodeEnum;
 import kubernetes.introspection.entities.exceptions.KubernetesException;
+import kubernetes.introspection.entities.owner.OwnerInfo;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
+import kubernetes.introspection.entities.owner.OwnerTypeEnum;
+import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.useCases.main.owner.OwnerCallChainService;
 import kubernetes.introspection.useCases.main.owner.OwnerService;
 import org.junit.jupiter.api.Assertions;
@@ -15,10 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class OwnerCallChainServiceTest {
 
@@ -38,13 +34,10 @@ public class OwnerCallChainServiceTest {
     @Test
     void getOwnerWithPermissionLastServiceValidTest() {
         PermissionInfo permissionInfo = new PermissionInfo();
-        OwnerReference ownerRef = new OwnerReference();
+        OwnerReferenceInfo ownerRef = OwnerReferenceInfo.builder().kind("Deployment").name("test").build();
 
         OwnerInfo mockOwnerInfo = mock(OwnerInfo.class);
-        OwnerTypeEnum mockType = mock(OwnerTypeEnum.class);
-        HasMetadata mockObject = mock(HasMetadata.class);
-
-        OwnerService.OwnerDto mockDto = new OwnerService.OwnerDto(mockOwnerInfo, mockType, mockObject);
+        OwnerService.OwnerDto mockDto = new OwnerService.OwnerDto(mockOwnerInfo, OwnerTypeEnum.DEPLOYMENT);
 
         OwnerService first = mockServices.get(0);
         OwnerService second = mockServices.get(1);
@@ -67,7 +60,7 @@ public class OwnerCallChainServiceTest {
     @Test
     void getOwnerWithPermissionNoValidTest() {
         PermissionInfo permissionInfo = new PermissionInfo();
-        OwnerReference ownerRef = new OwnerReference();
+        OwnerReferenceInfo ownerRef = OwnerReferenceInfo.builder().kind("Deployment").name("test").build();
 
         OwnerService first = mockServices.get(0);
         OwnerService second = mockServices.get(1);
@@ -86,13 +79,10 @@ public class OwnerCallChainServiceTest {
 
     @Test
     void getOwnerLastServiceValidTest() {
-        OwnerReference ownerRef = new OwnerReference();
+        OwnerReferenceInfo ownerRef = OwnerReferenceInfo.builder().kind("Deployment").name("test").build();
 
         OwnerInfo mockOwnerInfo = mock(OwnerInfo.class);
-        OwnerTypeEnum mockType = mock(OwnerTypeEnum.class);
-        HasMetadata mockObject = mock(HasMetadata.class);
-
-        OwnerService.OwnerDto mockDto = new OwnerService.OwnerDto(mockOwnerInfo, mockType, mockObject);
+        OwnerService.OwnerDto mockDto = new OwnerService.OwnerDto(mockOwnerInfo, OwnerTypeEnum.DEPLOYMENT);
 
         OwnerService first = mockServices.get(0);
         OwnerService second = mockServices.get(1);
@@ -114,7 +104,7 @@ public class OwnerCallChainServiceTest {
 
     @Test
     void getOwnerNoValidTest() {
-        OwnerReference ownerRef = new OwnerReference();
+        OwnerReferenceInfo ownerRef = OwnerReferenceInfo.builder().kind("Deployment").name("test").build();
 
         OwnerService first = mockServices.get(0);
         OwnerService second = mockServices.get(1);
@@ -130,6 +120,4 @@ public class OwnerCallChainServiceTest {
         verify(second, times(1)).getOwner(ownerRef);
         verify(third, times(1)).getOwner(ownerRef);
     }
-
-
 }

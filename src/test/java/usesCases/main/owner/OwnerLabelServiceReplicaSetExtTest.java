@@ -1,13 +1,13 @@
 package usesCases.main.owner;
 
 import engine.owners.OwnerAnalyzerReplicaSet;
-import usesCases.main.owner.parent.OwnerServiceTestAbstract;
-import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import kubernetes.introspection.adapters.kubernetes.Fabric8OwnerAdapter;
+import kubernetes.introspection.entities.exceptions.KubernetesException;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
 import kubernetes.introspection.entities.owner.OwnerTypeEnum;
 import kubernetes.introspection.entities.permision.PermissionInfo;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.useCases.main.owner.OwnerService.OwnerDto;
 import kubernetes.introspection.useCases.main.owner.delegate.OwnerServiceReplicaSetExt;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import usesCases.main.owner.parent.OwnerServiceTestAbstract;
+
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -38,10 +41,7 @@ public class OwnerLabelServiceReplicaSetExtTest extends OwnerServiceTestAbstract
     @Test
     void getOwnerWithPermissionValidReplicaSetOwner() throws Exception {
         OwnerAnalyzerReplicaSet ownerEngine = (OwnerAnalyzerReplicaSet) getOwnerAnalyzer(
-                "rbac/test-rbac.yaml",
-                "owner/pod-with-replicaset-owner.yaml",
-                OwnerAnalyzerReplicaSet.class
-        );
+                "rbac/test-rbac.yaml", "owner/pod-with-replicaset-owner.yaml", OwnerAnalyzerReplicaSet.class);
         setupMockServerWithValidReplicaSet(ownerEngine, REPLICASET_NAME);
 
         PermissionInfo permission = new PermissionInfo(true,
@@ -50,24 +50,20 @@ public class OwnerLabelServiceReplicaSetExtTest extends OwnerServiceTestAbstract
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.REPLICASETS_GET, true)
                 ));
 
-        OwnerReference ownerRef = getOwnerReference(REPLICASET_NAME, OwnerTypeEnum.REPLICASET);
-        OwnerServiceReplicaSetExt ownerService = new OwnerServiceReplicaSetExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(REPLICASET_NAME, OwnerTypeEnum.REPLICASET);
+        OwnerServiceReplicaSetExt ownerService = new OwnerServiceReplicaSetExt(new Fabric8OwnerAdapter(client), NAMESPACE);
         OwnerDto ownerDto = ownerService.getOwnerWithPermission(ownerRef, permission);
 
         assertNotNull(ownerDto);
         assertNotNull(ownerDto.getOwnerInfo());
         assertEquals(OwnerTypeEnum.REPLICASET, ownerDto.getOwnerInfo().getType());
         assertEquals(REPLICASET_NAME, ownerDto.getOwnerInfo().getName());
-        assertNotNull(ownerDto.getK8sObject());
     }
 
     @Test
     void getOwnerWithPermissionNoPermissionReplicaSet() throws Exception {
         OwnerAnalyzerReplicaSet ownerEngine = (OwnerAnalyzerReplicaSet) getOwnerAnalyzer(
-                "rbac/test-rbac.yaml",
-                "owner/pod-with-replicaset-owner.yaml",
-                OwnerAnalyzerReplicaSet.class
-        );
+                "rbac/test-rbac.yaml", "owner/pod-with-replicaset-owner.yaml", OwnerAnalyzerReplicaSet.class);
         setupMockServerWithValidReplicaSet(ownerEngine, REPLICASET_NAME);
 
         PermissionInfo permission = new PermissionInfo(true,
@@ -76,39 +72,28 @@ public class OwnerLabelServiceReplicaSetExtTest extends OwnerServiceTestAbstract
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.REPLICASETS_GET, false)
                 ));
 
-        OwnerReference ownerRef = getOwnerReference(REPLICASET_NAME, OwnerTypeEnum.REPLICASET);
-        OwnerServiceReplicaSetExt ownerService = new OwnerServiceReplicaSetExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(REPLICASET_NAME, OwnerTypeEnum.REPLICASET);
+        OwnerServiceReplicaSetExt ownerService = new OwnerServiceReplicaSetExt(new Fabric8OwnerAdapter(client), NAMESPACE);
 
-        Assertions.assertThrows(KubernetesException.class, () -> {
-            ownerService.getOwnerWithPermission(ownerRef, permission);
-        });
+        Assertions.assertThrows(KubernetesException.class, () ->
+                ownerService.getOwnerWithPermission(ownerRef, permission));
     }
 
     @Test
     void getOwnerNoPermissionReplicaSetByRbac() throws Exception {
         OwnerAnalyzerReplicaSet ownerEngine = (OwnerAnalyzerReplicaSet) getOwnerAnalyzer(
-                "rbac/fail-test-rbac-default.yaml",
-                "owner/pod-with-replicaset-owner.yaml",
-                OwnerAnalyzerReplicaSet.class
-        );
+                "rbac/fail-test-rbac-default.yaml", "owner/pod-with-replicaset-owner.yaml", OwnerAnalyzerReplicaSet.class);
         setupMockServerWithValidReplicaSet(ownerEngine, REPLICASET_NAME);
 
-        OwnerReference ownerRef = getOwnerReference(REPLICASET_NAME, OwnerTypeEnum.REPLICASET);
-        OwnerServiceReplicaSetExt ownerService = new OwnerServiceReplicaSetExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(REPLICASET_NAME, OwnerTypeEnum.REPLICASET);
+        OwnerServiceReplicaSetExt ownerService = new OwnerServiceReplicaSetExt(new Fabric8OwnerAdapter(client), NAMESPACE);
 
-        Assertions.assertThrows(KubernetesException.class, () -> {
-            ownerService.getOwner(ownerRef);
-        });
+        Assertions.assertThrows(KubernetesException.class, () -> ownerService.getOwner(ownerRef));
     }
 
     @Test
     void getOwnerWithPermissionNoKubernetesAnswerReplicaSet() throws Exception {
-        OwnerAnalyzerReplicaSet ownerEngine = (OwnerAnalyzerReplicaSet) getOwnerAnalyzer(
-                "rbac/test-rbac.yaml",
-                "owner/pod-with-replicaset-owner.yaml",
-                OwnerAnalyzerReplicaSet.class
-        );
-        setupMockServerWithError(); // Используется в других тестах
+        setupMockServerWithError();
 
         PermissionInfo permission = new PermissionInfo(true,
                 List.of(
@@ -116,11 +101,10 @@ public class OwnerLabelServiceReplicaSetExtTest extends OwnerServiceTestAbstract
                         new PermissionInfo.PermissionInfoDto(ResourcePermissionEnum.REPLICASETS_GET, true)
                 ));
 
-        OwnerReference ownerRef = getOwnerReference(REPLICASET_NAME, OwnerTypeEnum.REPLICASET);
-        OwnerServiceReplicaSetExt ownerService = new OwnerServiceReplicaSetExt(client, NAMESPACE);
+        OwnerReferenceInfo ownerRef = getOwnerReference(REPLICASET_NAME, OwnerTypeEnum.REPLICASET);
+        OwnerServiceReplicaSetExt ownerService = new OwnerServiceReplicaSetExt(new Fabric8OwnerAdapter(client), NAMESPACE);
 
-        Assertions.assertThrows(KubernetesException.class, () -> {
-            ownerService.getOwnerWithPermission(ownerRef, permission);
-        });
+        Assertions.assertThrows(KubernetesException.class, () ->
+                ownerService.getOwnerWithPermission(ownerRef, permission));
     }
 }

@@ -1,22 +1,15 @@
 package kubernetes.introspection.useCases.main.owner.delegate;
 
-import io.fabric8.kubernetes.api.model.LabelSelector;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.api.model.batch.v1.Job;
-import io.fabric8.kubernetes.api.model.batch.v1.JobSpec;
-import io.fabric8.kubernetes.api.model.batch.v1.JobStatus;
-import io.fabric8.kubernetes.client.KubernetesClient;
+import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.entities.owner.OwnerInfo;
+import kubernetes.introspection.entities.owner.OwnerReferenceInfo;
 import kubernetes.introspection.entities.owner.OwnerTypeEnum;
 import kubernetes.introspection.entities.permision.ResourcePermissionEnum;
-import kubernetes.introspection.entities.exceptions.KubernetesException;
 import kubernetes.introspection.useCases.main.owner.OwnerService;
+import kubernetes.introspection.useCases.ports.KubernetesOwnerPort;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static kubernetes.introspection.entities.exceptions.ErrorCodeEnum.OWNER_REALIZED_NOT_FOUND;
 
@@ -26,8 +19,8 @@ public class OwnerServiceJobExt extends OwnerService {
     private static final String SERVICE_NAME = "OwnerServiceJobExt";
     private static final OwnerTypeEnum OWNER_TYPE = OwnerTypeEnum.JOB;
 
-    public OwnerServiceJobExt(KubernetesClient kubernetesClient, String namespace) {
-        super(kubernetesClient, namespace);
+    public OwnerServiceJobExt(KubernetesOwnerPort ownerPort, String namespace) {
+        super(ownerPort, namespace);
     }
 
     @Override
@@ -46,52 +39,10 @@ public class OwnerServiceJobExt extends OwnerService {
     }
 
     @Override
-    public OwnerDto getOwnerDto(OwnerReference ownerRef) {
-        log.info("{}: fetching Job owner: {}", SERVICE_NAME, ownerRef.getName());
-
-        Job job = kubernetesClient
-                .batch()
-                .v1()
-                .jobs()
-                .inNamespace(namespace)
-                .withName(ownerRef.getName())
-                .get();
-
-        if (job == null) {
-            log.error("{}: Job not found: {}", SERVICE_NAME, ownerRef.getName());
-            throw new KubernetesException(OWNER_REALIZED_NOT_FOUND);
-        }
-
-        OwnerInfo ownerInfo = createOwnerInfo(job);
-
-        log.info("{}: created info: {}", SERVICE_NAME, ownerInfo);
-
-        return new OwnerDto(ownerInfo, OwnerTypeEnum.JOB, job);
-    }
-
-    private OwnerInfo createOwnerInfo(Job job) {
-        return OwnerInfo.builder()
-                .type(OwnerTypeEnum.JOB)
-                .name(
-                        Optional.ofNullable(job.getMetadata())
-                                .map(ObjectMeta::getName)
-                                .orElse(null)
-                )
-                .exists(true)
-                .selector(
-                        Optional.ofNullable(job.getSpec())
-                                .map(JobSpec::getSelector)
-                                .map(LabelSelector::getMatchLabels)
-                                .orElse(Collections.emptyMap())
-                )
-                .desiredReplicas(1) // Job запускается один раз
-                .availableReplicas(
-                        Optional.ofNullable(job.getStatus())
-                                .map(JobStatus::getSucceeded)
-                                .orElse(null)
-                )
-                .jobStatus(job.getStatus()) // можно оставить как есть, если нужен полный объект
-                .lastSuccessfulTime(null)
-                .build();
+    public OwnerDto getOwnerDto(OwnerReferenceInfo ownerRef) {
+        log.info("{}: fetching Job: {}", SERVICE_NAME, ownerRef.getName());
+        OwnerInfo ownerInfo = ownerPort.getJob(ownerRef.getName(), namespace);
+        if (ownerInfo == null) throw new KubernetesException(OWNER_REALIZED_NOT_FOUND);
+        return new OwnerDto(ownerInfo, OWNER_TYPE);
     }
 }
